@@ -16,7 +16,6 @@ export const connectDB = async () => {
     console.log(`✅ MongoDB Connected successfully: ${conn.connection.host}/${conn.connection.name}`);
   } catch (error) {
     console.error(`❌ MongoDB Connection Error: ${error.message}`);
-    // Exit process with failure code if database fails to connect
-    process.exit(1);
+    console.error(`⚠️ Server will continue running so API stays responsive while checking MONGO_URI network access.`);
   }
 };

@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import path from "path";
+import mongoose from "mongoose";
 import { connectDB } from "./config/db.js";
 import postRoutes from "./routes/postRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
@@ -46,9 +47,16 @@ app.use("/api/auth", authRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/upload", uploadRoutes);
 
-// Health Check endpoint
+// Health Check endpoint with diagnostic status
 app.get("/", (req, res) => {
-  res.send("🚀 X Clone API is running smoothly with MongoDB!");
+  const states = ["Disconnected", "Connected", "Connecting", "Disconnecting"];
+  const dbStatus = states[mongoose.connection.readyState] || "Unknown";
+  res.status(200).json({
+    status: "OK",
+    message: "🚀 X Clone API is running smoothly on Render!",
+    database: dbStatus,
+    mongoConfigured: !!process.env.MONGO_URI
+  });
 });
 
 // Start our Express Server
