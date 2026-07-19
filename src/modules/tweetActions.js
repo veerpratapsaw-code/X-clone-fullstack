@@ -48,7 +48,7 @@ export function initTweetActions() {
           <div class="w-5"></div>
         </div>
         <div class="flex gap-3">
-          <img class="size-10 rounded-full object-cover shrink-0" src="/src/assets/user/headShot.jpg" alt="You" />
+          <img class="size-10 rounded-full object-cover shrink-0" src="/assets/user/headShot.jpg" alt="You" />
           <div class="flex-1">
             <textarea rows="3" placeholder="Post your reply" class="w-full bg-transparent text-white placeholder-gray-500 focus:outline-none resize-none text-base"></textarea>
             <div class="flex justify-end mt-3 pt-2 border-t border-[#313233ad]/30">

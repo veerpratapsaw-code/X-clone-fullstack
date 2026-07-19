@@ -191,7 +191,7 @@ export function initCreatePost() {
     const postPayload = {
       author: user?.username || "Veer Pratap Saw",
       handle: user?.handle || "@Veerpratapsaw",
-      avatar: user?.avatar || "/src/assets/user/headShot.jpg",
+      avatar: user?.avatar || "/assets/user/headShot.jpg",
       verified: user?.verified ?? true,
       text: text,
       media: mediaObj,

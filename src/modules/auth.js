@@ -46,11 +46,11 @@ export const updateUserProfilePill = () => {
     pill.innerHTML = `
       <div class="flex items-center justify-between p-3 rounded-full hover:bg-[#181818] cursor-pointer transition-colors group relative" id="auth-user-pill">
         <div class="flex items-center gap-3 min-w-0">
-          <img class="size-10 rounded-full object-cover shrink-0 border border-[#313233ad]" src="${user.avatar || '/src/assets/user/headShot.jpg'}" alt="${user.username}" />
+          <img class="size-10 rounded-full object-cover shrink-0 border border-[#313233ad]" src="${user.avatar || '/assets/user/headShot.jpg'}" alt="${user.username}" />
           <div class="hidden xl:flex flex-col min-w-0 leading-tight">
             <span class="font-bold text-white text-sm truncate group-hover:underline flex items-center gap-1">
               ${user.username}
-              ${user.verified ? `<img class="size-3.5 shrink-0" src="/src/assets/svg/lock.svg" alt="Verified" />` : ''}
+              ${user.verified ? `<img class="size-3.5 shrink-0" src="/assets/svg/lock.svg" alt="Verified" />` : ''}
             </span>
             <span class="text-[#71767b] text-xs truncate">${user.handle}</span>
           </div>

@@ -58,11 +58,11 @@ export function renderPostCard(post) {
       <div class="authorRow flex items-center justify-between text-sm">
         <div class="flex items-center gap-1 min-w-0 overflow-hidden">
           <span class="font-bold text-white hover:underline truncate">${post.author}</span>
-          ${post.verified ? `<img class="w-4 shrink-0" src="/src/assets/svg/lock.svg" alt="Verified" />` : ''}
+          ${post.verified ? `<img class="w-4 shrink-0" src="/assets/svg/lock.svg" alt="Verified" />` : ''}
           <span class="text-[#71767b] truncate min-w-0">${post.handle} · ${post.time}</span>
         </div>
         <div class="more text-[#71767b] hover:text-[#1d9bf0] p-1.5 hover:bg-[#1d9cf01e] rounded-full transition-colors">
-          <img class="w-4 invert opacity-60" src="/src/assets/svg/morefilled.svg" alt="More" />
+          <img class="w-4 invert opacity-60" src="/assets/svg/morefilled.svg" alt="More" />
         </div>
       </div>
       <div class="tweetText text-sm text-[#e7e9ea] mt-1 leading-normal">${post.text}</div>
@@ -85,7 +85,7 @@ export function renderPostCard(post) {
           <span>${post.stats?.views || "0"}</span>
         </div>
         <div class="flex items-center gap-2">
-          <div class="p-2 hover:bg-[#1d9cf01e] hover:text-[#1d9bf0] rounded-full cursor-pointer transition-colors"><img class="size-4 opacity-70 hover:opacity-100" src="/src/assets/svg/bookmarks.svg" alt="Bookmark" /></div>
+          <div class="p-2 hover:bg-[#1d9cf01e] hover:text-[#1d9bf0] rounded-full cursor-pointer transition-colors"><img class="size-4 opacity-70 hover:opacity-100" src="/assets/svg/bookmarks.svg" alt="Bookmark" /></div>
         </div>
       </div>
     </div>

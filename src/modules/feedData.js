@@ -4,7 +4,7 @@ export const initialPosts = [
     author: "Edgar Dobriban",
     handle: "@EdgarDobriban",
     time: "Jul 14",
-    avatar: "/src/assets/user/akshay_kumar.jpg",
+    avatar: "/assets/user/akshay_kumar.jpg",
     verified: true,
     repostLabel: "Paul Graham reposted",
     text: `AI has helped resolve an important question in statistics. In the area of multiple hypothesis testing, the goal of controlling the false discovery rate (FDR) has been introduced in a seminal paper by Benjamini and Hochberg (1995). They also introduced a method the <span class="text-[#1d9bf0] hover:underline cursor-pointer ml-1">Show more</span>`,
@@ -26,7 +26,7 @@ export const initialPosts = [
     author: "ISRO",
     handle: "@isro",
     time: "2h",
-    avatar: "/src/assets/user/Cristiano-Ronaldo.jpg",
+    avatar: "/assets/user/Cristiano-Ronaldo.jpg",
     verified: true,
     repostLabel: null,
     text: `Chandrayaan-4 mission design finalized! 🚀 Our next lunar mission aims to demonstrate sample return technology and deep space autonomous docking. Congratulations to the entire scientific community across India. 🇮🇳 #ISRO #SpaceExploration`,
@@ -43,13 +43,13 @@ export const initialPosts = [
     author: "Sardar Vallabhbhai Patel",
     handle: "@sardarpatel",
     time: "3h",
-    avatar: "/src/assets/user/sardar Vallabh bhai patel.jpg",
+    avatar: "/assets/user/sardar_patel.jpg",
     verified: true,
     repostLabel: null,
     text: `Manpower without unity is not a strength unless it is harmonized and united properly, then it becomes a spiritual power. Let us work tirelessly for the strength and unity of our nation! 🇮🇳✨ #Unity #Strength #Leadership`,
     media: {
       type: "video",
-      url: "/src/assets/posts videos/how to become king.mp4"
+      url: "/assets/posts_videos/how_to_become_king.mp4"
     },
     stats: {
       replies: "1.8K",
@@ -63,13 +63,13 @@ export const initialPosts = [
     author: "Akshay Kumar",
     handle: "@akshaykumar",
     time: "4h",
-    avatar: "/src/assets/user/akshay_kumar.jpg",
+    avatar: "/assets/user/akshay_kumar.jpg",
     verified: true,
     repostLabel: null,
     text: `Discipline and early mornings are the real secret to lifelong health and energy. Never compromise on your fitness regime, no matter where you are! 💪🥊 #Fitness #Discipline #Health`,
     media: {
       type: "image",
-      url: "/src/assets/posts images/tixonov_valentin-boxing-4383119_1920.jpg",
+      url: "https://images.unsplash.com/photo-1549719386-74dfcbf7dbed?w=1200&auto=format&fit=crop&q=80",
       alt: "Boxing training"
     },
     stats: {
@@ -84,13 +84,13 @@ export const initialPosts = [
     author: "Dipika Padukone",
     handle: "@deepikapadukone",
     time: "5h",
-    avatar: "/src/assets/user/dipika.jpg",
+    avatar: "/assets/user/dipika.jpg",
     verified: true,
     repostLabel: null,
     text: `Finding peace amidst the chaos of everyday life. Nothing heals the soul quite like the serenity of mountain peaks and breathtaking nature views. 🏔️✨ #Nature #Peace #Travel`,
     media: {
       type: "image",
-      url: "/src/assets/posts images/jimbochan-kirkjufell-2148191_1920.jpg",
+      url: "https://images.unsplash.com/photo-1504893524553-b855bce32c67?w=1200&auto=format&fit=crop&q=80",
       alt: "Kirkjufell mountain"
     },
     stats: {
@@ -105,13 +105,13 @@ export const initialPosts = [
     author: "Cristiano Ronaldo",
     handle: "@Cristiano",
     time: "6h",
-    avatar: "/src/assets/user/Cristiano-Ronaldo.jpg",
+    avatar: "/assets/user/Cristiano-Ronaldo.jpg",
     verified: true,
     repostLabel: null,
     text: `Hard work beats talent when talent doesn't work hard. Always master your craft first before dreaming of the results. Thank you for all the incredible support! ⚽🏆 #CR7 #Motivation #Mastery`,
     media: {
       type: "video",
-      url: "/src/assets/posts videos/master a thing first.mp4"
+      url: "/assets/posts_videos/master_a_thing_first.mp4"
     },
     stats: {
       replies: "14.8K",
@@ -125,13 +125,13 @@ export const initialPosts = [
     author: "Nandani Gupta",
     handle: "@nandanigupta",
     time: "8h",
-    avatar: "/src/assets/user/Nandani Gupta.jpg",
+    avatar: "/assets/user/nandani_gupta.jpg",
     verified: true,
     repostLabel: null,
     text: `Exploring the hidden gems across Europe! Every bridge has a story to tell and every cobblestone path leads to a new adventure. Where should I travel next? 🌍✈️ #TravelDiary #Europe #Wanderlust`,
     media: {
       type: "image",
-      url: "/src/assets/posts images/Europe.jpeg",
+      url: "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=1200&auto=format&fit=crop&q=80",
       alt: "Europe travel"
     },
     stats: {
@@ -146,13 +146,13 @@ export const initialPosts = [
     author: "Veer Pratap Saw",
     handle: "@veerpratapsaw",
     time: "11h",
-    avatar: "/src/assets/user/headShot.jpg",
+    avatar: "/assets/user/headShot.jpg",
     verified: true,
     repostLabel: null,
     text: `Artificial Intelligence is transforming how we build software and analyze complex data strategies. Here is a deep dive into modern neural network architectures and strategic roadmaps for 2026. 🤖🚀 #AI #Tech #Innovation`,
     media: {
       type: "image",
-      url: "/src/assets/posts images/mrwashingt0n-ai-generated-8992183_1920.jpg",
+      url: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1200&auto=format&fit=crop&q=80",
       alt: "AI technology"
     },
     stats: {
@@ -167,13 +167,13 @@ export const initialPosts = [
     author: "Sardar Vallabhbhai Patel",
     handle: "@sardarpatel",
     time: "14h",
-    avatar: "/src/assets/user/sardar Vallabh bhai patel.jpg",
+    avatar: "/assets/user/sardar_patel.jpg",
     verified: true,
     repostLabel: null,
     text: `True wisdom lies in understanding the eternal truth of action without attachment to results. As the Bhagavad Gita teaches us, perform your duty with absolute determination and honesty. 🙏📚 #BhagavadGita #Wisdom #Duty #Truth`,
     media: {
       type: "video",
-      url: "/src/assets/posts videos/don't be straight - bhagwat gita.mp4"
+      url: "/assets/posts_videos/bhagwat_gita.mp4"
     },
     stats: {
       replies: "4.1K",
@@ -187,13 +187,13 @@ export const initialPosts = [
     author: "Akshay Kumar",
     handle: "@akshaykumar",
     time: "17h",
-    avatar: "/src/assets/user/akshay_kumar.jpg",
+    avatar: "/assets/user/akshay_kumar.jpg",
     verified: true,
     repostLabel: null,
     text: `Risk assessment and emotional control are key when navigating fast-moving markets and building businesses. Stay focused, do your research, and keep learning! 📈💡 #Trading #Business #Mindset #Finance`,
     media: {
       type: "video",
-      url: "/src/assets/posts videos/trading.mp4"
+      url: "/assets/posts_videos/trading.mp4"
     },
     stats: {
       replies: "1.1K",
@@ -207,13 +207,13 @@ export const initialPosts = [
     author: "Dipika Padukone",
     handle: "@deepikapadukone",
     time: "19h",
-    avatar: "/src/assets/user/dipika.jpg",
+    avatar: "/assets/user/dipika.jpg",
     verified: true,
     repostLabel: null,
     text: `Letting go and trusting the flow. Nature’s majestic waterfalls remind us of power, persistence, and grace all happening simultaneously. 🌊✨ #Waterfall #Nature #Persistence`,
     media: {
       type: "image",
-      url: "/src/assets/posts images/suju-foto-waterfall-6574302_1920.jpg",
+      url: "https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?w=1200&auto=format&fit=crop&q=80",
       alt: "Majestic waterfall"
     },
     stats: {
@@ -228,13 +228,13 @@ export const initialPosts = [
     author: "Cristiano Ronaldo",
     handle: "@Cristiano",
     time: "22h",
-    avatar: "/src/assets/user/Cristiano-Ronaldo.jpg",
+    avatar: "/assets/user/Cristiano-Ronaldo.jpg",
     verified: true,
     repostLabel: null,
     text: `When the pressure rises, champions step up. There are no excuses when you step onto the field—give everything you have until the final whistle blows! 🔥👊 #NoExcuses #Champion #Mindset`,
     media: {
       type: "video",
-      url: "/src/assets/posts videos/no excuses.mp4"
+      url: "/assets/posts_videos/no_excuses.mp4"
     },
     stats: {
       replies: "9.4K",
