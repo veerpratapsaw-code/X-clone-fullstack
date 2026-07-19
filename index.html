@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon shortcut" type="image/x-icon" href="/favicon.ico?v=2" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>X</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wght@6..144,1..1000&family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap"
+    rel="stylesheet" />
+</head>
+
+<body class="font-['Open_Sans',sans-serif] bg-black">
+  <section class="container flex text-white mx-auto bg-black p-0 min-h-screen justify-center">
+    <section
+      class="left sticky top-0 h-screen hidden sm:flex flex-col justify-between border-r border-[#313233ad] bg-[#010101] w-[68px] xl:w-[275px] overflow-y-auto shrink-0 no-scrollbar [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+      <div class="upper flex flex-col items-center xl:items-start">
+        <div class="logo w-10 ml-0 xl:ml-1.5 p-1.5 pt-2.5 text-white">
+          <svg viewBox="0 0 24 24" aria-hidden="true" class="w-full h-full fill-current">
+            <g>
+              <path
+                d="M21.742 21.75l-7.563-11.179 7.056-8.321h-2.456l-5.691 6.714-4.54-6.714H2.359l7.29 10.776L2.25 21.75h2.456l6.035-7.118 4.818 7.118h6.191-.008zM7.739 3.818L18.81 20.182h-2.447L5.29 3.818h2.447z">
+              </path>
+            </g>
+          </svg>
+        </div>
+        <div class="smallBtn py-3 w-full flex justify-center xl:justify-start">
+          <ul class="flex flex-col gap-1 text-[18px] items-center xl:items-start w-full">
+            <li
+              class="flex w-fit cursor-pointer items-center justify-center xl:justify-start gap-5 rounded-full p-3 xl:px-4 xl:py-3 font-bold transition-colors hover:bg-[#1d1d1d]">
+              <img src="/src/assets/svg/homefilled.svg" alt="" class="size-7 shrink-0 invert" />
+              <span class="hidden xl:inline">Home</span>
+            </li>
+            <li
+              class="flex w-fit cursor-pointer items-center justify-center xl:justify-start gap-5 rounded-full p-3 xl:px-4 xl:py-3 transition-colors hover:bg-[#1d1d1d]">
+              <img src="/src/assets/svg/explore.svg" alt="" class="size-7 shrink-0 invert" />
+              <span class="hidden xl:inline">Explore</span>
+            </li>
+            <li
+              class="flex w-fit cursor-pointer items-center justify-center xl:justify-start gap-5 rounded-full p-3 xl:px-4 xl:py-3 transition-colors hover:bg-[#1d1d1d]">
+              <img src="/src/assets/svg/notifications.svg" alt="" class="size-7 shrink-0 invert" />
+              <span class="hidden xl:inline">Notifications</span>
+            </li>
+            <li
+              class="flex w-fit cursor-pointer items-center justify-center xl:justify-start gap-5 rounded-full p-3 xl:px-4 xl:py-3 transition-colors hover:bg-[#1d1d1d]">
+              <img src="/src/assets/svg/follow.svg" alt="" class="size-7 shrink-0 invert" />
+              <span class="hidden xl:inline">Follow</span>
+            </li>
+            <li
+              class="flex w-fit cursor-pointer items-center justify-center xl:justify-start gap-5 rounded-full p-3 xl:px-4 xl:py-3 transition-colors hover:bg-[#1d1d1d]">
+              <img src="/src/assets/svg/chat.svg" alt="" class="size-7 shrink-0 invert" />
+              <span class="hidden xl:inline">Chat</span>
+            </li>
+            <li
+              class="flex w-fit cursor-pointer items-center justify-center xl:justify-start gap-5 rounded-full p-3 xl:px-4 xl:py-3 transition-colors hover:bg-[#1d1d1d]">
+              <img src="/src/assets/svg/grok.svg" alt="" class="size-7 shrink-0 invert" />
+              <span class="hidden xl:inline">Grok</span>
+            </li>
+            <li
+              class="flex w-fit cursor-pointer items-center justify-center xl:justify-start gap-5 rounded-full p-3 xl:px-4 xl:py-3 transition-colors hover:bg-[#1d1d1d]">
+              <img src="/src/assets/svg/bookmarks.svg" alt="" class="size-7 shrink-0 invert" />
+              <span class="hidden xl:inline">Bookmarks</span>
+            </li>
+            <li
+              class="flex w-fit cursor-pointer items-center justify-center xl:justify-start gap-5 rounded-full p-3 xl:px-4 xl:py-3 transition-colors hover:bg-[#1d1d1d]">
+              <img src="/src/assets/svg/creatorstudio.svg" alt="" class="size-7 shrink-0 invert" />
+              <span class="hidden xl:inline">Creator Studio</span>
+            </li>
+            <li
+              class="flex w-fit cursor-pointer items-center justify-center xl:justify-start gap-5 rounded-full p-3 xl:px-4 xl:py-3 transition-colors hover:bg-[#1d1d1d]">
+              <img src="/src/assets/svg/premium.svg" alt="" class="size-7 shrink-0 invert" />
+              <span class="hidden xl:inline">Premium</span>
+            </li>
+            <li
+              class="flex w-fit cursor-pointer items-center justify-center xl:justify-start gap-5 rounded-full p-3 xl:px-4 xl:py-3 transition-colors hover:bg-[#1d1d1d]">
+              <img src="/src/assets/svg/profile.svg" alt="" class="size-7 shrink-0 invert" />
+              <span class="hidden xl:inline">Profile</span>
+            </li>
+            <li
+              class="flex w-fit cursor-pointer items-center justify-center xl:justify-start gap-5 rounded-full p-3 xl:px-4 xl:py-3 transition-colors hover:bg-[#1d1d1d]">
+              <img src="/src/assets/svg/more.svg" alt="" class="size-7 shrink-0 invert" />
+              <span class="hidden xl:inline">More</span>
+            </li>
+          </ul>
+        </div>
+        <div class="postbtn w-full px-2 xl:px-4 mt-4 flex justify-center xl:justify-start">
+          <button
+            class="size-12 xl:w-full xl:h-auto rounded-full bg-white xl:px-3 xl:py-3 text-xl text-black font-bold transition-colors hover:bg-[#1a8cd8] cursor-pointer flex items-center justify-center shadow-md">
+            <span class="hidden xl:inline">Post</span>
+            <img class="w-5 invert-100 xl:hidden" src="src/assets/svg/post.svg" alt="">
+          </button>
+        </div>
+      </div>
+      
+    </section>
+    <section class="right-section flex-1 max-w-[950px] flex justify-center min-h-screen">
+      <div class="main w-full max-sm:w-[100vw] bg-black sm:border-r border-[#313233ad] min-h-screen pb-20 sm:pb-0">
+        <!-- Top Sticky Header Tabs -->
+        <!-- Top Sticky Header Container -->
+        <div class="top sticky top-0 z-10 w-full bg-[#000000dd] backdrop-blur-md flex flex-col border-b border-[#313233ad]">
+          <!-- Authentic Mobile Top Bar (max-sm / max-xs only) matching real X screenshot -->
+          <div class="hidden max-sm:flex items-center justify-between px-4 h-[53px] w-full border-b border-[#313233ad]/40 relative">
+            <!-- Left: Profile Avatar -->
+            <div class="cursor-pointer shrink-0">
+              <img class="size-8 rounded-full object-cover border border-[#313233ad]" src="/src/assets/user/headShot.jpg" alt="Profile" />
+            </div>
+            <!-- Center: Perfectly Centered X Logo -->
+            <div class="text-white shrink-0 absolute left-1/2 -translate-x-1/2">
+              <svg viewBox="0 0 24 24" aria-hidden="true" class="size-6 fill-current">
+                <path d="M21.742 21.75l-7.563-11.179 7.056-8.321h-2.456l-5.691 6.714-4.54-6.714H2.359l7.29 10.776L2.25 21.75h2.456l6.035-7.118 4.818 7.118h6.191-.008zM7.739 3.818L18.81 20.182h-2.447L5.29 3.818h2.447z"></path>
+              </svg>
+            </div>
+            <!-- Right: Subscribe Pill Button -->
+            <div class="shrink-0">
+              <button class="border border-[#313233ad] rounded-full px-3.5 py-1.5 font-bold text-xs text-white hover:bg-[#181818] transition-colors cursor-pointer">
+                Subscribe
+              </button>
+            </div>
+          </div>
+
+          <!-- Tabs Row -->
+          <div class="w-full flex items-center px-2 overflow-x-auto no-scrollbar [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+            <div
+              class="tab flex-1 min-w-fit px-4 flex justify-center items-center py-4 relative hover:bg-[#181818] cursor-pointer transition-colors text-sm font-bold text-white">
+              <span>For you</span>
+            </div>
+            <div
+              class="tab flex-1 min-w-fit px-4 flex justify-center items-center py-4 relative hover:bg-[#181818] cursor-pointer transition-colors text-sm font-bold text-white">
+              <span>Following</span>
+              <div class="absolute bottom-0 h-1 w-14 rounded-full bg-[#1d9bf0]"></div>
+            </div>
+            <div
+              class="tab flex-1 min-w-fit px-4 flex justify-center items-center py-4 relative hover:bg-[#181818] cursor-pointer transition-colors text-sm font-bold text-[#71767b] hover:text-white">
+              <span>Tech</span>
+            </div>
+            <div
+              class="tab flex-1 min-w-fit px-4 flex justify-center items-center py-4 relative hover:bg-[#181818] cursor-pointer transition-colors text-sm font-bold text-[#71767b] hover:text-white">
+              <span>Gaming</span>
+            </div>
+            <div
+              class="tab flex-1 min-w-fit px-4 flex justify-center items-center py-4 relative hover:bg-[#181818] cursor-pointer transition-colors text-sm font-bold text-[#71767b] hover:text-white">
+              <span>Travel</span>
+            </div>
+            <div
+              class="tab flex-1 min-w-fit px-4 flex justify-center items-center py-4 relative hover:bg-[#181818] cursor-pointer transition-colors text-sm font-bold text-[#71767b] hover:text-white">
+              <span>Stocks</span>
+            </div>
+            <div
+              class="tab flex-1 min-w-fit px-4 flex justify-center items-center py-4 relative hover:bg-[#181818] cursor-pointer transition-colors text-sm font-bold text-[#71767b] hover:text-white">
+              <span>Science</span>
+            </div>
+            <div
+              class="p-3 hover:bg-[#181818] rounded-full cursor-pointer transition-colors text-[#71767b] hover:text-white shrink-0 ml-auto">
+              <svg viewBox="0 0 24 24" aria-hidden="true" class="size-5 fill-current">
+                <path d="M11 11V4h2v7h7v2h-7v7h-2v-7H4v-2h7z"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tweet Creation Section ("What's happening?") -->
+        <div class="createPost flex px-4 pt-4 pb-3 border-b border-[#313233ad] gap-3">
+          <div class="avatar shrink-0">
+            <img class="size-10 rounded-full object-cover" src="/src/assets/user/headShot.jpg"
+              alt="Your profile photo" />
+          </div>
+          <div class="content flex-1 flex flex-col justify-between min-w-0">
+            <div class="textarea py-2">
+              <textarea rows="2" placeholder="What’s happening?"
+                class="w-full bg-transparent text-white placeholder-gray-500 text-lg focus:outline-none resize-none break-words overflow-hidden"></textarea>
+            </div>
+            <!-- Media Preview Container & Hidden File Input -->
+            <div class="media-preview-container flex flex-wrap gap-3 mt-2 empty:hidden"></div>
+            <input type="file" accept="image/*,video/*" class="hidden media-file-input" multiple />
+
+            <!-- Action Toolbar & Post Button -->
+            <div class="toolbar flex items-center justify-between mt-3 pt-2 border-t border-[#313233ad]/40">
+              <div class="icons flex items-center gap-1">
+                <!-- Media Icon -->
+                <div class="media-icon-btn p-2 cursor-pointer transition-all duration-200 hover:scale-[1.15] hover:brightness-150" title="Media">
+                  <img src="/src/assets/svg/media.svg" alt="Media" class="size-5" />
+                </div>
+                <!-- GIF Icon -->
+                <div class="p-2 max-xs:p-1.5 cursor-pointer transition-all duration-200 hover:scale-[1.15] hover:brightness-150">
+                  <img src="/src/assets/svg/gif.svg" alt="GIF" class="size-5" />
+                </div>
+                <!-- Poll Icon -->
+                <div class="p-2 max-xs:p-1.5 cursor-pointer transition-all duration-200 hover:scale-[1.15] hover:brightness-150">
+                  <img src="/src/assets/svg/poll.svg" alt="Poll" class="size-5" />
+                </div>
+                <!-- Emoji Icon -->
+                <div class="p-2 max-xs:p-1.5 cursor-pointer transition-all duration-200 hover:scale-[1.15] hover:brightness-150">
+                  <img src="/src/assets/svg/emoji.svg" alt="Emoji" class="size-5" />
+                </div>
+                <!-- Grok Icon -->
+                <div class="p-2 max-xs:p-1.5 cursor-pointer transition-all duration-200 hover:scale-[1.15] hover:brightness-150">
+                  <img src="/src/assets/svg/grok.svg" alt="Grok" class="size-5" />
+                </div>
+                <!-- Schedule Icon -->
+                <div class="p-2 max-xs:p-1.5 cursor-pointer transition-all duration-200 hover:scale-[1.15] hover:brightness-150">
+                  <img src="/src/assets/svg/schedule.svg" alt="Schedule" class="size-5" />
+                </div>
+                <!-- Location Icon -->
+                <div class="p-2 max-xs:p-1.5 cursor-pointer transition-all duration-200 hover:scale-[1.15] hover:brightness-150">
+                  <img src="/src/assets/svg/location.svg" alt="Location" class="size-5" />
+                </div>
+              </div>
+              <div class="flex items-center gap-3">
+                <!-- Character Counter Ring & Over-limit Display -->
+                <div class="char-counter hidden items-center justify-center min-w-[24px] h-6 px-0.5">
+                  <svg class="char-counter-svg size-6 -rotate-90 shrink-0" viewBox="0 0 36 36">
+                    <path class="text-[#333639]" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                    <path class="char-counter-ring text-[#1d9bf0] transition-all duration-150" stroke-dasharray="0, 100" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                  </svg>
+                  <span class="char-counter-text absolute text-[10px] font-bold text-[#71767b] hidden"></span>
+                </div>
+                <div class="postBtn">
+                  <button class="bg-[#1d9bf0] text-white font-bold px-4 py-1.5 rounded-full text-sm cursor-pointer opacity-50 transition-all duration-200" disabled>
+                    Post
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Show New Posts Banner -->
+        <div
+          class="showPosts py-3 text-center text-[#1d9bf0] text-sm cursor-pointer hover:bg-[#181818] transition-colors border-b border-[#313233ad]">
+          Show 4 posts
+        </div>
+
+        <!-- Feed Posts Container -->
+        <div class="posts max-sm:w-[95%] pl-[5%] max-xs:pl-0">
+        </div>
+      </div>
+
+      <div
+        class="right hidden lg:flex w-[350px] flex-col items-center bg-black border-[#313233ad] border-l shrink-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        <!-- search bar is here  -->
+        <div class="sticky top-0 z-20 w-full flex justify-center bg-black/80 backdrop-blur-md py-2">
+          <input
+            class="h-8 border-2 w-[80%] border-[#313233ad] focus:border-blue-500 focus:outline-none rounded-full p-5 px-5 text-[10px]"
+            type="text" placeholder="Search" />
+        </div>
+
+        <!-- Bidirectional Direction-Aware Sticky Container controlled by src/main.js -->
+        <div class="right-widgets w-full flex flex-col items-center pb-10">
+          <!-- subscribe button and ads is here  -->
+          <div class="subscribe p-6 pb-2 border-2 rounded-3xl border-[#313233ad] w-[80%] m-4 mx-0 ">
+            <h1 class="text-xl font-bold">Subscribe to Premium</h1>
+            <h2 class="text-sm py-2">
+              Get rid of ads, see your analytics, boost your replies and unlock
+              20+ features.
+            </h2>
+            <button class="border-0 rounded-full hover:bg-blue-700 p-2 px-4 font-bold my-3 bg-[#0972b8]">
+              Subscribe
+            </button>
+          </div>
+          <!-- seperator or <hr> tag is here  -->
+          <div class="w-[80%] bg-[#313233ad] h-0.5"></div>
+
+          <!-- Trending things are here  -->
+
+          <div class="WhatsHappening pb-2 border-2 rounded-3xl border-[#313233ad] w-[80%] m-4 mx-0">
+            <div class="content px-5 my-5 text-xl font-extrabold">
+              What’s happening
+            </div>
+
+            <!-- Trending Item 1 -->
+            <div class="content px-5 py-3 my-1 hover:bg-[#111] cursor-pointer transition-colors">
+              <div class="name text-[10px] text-gray-400">
+                Trending in India
+              </div>
+              <div class="username flex justify-between font-bold">
+                #INDvAUS
+                <img
+                  class="relative bottom-1.75 hover:filter-[brightness(0)_saturate(100%)_invert(52%)_sepia(91%)_saturate(2250%)_hue-rotate(176deg)_brightness(97%)_contrast(94%)] transition-all duration-100 hover:bg-[#1d9cf01e] rounded-full p-1 border-0"
+                  src="/src/assets/svg/morefilled.svg" alt="More options" />
+              </div>
+              <div class="posts text-[11px] text-gray-500 mt-0.5">
+                54.2K posts
+              </div>
+            </div>
+
+            <!-- Trending Item 2 -->
+            <div class="content px-5 py-3 my-1 hover:bg-[#111] cursor-pointer transition-colors">
+              <div class="name text-[10px] text-gray-400">
+                Entertainment · Trending
+              </div>
+              <div class="username flex justify-between font-bold">
+                #Pushpa2TheRule
+                <img
+                  class="relative bottom-1.75 hover:filter-[brightness(0)_saturate(100%)_invert(52%)_sepia(91%)_saturate(2250%)_hue-rotate(176deg)_brightness(97%)_contrast(94%)] transition-all duration-100 hover:bg-[#1d9cf01e] rounded-full p-1 border-0"
+                  src="/src/assets/svg/morefilled.svg" alt="More options" />
+              </div>
+              <div class="posts text-[11px] text-gray-500 mt-0.5">
+                128.5K posts
+              </div>
+            </div>
+
+            <!-- Trending Item 3 -->
+            <div class="content px-5 py-3 my-1 hover:bg-[#111] cursor-pointer transition-colors">
+              <div class="name text-[10px] text-gray-400">
+                Technology · Trending
+              </div>
+              <div class="username flex justify-between font-bold">
+                #ISRO
+                <img
+                  class="relative bottom-1.75 hover:filter-[brightness(0)_saturate(100%)_invert(52%)_sepia(91%)_saturate(2250%)_hue-rotate(176deg)_brightness(97%)_contrast(94%)] transition-all duration-100 hover:bg-[#1d9cf01e] rounded-full p-1 border-0"
+                  src="/src/assets/svg/morefilled.svg" alt="More options" />
+              </div>
+              <div class="posts text-[11px] text-gray-500 mt-0.5">
+                32.4K posts
+              </div>
+            </div>
+
+            <!-- Show More -->
+            <div class="px-5 py-3 my-1 text-[#1d9bf0] text-sm cursor-pointer transition-colors rounded-b-3xl">
+              Show more
+            </div>
+          </div>
+          <div class="Whotofollow pb-2 border-2 rounded-3xl border-[#313233ad] w-[80%] m-4 mx-0">
+            <div class="content px-5 my-5 text-xl font-extrabold">
+              Who to follow
+            </div>
+
+            <div
+              class="content flex items-center justify-between px-5 py-3 my-1 hover:bg-[#111] cursor-pointer transition-colors">
+              <div class="flex items-center min-w-0 flex-1">
+                <div class="photo text-[10px] text-gray-400 shrink-0 mr-3">
+                  <img class="size-10 border-0 rounded-full object-cover object-center"
+                    src="/src/assets/user/akshay_kumar.jpg" alt="Akshay Kumar" />
+                </div>
+
+                <div class="text flex flex-col min-w-0 mr-2">
+                  <div class="text-[13px] font-bold text-white truncate">
+                    Akshay Kumar
+                  </div>
+                  <div class="text-[11px] text-gray-500 truncate mt-0.5 font-normal">
+                    @akshay
+                  </div>
+                </div>
+              </div>
+
+              <div
+                class="btn shrink-0 border-0 text-black bg-white font-bold rounded-full h-8 px-4 flex items-center justify-center text-xs hover:bg-[#eff3f4] transition-colors">
+                Follow
+              </div>
+            </div>
+
+            <div
+              class="content flex items-center justify-between px-5 py-3 my-1 hover:bg-[#111] cursor-pointer transition-colors">
+              <div class="flex items-center min-w-0 flex-1">
+                <div class="photo text-[10px] text-gray-400 shrink-0 mr-3">
+                  <img class="size-10 border-0 rounded-full object-cover object-center"
+                    src="/src/assets/user/Cristiano-Ronaldo.jpg" alt="Cristiano Ronaldo" />
+                </div>
+
+                <div class="text flex flex-col min-w-0 mr-2">
+                  <div class="text-[13px] font-bold text-white truncate">
+                    Cristiano Ronaldo
+                  </div>
+                  <div class="text-[11px] text-gray-500 truncate mt-0.5 font-normal">
+                    @Cristiano
+                  </div>
+                </div>
+              </div>
+
+              <div
+                class="btn shrink-0 border-0 text-black bg-white font-bold rounded-full h-8 px-4 flex items-center justify-center text-xs hover:bg-[#eff3f4] transition-colors">
+                Follow
+              </div>
+            </div>
+
+            <div
+              class="content flex items-center justify-between px-5 py-3 my-1 hover:bg-[#111] cursor-pointer transition-colors">
+              <div class="flex items-center min-w-0 flex-1">
+                <div class="photo text-[10px] text-gray-400 shrink-0 mr-3">
+                  <img class="size-10 border-0 rounded-full object-cover object-center"
+                    src="/src/assets/user/Nandani%20Gupta.jpg" alt="Nandani Gupta" />
+                </div>
+
+                <div class="text flex flex-col min-w-0 mr-2">
+                  <div class="text-[13px] font-bold text-white truncate">
+                    Nandani Gupta
+                  </div>
+                  <div class="text-[11px] text-gray-500 truncate mt-0.5 font-normal">
+                    @nandanigupta
+                  </div>
+                </div>
+              </div>
+
+              <div
+                class="btn shrink-0 border-0 text-black bg-white font-bold rounded-full h-8 px-4 flex items-center justify-center text-xs hover:bg-[#eff3f4] transition-colors">
+                Follow
+              </div>
+            </div>
+            <!-- Show More -->
+            <div class="px-5 py-3 my-1 text-[#1d9bf0] text-sm cursor-pointer transition-colors rounded-b-3xl">
+              Show more
+            </div>
+          </div>
+          <!-- seperator or <hr> tag is here  -->
+          <div class="w-[80%] bg-[#313233ad] h-0.5"></div>
+
+          <!-- X Right Sidebar Footer Links -->
+          <div class="footer px-5 py-4 w-[80%] text-xs text-[#71767b] flex flex-wrap gap-x-3 gap-y-1 leading-relaxed">
+            <span class="hover:underline cursor-pointer">Terms of Service</span>
+            <span class="hover:underline cursor-pointer">Privacy Policy</span>
+            <span class="hover:underline cursor-pointer">Cookie Policy</span>
+            <span class="hover:underline cursor-pointer">Accessibility</span>
+            <span class="hover:underline cursor-pointer">Ads info</span>
+            <span class="hover:underline cursor-pointer flex items-center gap-1">More <span
+                class="font-bold">...</span></span>
+            <span class="w-full mt-1 text-[#71767b]">© 2026 X Corp.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </section>
+
+  <!-- Mobile Bottom Navigation Bar (< 640px) -->
+  <nav class="fixed bottom-0 left-0 right-0 z-50 bg-black/95 backdrop-blur-md border-t border-[#313233ad] flex justify-around items-center h-[53px] sm:hidden px-2">
+    <div class="p-2 text-white hover:text-[#1d9bf0] cursor-pointer transition-colors" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+      <img src="/src/assets/svg/homefilled.svg" alt="Home" class="size-6 invert" />
+    </div>
+    <div class="p-2  hover:text-[#1d9bf0] cursor-pointer transition-colors">
+      <img src="/src/assets/svg/explore.svg" alt="Explore" class="size-6 invert opacity-80 hover:opacity-100" />
+    </div>
+    <div class="p-2  hover:text-[#1d9bf0] cursor-pointer transition-colors">
+      <img src="/src/assets/svg/grok.svg" alt="Grok" class="size-6 invert opacity-80 hover:opacity-100" />
+    </div>
+    <div class="p-2  hover:text-[#1d9bf0] cursor-pointer transition-colors">
+      <img src="/src/assets/svg/notifications.svg" alt="Notifications" class="size-6 invert opacity-80 hover:opacity-100" />
+    </div>
+    <div class="p-1 cursor-pointer">
+      <img src="src/assets/svg/chat.svg" class="invert-75" alt="">
+    </div>
+  </nav>
+
+  <!-- Mobile Floating Post Button  -->
+  <button onclick="document.querySelector('.createPost textarea')?.focus(); window.scrollTo({top: 0, behavior: 'smooth'});" class="fixed bottom-18 right-4 z-50 size-14 rounded-full bg-[#1d9bf0] hover:bg-[#1a8cd8] active:scale-95 text-white shadow-2xl flex items-center justify-center sm:hidden transition-all cursor-pointer ">
+    <img src="src/assets/svg/post.svg" class=" w-5" alt="">
+  </button>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+
+</html>
