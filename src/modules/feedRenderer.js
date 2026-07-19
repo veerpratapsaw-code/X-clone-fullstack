@@ -1,5 +1,5 @@
 import { initialPosts } from "./feedData.js";
-import { API_BASE_URL } from "./config.js";
+import { API_BASE_URL } from "../config.js";
 
 export function renderPostCard(post) {
   const postCard = document.createElement("div");

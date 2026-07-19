@@ -2,7 +2,7 @@ import { initXVideoPlayers } from "./videoPlayer.js";
 import { renderPostCard } from "./feedRenderer.js";
 import { initTweetActions } from "./tweetActions.js";
 import { getToken, getCurrentUser } from "./auth.js";
-import { API_BASE_URL } from "./config.js";
+import { API_BASE_URL } from "../config.js";
 
 const MAX_CHARS = 280;
 
