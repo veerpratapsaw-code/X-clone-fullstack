@@ -106,7 +106,7 @@ const showLogoutPopover = (anchorEl) => {
 /**
  * Shows the authentic X Login / Register Glassmorphic Modal
  */
-export const showAuthModal = (initialMode = "login") => {
+export const showAuthModal = (initialMode = "login", isCompulsory = false) => {
   document.querySelectorAll(".x-auth-modal").forEach(el => el.remove());
 
   let mode = initialMode; // 'login' or 'register'
@@ -117,9 +117,11 @@ export const showAuthModal = (initialMode = "login") => {
   const renderModalContent = () => {
     modal.innerHTML = `
       <div class="bg-[#000000] border border-[#313233ad] rounded-3xl w-full max-w-md p-6 shadow-2xl relative">
-        <button class="close-auth-modal absolute top-5 left-5 p-2 hover:bg-[#181818] rounded-full text-white cursor-pointer transition-colors">
-          <svg class="size-5 fill-current" viewBox="0 0 24 24"><path d="M10.59 12L4.54 5.96l1.42-1.42L12 10.59l6.04-6.05 1.42 1.42L13.41 12l6.05 6.04-1.42 1.42L12 13.41l-6.04 6.05-1.42-1.42L10.59 12z"/></svg>
-        </button>
+        ${!isCompulsory ? `
+          <button class="close-auth-modal absolute top-5 left-5 p-2 hover:bg-[#181818] rounded-full text-white cursor-pointer transition-colors">
+            <svg class="size-5 fill-current" viewBox="0 0 24 24"><path d="M10.59 12L4.54 5.96l1.42-1.42L12 10.59l6.04-6.05 1.42 1.42L13.41 12l6.05 6.04-1.42 1.42L12 13.41l-6.04 6.05-1.42-1.42L10.59 12z"/></svg>
+          </button>
+        ` : ''}
         <div class="flex justify-center mb-6">
           <svg class="size-8 fill-white" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
         </div>
@@ -157,8 +159,10 @@ export const showAuthModal = (initialMode = "login") => {
       </div>
     `;
 
-    modal.querySelector(".close-auth-modal")?.addEventListener("click", () => modal.remove());
-    modal.addEventListener("click", (e) => { if (e.target === modal) modal.remove(); });
+    if (!isCompulsory) {
+      modal.querySelector(".close-auth-modal")?.addEventListener("click", () => modal.remove());
+      modal.addEventListener("click", (e) => { if (e.target === modal) modal.remove(); });
+    }
 
     modal.querySelector("#switch-to-register")?.addEventListener("click", () => { mode = "register"; renderModalContent(); });
     modal.querySelector("#switch-to-login")?.addEventListener("click", () => { mode = "login"; renderModalContent(); });
@@ -189,6 +193,7 @@ export const showAuthModal = (initialMode = "login") => {
 
           setAuthData(data.token, data.user);
           modal.remove();
+          window.location.reload();
         } else {
           const username = modal.querySelector("#auth-username")?.value.trim();
           const handle = modal.querySelector("#auth-handle")?.value.trim();
@@ -202,6 +207,7 @@ export const showAuthModal = (initialMode = "login") => {
 
           setAuthData(data.token, data.user);
           modal.remove();
+          window.location.reload();
         }
       } catch (err) {
         errBox.textContent = err.message;
@@ -218,4 +224,7 @@ export const showAuthModal = (initialMode = "login") => {
 
 export function initAuth() {
   updateUserProfilePill();
+  if (!getToken()) {
+    showAuthModal("login", true);
+  }
 }
