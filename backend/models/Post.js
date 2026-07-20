@@ -17,7 +17,7 @@ const postSchema = new mongoose.Schema(
     },
     avatar: {
       type: String,
-      default: "/src/assets/user/headShot.jpg",
+      default: "/assets/user/headShot.jpg",
     },
     verified: {
       type: Boolean,

@@ -20,7 +20,7 @@ router.get("/", async (req, res) => {
         {
           author: "Edgar Dobriban",
           handle: "@EdgarDobriban",
-          avatar: "/src/assets/user/akshay_kumar.jpg",
+          avatar: "/assets/user/akshay_kumar.jpg",
           verified: true,
           repostLabel: "Paul Graham reposted",
           text: `AI has helped resolve an important question in statistics. In the area of multiple hypothesis testing, the goal of controlling the false discovery rate (FDR) has been introduced in a seminal paper by Benjamini and Hochberg (1995).`,
@@ -35,7 +35,7 @@ router.get("/", async (req, res) => {
         {
           author: "ISRO",
           handle: "@isro",
-          avatar: "/src/assets/user/Cristiano-Ronaldo.jpg",
+          avatar: "/assets/user/Cristiano-Ronaldo.jpg",
           verified: true,
           text: `Chandrayaan-4 mission design finalized! 🚀 Our next lunar mission aims to demonstrate sample return technology and deep space autonomous docking. Congratulations to the entire scientific community across India. 🇮🇳 #ISRO #SpaceExploration`,
           stats: { replies: "3.2K", reposts: "14.8K", likes: "89.2K", views: "1.2M" },
@@ -43,19 +43,19 @@ router.get("/", async (req, res) => {
         {
           author: "Sardar Vallabhbhai Patel",
           handle: "@sardarpatel",
-          avatar: "/src/assets/user/sardar Vallabh bhai patel.jpg",
+          avatar: "/assets/user/sardar_patel.jpg",
           verified: true,
           text: `Manpower without unity is not a strength unless it is harmonized and united properly, then it becomes a spiritual power. Let us work tirelessly for the strength and unity of our nation! 🇮🇳✨ #Unity #Strength #Leadership`,
-          media: { type: "video", url: "/src/assets/posts videos/how to become king.mp4" },
+          media: { type: "video", url: "/assets/posts_videos/how_to_become_king.mp4" },
           stats: { replies: "1.8K", reposts: "12.4K", likes: "94.2K", views: "820K" },
         },
         {
           author: "Cristiano Ronaldo",
           handle: "@Cristiano",
-          avatar: "/src/assets/user/Cristiano-Ronaldo.jpg",
+          avatar: "/assets/user/Cristiano-Ronaldo.jpg",
           verified: true,
           text: `Hard work beats talent when talent doesn't work hard. Always master your craft first before dreaming of the results. Thank you for all the incredible support! ⚽🏆 #CR7 #Motivation #Mastery`,
-          media: { type: "video", url: "/src/assets/posts videos/master a thing first.mp4" },
+          media: { type: "video", url: "/assets/posts_videos/master_a_thing_first.mp4" },
           stats: { replies: "14.8K", reposts: "89.2K", likes: "450K", views: "4.2M" },
         },
       ];
@@ -100,7 +100,7 @@ router.post("/", optionalAuth, async (req, res) => {
     const newPost = new Post({
       author: author || "Veer Pratap Saw",
       handle: handle || "@Veerpratapsaw",
-      avatar: avatar || "/src/assets/user/headShot.jpg",
+      avatar: avatar || "/assets/user/headShot.jpg",
       verified: verified ?? true,
       text: text || "",
       media: media || undefined,

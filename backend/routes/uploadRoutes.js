@@ -52,7 +52,8 @@ router.post("/", upload.single("file"), async (req, res) => {
 
       await fs.promises.writeFile(filePath, req.file.buffer);
 
-      const localUrl = `http://localhost:5000/uploads/${filename}`;
+      const baseUrl = process.env.API_URL || `${req.protocol}://${req.get("host")}`;
+      const localUrl = `${baseUrl}/uploads/${filename}`;
       console.log(`📁 Saved media locally to: ${localUrl}`);
 
       return res.status(200).json({

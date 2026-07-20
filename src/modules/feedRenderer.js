@@ -2,6 +2,33 @@ import { initialPosts } from "./feedData.js";
 import { API_BASE_URL } from "../config.js";
 
 export function renderPostCard(post) {
+  const sanitizeUrl = (url) => {
+    if (!url) return url;
+    if (url.startsWith("/src/assets/")) return url.replace("/src/assets/", "/assets/");
+    if (url.includes("localhost:5000/uploads")) return url.replace("http://localhost:5000", API_BASE_URL);
+    if (url.startsWith("/uploads")) return `${API_BASE_URL}${url}`;
+    return url;
+  };
+
+  let timeDisplay = post.time;
+  if (!timeDisplay || timeDisplay === "undefined") {
+    if (post.createdAt) {
+      const diffSec = Math.floor((new Date() - new Date(post.createdAt)) / 1000);
+      if (diffSec < 60) timeDisplay = "Just now";
+      else if (diffSec < 3600) timeDisplay = `${Math.floor(diffSec / 60)}m`;
+      else if (diffSec < 86400) timeDisplay = `${Math.floor(diffSec / 3600)}h`;
+      else {
+        const d = new Date(post.createdAt);
+        const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        timeDisplay = `${months[d.getMonth()]} ${d.getDate()}`;
+      }
+    } else {
+      timeDisplay = "Just now";
+    }
+  }
+
+  const avatarUrl = sanitizeUrl(post.avatar || "/assets/user/headShot.jpg");
+
   const postCard = document.createElement("div");
   postCard.className = "post p-4 border-b border-[#313233ad] hover:bg-[#080808] transition-colors flex gap-3 cursor-pointer";
   if (post.id) postCard.id = post.id;
@@ -21,6 +48,7 @@ export function renderPostCard(post) {
 
   let mediaHtml = "";
   if (post.media) {
+    const mediaUrl = sanitizeUrl(post.media.url);
     if (post.media.type === "article") {
       mediaHtml = `
         <div class="tweetMedia mt-3 rounded-2xl border border-[#313233ad] overflow-hidden bg-[#16181c]">
@@ -35,14 +63,14 @@ export function renderPostCard(post) {
       mediaHtml = `
         <div class="tweetMedia mt-3 rounded-2xl border border-[#313233ad] overflow-hidden bg-[#16181c] flex items-center justify-center max-h-[600px] w-fit max-w-full">
           <video controls class="max-w-full max-h-[600px] w-auto h-auto object-contain mx-auto block">
-            <source src="${post.media.url}" type="video/mp4" />
+            <source src="${mediaUrl}" type="video/mp4" />
           </video>
         </div>
       `;
     } else if (post.media.type === "image") {
       mediaHtml = `
         <div class="tweetMedia mt-3 rounded-2xl border border-[#313233ad] overflow-hidden bg-[#16181c] flex items-center justify-center max-h-[600px] w-fit max-w-full">
-          <img src="${post.media.url}" alt="${post.media.alt || ''}" class="max-w-full max-h-[600px] w-auto h-auto object-contain mx-auto block" />
+          <img src="${mediaUrl}" alt="${post.media.alt || ''}" class="max-w-full max-h-[600px] w-auto h-auto object-contain mx-auto block" />
         </div>
       `;
     }
@@ -51,7 +79,7 @@ export function renderPostCard(post) {
   postCard.innerHTML = `
     <div class="leftCol shrink-0 flex flex-col items-end">
       ${repostTopHtml}
-      <img class="size-10 rounded-full object-cover border border-[#313233ad]" src="${post.avatar}" alt="${post.author}" />
+      <img class="size-10 rounded-full object-cover border border-[#313233ad]" src="${avatarUrl}" alt="${post.author}" />
     </div>
     <div class="rightCol flex-1 min-w-0">
       ${repostLabelHtml}
@@ -59,7 +87,7 @@ export function renderPostCard(post) {
         <div class="flex items-center gap-1 min-w-0 overflow-hidden">
           <span class="font-bold text-white hover:underline truncate">${post.author}</span>
           ${post.verified ? `<img class="w-4 shrink-0" src="/assets/svg/lock.svg" alt="Verified" />` : ''}
-          <span class="text-[#71767b] truncate min-w-0">${post.handle} · ${post.time}</span>
+          <span class="text-[#71767b] truncate min-w-0">${post.handle} · ${timeDisplay}</span>
         </div>
         <div class="more text-[#71767b] hover:text-[#1d9bf0] p-1.5 hover:bg-[#1d9cf01e] rounded-full transition-colors">
           <img class="w-4 invert opacity-60" src="/assets/svg/morefilled.svg" alt="More" />
