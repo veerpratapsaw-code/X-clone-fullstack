@@ -27,6 +27,9 @@ process.on("unhandledRejection", (reason) => {
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+app.set("views", path.join(__dirname, "views"));
+app.set("view engine", "ejs");
+
 // Connect to MongoDB using our helper function
 connectDB();
 
@@ -56,11 +59,14 @@ app.use("/api/upload", uploadRoutes);
 app.get("/", (req, res) => {
   const states = ["Disconnected", "Connected", "Connecting", "Disconnecting"];
   const dbStatus = states[mongoose.connection.readyState] || "Unknown";
-  res.status(200).json({
+  return res.status(200).render("index", {
     status: "OK",
-    message: "🚀 X Clone API is running smoothly on Render!",
+    appName: "X Clone API",
+    message: "Backend server is running smoothly",
     database: dbStatus,
-    mongoConfigured: !!process.env.MONGO_URI
+    mongoConfigured: !!process.env.MONGO_URI,
+    port: PORT,
+    generatedAt: new Date().toISOString()
   });
 });
 

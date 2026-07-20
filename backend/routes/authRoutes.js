@@ -51,7 +51,7 @@ router.post("/register", async (req, res) => {
       handle: handle.trim(),
       email: normalizedEmail,
       password: hashedPassword,
-      avatar: avatar || "/src/assets/user/headShot.jpg",
+      avatar: avatar || "/assets/user/headShot.jpg",
       bio: bio || "Hey there! I am using X.",
       verified: true, // Auto-verify new accounts so they get the blue checkmark
     });
