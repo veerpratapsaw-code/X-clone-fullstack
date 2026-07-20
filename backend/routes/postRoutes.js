@@ -20,7 +20,7 @@ router.get("/", async (req, res) => {
         {
           author: "Sardar Vallabhbhai Patel",
           handle: "@sardarpatel",
-          avatar: "/assets/user/sardar Vallabh bhai patel.jpg",
+          avatar: "/assets/user/sardar_patel.jpg",
           verified: true,
           text: `True wisdom lies in understanding the eternal truth of action without attachment to results. As the Bhagavad Gita teaches us, perform your duty with absolute determination and honesty. 🙏📚 #BhagavadGita #Wisdom #Duty #Truth`,
           media: { type: "video", url: "/assets/posts_videos/bhagwat_gita.mp4" },
@@ -83,7 +83,7 @@ router.get("/", async (req, res) => {
         {
           author: "Anushka Sharma",
           handle: "@anushkasharma",
-          avatar: "/assets/user/anushka sharma.png",
+          avatar: "/assets/user/anushka_sharma.png",
           verified: true,
           text: `Morning sunlight and clean eating are my ultimate energy boosters. Taking care of your mental peace is the highest self-love you can practice every day. ☀️🧘‍♀️ #SelfLove #Wellness #Peace`,
           media: { type: "image", url: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=1200&auto=format&fit=crop&q=80", alt: "Morning yoga meditation" },
@@ -110,7 +110,7 @@ router.get("/", async (req, res) => {
         {
           author: "Kyra Advani",
           handle: "@kyraadvani",
-          avatar: "/assets/user/kyrea gunue.png",
+          avatar: "/assets/user/kyrea_gunue.png",
           verified: true,
           text: `Wrapped up an amazing weekend shoot! Truly grateful for the wonderful team and all the love you guys shower on every project. Big things coming soon! 🎬✨ #BehindTheScenes #Grateful #Cinema`,
           media: { type: "image", url: "https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?w=1200&auto=format&fit=crop&q=80", alt: "Film shoot setup" },
@@ -128,7 +128,7 @@ router.get("/", async (req, res) => {
         {
           author: "Parineeti Chopra",
           handle: "@parineetichopra",
-          avatar: "/assets/user/halkat choopra.png",
+          avatar: "/assets/user/halkat_choopra.png",
           verified: true,
           text: `Sometimes you just need a spontaneous road trip with good playlists and great friends to hit the refresh button on life! Driving through the scenic highways today. 🚗💨 #RoadTrip #Vibes #Friends`,
           media: { type: "image", url: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=1200&auto=format&fit=crop&q=80", alt: "Road trip adventure" },
@@ -137,7 +137,7 @@ router.get("/", async (req, res) => {
         {
           author: "Ananya (Attitude Girl)",
           handle: "@attitudegirl",
-          avatar: "/assets/user/@attidude_girl.png",
+          avatar: "/assets/user/attitude_girl.png",
           verified: true,
           text: `Your energy introduces you before you even speak a word. Keep your standards high, your focus sharp, and let your success make all the noise! 💅✨ #Attitude #Confidence #GoodVibes`,
           stats: { replies: "512", reposts: "3.4K", likes: "28.9K", views: "290K" },
