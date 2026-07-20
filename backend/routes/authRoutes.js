@@ -2,6 +2,7 @@ import express from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { User } from "../models/User.js";
+import { Post } from "../models/Post.js";
 import { protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
@@ -19,7 +20,7 @@ const generateToken = (id, handle) => {
  */
 router.post("/register", async (req, res) => {
   try {
-    let { username, handle, email, password, avatar, bio } = req.body;
+    let { username, handle, email, password, avatar, bio, dob, location, website, interests } = req.body;
 
     if (!username || !handle || !email || !password) {
       return res.status(400).json({ message: "Please fill in all required fields" });
@@ -53,6 +54,10 @@ router.post("/register", async (req, res) => {
       password: hashedPassword,
       avatar: avatar || "/assets/user/headShot.jpg",
       bio: bio || "Hey there! I am using X.",
+      dob: dob || "",
+      location: location || "",
+      website: website || "",
+      interests: Array.isArray(interests) ? interests : [],
       verified: true, // Auto-verify new accounts so they get the blue checkmark
     });
 
@@ -70,6 +75,10 @@ router.post("/register", async (req, res) => {
         email: savedUser.email,
         avatar: savedUser.avatar,
         bio: savedUser.bio,
+        dob: savedUser.dob,
+        location: savedUser.location,
+        website: savedUser.website,
+        interests: savedUser.interests,
         verified: savedUser.verified,
       },
     });
@@ -127,12 +136,68 @@ router.post("/login", async (req, res) => {
         email: user.email,
         avatar: user.avatar,
         bio: user.bio,
+        dob: user.dob,
+        location: user.location,
+        website: user.website,
+        interests: user.interests,
         verified: user.verified,
       },
     });
   } catch (error) {
     console.error("Login error:", error);
     res.status(500).json({ message: "Server error during login" });
+  }
+});
+
+/**
+ * @route   PUT /api/auth/profile
+ * @desc    Update currently logged-in user profile details (username, bio, avatar, location, website, dob, interests)
+ * @access  Protected
+ */
+router.put("/profile", protect, async (req, res) => {
+  try {
+    const { username, bio, avatar, location, website, dob, interests } = req.body;
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (username !== undefined) user.username = username;
+    if (bio !== undefined) user.bio = bio;
+    if (avatar !== undefined) user.avatar = avatar;
+    if (location !== undefined) user.location = location;
+    if (website !== undefined) user.website = website;
+    if (dob !== undefined) user.dob = dob;
+    if (interests !== undefined) user.interests = interests;
+
+    const updatedUser = await user.save();
+
+    // Also update all existing posts by this user to reflect their new avatar/username
+    if (avatar !== undefined || username !== undefined) {
+      await Post.updateMany(
+        { handle: { $regex: new RegExp(`^${user.handle}$`, "i") } },
+        { $set: { ...(avatar !== undefined && { avatar }), ...(username !== undefined && { author: username }) } }
+      );
+    }
+
+    res.status(200).json({
+      id: updatedUser._id,
+      username: updatedUser.username,
+      handle: updatedUser.handle,
+      email: updatedUser.email,
+      avatar: updatedUser.avatar,
+      bio: updatedUser.bio,
+      dob: updatedUser.dob,
+      location: updatedUser.location,
+      website: updatedUser.website,
+      interests: updatedUser.interests,
+      verified: updatedUser.verified,
+      followers: updatedUser.followers || [],
+      following: updatedUser.following || [],
+    });
+  } catch (error) {
+    console.error("Update profile error:", error);
+    res.status(500).json({ message: "Server error updating profile" });
   }
 });
 

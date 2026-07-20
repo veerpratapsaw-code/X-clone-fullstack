@@ -1,4 +1,168 @@
 // Dynamic Tweet Engagement Engine: Like, Repost, Bookmark, and Reply interactions
+import { getToken, getCurrentUser, showAuthModal } from "./auth.js";
+import { API_BASE_URL } from "../config.js";
+
+/**
+ * Shows the authentic X Post Detail / Threaded Replies Modal
+ */
+export function showPostDetailModal(postId, postElement) {
+  document.querySelectorAll(".x-detail-modal").forEach(el => el.remove());
+
+  const author = postElement.querySelector(".authorRow span.font-bold")?.textContent || "User";
+  const handle = postElement.querySelector(".authorRow span.text-\\[\\#71767b\\]")?.textContent?.split("·")[0]?.trim() || "@user";
+  const avatarUrl = postElement.querySelector(".leftCol img")?.src || "/assets/user/headShot.jpg";
+  const tweetText = postElement.querySelector(".tweetText")?.innerHTML || "";
+  const mediaHtml = postElement.querySelector(".tweetMedia")?.outerHTML || "";
+  const verifiedHtml = postElement.querySelector(".authorRow img[alt='Verified']")?.outerHTML || "";
+
+  const modal = document.createElement("div");
+  modal.className = "x-detail-modal fixed inset-0 z-[250] bg-black/80 backdrop-blur-md flex items-start justify-center pt-8 pb-8 px-4 overflow-y-auto animate-[fadeInPop_0.2s_ease-out]";
+
+  modal.innerHTML = `
+    <div class="bg-[#000000] border border-[#313233ad] rounded-3xl w-full max-w-xl shadow-2xl overflow-hidden my-auto">
+      <!-- Header -->
+      <div class="flex items-center justify-between px-4 py-3 border-b border-[#313233ad]/60 bg-[#000000]/90 sticky top-0 z-10 backdrop-blur-sm">
+        <div class="flex items-center gap-6">
+          <button class="close-detail p-2 hover:bg-[#181818] rounded-full text-white cursor-pointer transition-colors">
+            <svg class="size-5 fill-current" viewBox="0 0 24 24"><path d="M10.59 12L4.54 5.96l1.42-1.42L12 10.59l6.04-6.05 1.42 1.42L13.41 12l6.05 6.04-1.42 1.42L12 13.41l-6.04 6.05-1.42-1.42L10.59 12z"/></svg>
+          </button>
+          <h2 class="text-lg font-bold text-white">Post</h2>
+        </div>
+      </div>
+
+      <!-- Main Post Content -->
+      <div class="p-4 border-b border-[#313233ad]/60">
+        <div class="flex items-center gap-3 mb-3">
+          <img class="size-11 rounded-full object-cover border border-[#313233ad]" src="${avatarUrl}" alt="${author}" />
+          <div>
+            <div class="flex items-center gap-1 font-bold text-white text-base leading-tight">
+              <span>${author}</span>
+              ${verifiedHtml}
+            </div>
+            <div class="text-sm text-[#71767b]">${handle}</div>
+          </div>
+        </div>
+        
+        <div class="text-lg text-[#e7e9ea] leading-normal mb-3 font-normal">${tweetText}</div>
+        ${mediaHtml}
+      </div>
+
+      <!-- Reply Box -->
+      <div class="flex gap-3 p-4 border-b border-[#313233ad]/60 bg-[#080808]">
+        <img class="size-10 rounded-full object-cover shrink-0 border border-[#313233ad]" src="${getCurrentUser()?.avatar || '/assets/user/headShot.jpg'}" alt="You" />
+        <div class="flex-1">
+          <textarea rows="2" placeholder="Post your reply" class="w-full bg-transparent text-white placeholder-gray-500 focus:outline-none resize-none text-base"></textarea>
+          <div class="flex justify-end mt-2 pt-2 border-t border-[#313233ad]/30">
+            <button class="detail-submit-reply bg-[#1d9bf0] hover:bg-[#1a8cd8] text-white font-bold px-5 py-1.5 rounded-full text-sm cursor-pointer transition-colors shadow-md">Reply</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Threaded Replies List -->
+      <div class="detail-replies-list divide-y divide-[#313233ad]/40 max-h-[450px] overflow-y-auto">
+        <div class="p-8 text-center text-gray-500 text-sm animate-pulse">Loading replies...</div>
+      </div>
+    </div>
+  `;
+
+  const close = () => modal.remove();
+  modal.querySelector(".close-detail")?.addEventListener("click", close);
+  modal.addEventListener("click", (e) => { if (e.target === modal) close(); });
+
+  const repliesList = modal.querySelector(".detail-replies-list");
+
+  const renderReplyCard = (reply) => {
+    const card = document.createElement("div");
+    card.className = "p-4 flex gap-3 hover:bg-[#080808] transition-colors animate-[fadeInPop_0.2s_ease-out]";
+    card.innerHTML = `
+      <img class="size-10 rounded-full object-cover shrink-0 border border-[#313233ad]" src="${reply.avatar || '/assets/user/headShot.jpg'}" alt="${reply.author}" />
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center justify-between text-sm">
+          <div class="flex items-center gap-1 min-w-0 truncate">
+            <span class="font-bold text-white hover:underline truncate">${reply.author}</span>
+            ${reply.verified ? `<img class="w-4 shrink-0" src="/assets/svg/lock.svg" alt="Verified" />` : ''}
+            <span class="text-[#71767b] truncate">${reply.handle}</span>
+          </div>
+        </div>
+        <div class="text-sm text-[#e7e9ea] mt-1 leading-normal">${reply.text}</div>
+      </div>
+    `;
+    return card;
+  };
+
+  // Fetch live replies from MongoDB
+  if (postId && postId !== "undefined") {
+    fetch(`${API_BASE_URL}/api/posts/${postId}/replies`)
+      .then(res => res.json())
+      .then(replies => {
+        repliesList.innerHTML = "";
+        if (!replies || replies.length === 0) {
+          repliesList.innerHTML = `<div class="p-8 text-center text-gray-500 text-sm">No replies yet. Be the first to reply!</div>`;
+          return;
+        }
+        replies.forEach(reply => repliesList.appendChild(renderReplyCard(reply)));
+      })
+      .catch(err => {
+        console.warn("Error loading replies:", err);
+        repliesList.innerHTML = `<div class="p-8 text-center text-red-400 text-sm">Failed to load replies</div>`;
+      });
+  } else {
+    repliesList.innerHTML = `<div class="p-8 text-center text-gray-500 text-sm">No replies yet. Be the first to reply!</div>`;
+  }
+
+  // Handle posting a new reply
+  modal.querySelector(".detail-submit-reply")?.addEventListener("click", async () => {
+    const textarea = modal.querySelector("textarea");
+    const replyText = textarea?.value.trim();
+    if (!replyText) return;
+
+    if (!getToken()) {
+      showAuthModal("login", true);
+      return;
+    }
+
+    // Immediately show reply in UI
+    const currentUser = getCurrentUser() || { username: "You", handle: "@user", avatar: "/assets/user/headShot.jpg", verified: true };
+    const tempReply = {
+      author: currentUser.username,
+      handle: currentUser.handle,
+      avatar: currentUser.avatar,
+      verified: currentUser.verified,
+      text: replyText
+    };
+
+    if (repliesList.querySelector("div.text-center")) {
+      repliesList.innerHTML = "";
+    }
+    repliesList.insertBefore(renderReplyCard(tempReply), repliesList.firstChild);
+    textarea.value = "";
+
+    // Update counter on feed card
+    const span = postElement.querySelector(".actions > div:first-child span");
+    if (span) {
+      const current = parseInt(span.textContent.replace(/[^0-9]/g, ""), 10) || 0;
+      span.textContent = String(current + 1);
+    }
+
+    // Persist to MongoDB backend
+    if (postId && postId !== "undefined") {
+      try {
+        await fetch(`${API_BASE_URL}/api/posts/${postId}/replies`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${getToken()}`
+          },
+          body: JSON.stringify({ text: replyText })
+        });
+      } catch (err) {
+        console.warn("Backend reply sync error:", err);
+      }
+    }
+  });
+
+  document.body.appendChild(modal);
+}
 
 export function initTweetActions() {
   const postsContainer = document.querySelector(".posts");
@@ -17,7 +181,7 @@ export function initTweetActions() {
     setTimeout(() => toast.remove(), 2500);
   };
 
-  // Number parser & formatter (e.g. "320K" -> 320000 -> "320.1K")
+  // Number parser & formatter
   const parseNum = (str) => {
     if (!str || str === "0") return 0;
     str = str.trim().toUpperCase();
@@ -34,59 +198,7 @@ export function initTweetActions() {
     return num.toString();
   };
 
-  // Reply Modal Helper
-  const showReplyModal = (postElement, handle) => {
-    const modal = document.createElement("div");
-    modal.className = "fixed inset-0 z-[200] bg-black/70 backdrop-blur-sm flex items-start justify-center pt-20 animate-[fadeInPop_0.2s_ease-out]";
-    modal.innerHTML = `
-      <div class="bg-[#000000] border border-[#313233ad] rounded-2xl w-full max-w-lg p-4 shadow-2xl">
-        <div class="flex items-center justify-between border-b border-[#313233ad]/50 pb-3 mb-3">
-          <button class="close-reply p-1.5 hover:bg-[#181818] rounded-full text-white cursor-pointer transition-colors">
-            <svg class="size-5 fill-current" viewBox="0 0 24 24"><path d="M10.59 12L4.54 5.96l1.42-1.42L12 10.59l6.04-6.05 1.42 1.42L13.41 12l6.05 6.04-1.42 1.42L12 13.41l-6.04 6.05-1.42-1.42L10.59 12z"/></svg>
-          </button>
-          <span class="font-bold text-sm text-[#71767b]">Replying to <span class="text-[#1d9bf0]">${handle}</span></span>
-          <div class="w-5"></div>
-        </div>
-        <div class="flex gap-3">
-          <img class="size-10 rounded-full object-cover shrink-0" src="/assets/user/headShot.jpg" alt="You" />
-          <div class="flex-1">
-            <textarea rows="3" placeholder="Post your reply" class="w-full bg-transparent text-white placeholder-gray-500 focus:outline-none resize-none text-base"></textarea>
-            <div class="flex justify-end mt-3 pt-2 border-t border-[#313233ad]/30">
-              <button class="submit-reply bg-[#1d9bf0] hover:bg-[#1a8cd8] text-white font-bold px-4 py-1.5 rounded-full text-sm cursor-pointer transition-colors">Reply</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
-
-    const close = () => modal.remove();
-    modal.querySelector(".close-reply").addEventListener("click", close);
-    modal.addEventListener("click", (e) => { if (e.target === modal) close(); });
-
-    modal.querySelector(".submit-reply").addEventListener("click", () => {
-      const replyText = modal.querySelector("textarea").value.trim();
-      if (!replyText) return;
-      const span = postElement.querySelector(".actions > div:first-child span");
-      if (span) span.textContent = formatNum(parseNum(span.textContent) + 1);
-      showToast("Your reply was posted");
-
-      // Sync reply with MongoDB Backend
-      if (postElement.id) {
-        fetch(`${API_BASE_URL}/api/posts/${postElement.id}/reply`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ replyText, author: "Veer Pratap Saw", handle: "@Veerpratapsaw" })
-        }).catch(err => console.warn("Backend sync error:", err));
-      }
-
-      close();
-    });
-
-    document.body.appendChild(modal);
-    modal.querySelector("textarea").focus();
-  };
-
-  // Event Delegation for all post actions & More menu
+  // Event Delegation for all post actions & More menu & detail click
   postsContainer.addEventListener("click", (e) => {
     // Check if clicked the More (...) button
     const moreBtn = e.target.closest(".more");
@@ -95,8 +207,6 @@ export function initTweetActions() {
       const post = moreBtn.closest(".post");
       if (!post) return;
 
-      // Remove any existing dropdowns
-      document.querySelectorAll(".x-more-dropdown").remove?.();
       document.querySelectorAll(".x-more-dropdown").forEach(el => el.remove());
 
       const dropdown = document.createElement("div");
@@ -108,7 +218,6 @@ export function initTweetActions() {
         </button>
       `;
 
-      // Position dropdown relative to more button container
       moreBtn.style.position = "relative";
       moreBtn.appendChild(dropdown);
 
@@ -123,7 +232,6 @@ export function initTweetActions() {
         if (post.id) {
           try {
             await fetch(`${API_BASE_URL}/api/posts/${post.id}`, { method: "DELETE" });
-            console.log("🗑️ Deleted post from MongoDB:", post.id);
           } catch (err) {
             console.warn("Backend delete sync error:", err);
           }
@@ -131,7 +239,6 @@ export function initTweetActions() {
         showToast("Post deleted");
       });
 
-      // Close dropdown when clicking anywhere else
       const closeDropdown = () => {
         dropdown.remove();
         window.removeEventListener("click", closeDropdown);
@@ -141,11 +248,25 @@ export function initTweetActions() {
     }
 
     const actionItem = e.target.closest(".actions > div, .actions .hover\\:bg-\\[\\#1d9cf01e\\], img[alt='Bookmark'], img[src*='bookmarks.svg']");
-    if (!actionItem) return;
+    const post = e.target.closest(".post");
+    if (!post) return;
+
+    // Check auth requirement for actions
+    if (actionItem && !getToken()) {
+      e.stopPropagation();
+      showAuthModal("login", true);
+      return;
+    }
+
+    if (!actionItem) {
+      // If clicking inside the tweet body (not on an action icon or media or link), open Post Detail Modal
+      if (!e.target.closest("video, img, button, a")) {
+        showPostDetailModal(post.id, post);
+      }
+      return;
+    }
 
     e.stopPropagation();
-    const post = actionItem.closest(".post");
-    if (!post) return;
 
     // 1. LIKE / HEART ACTION
     if (actionItem.classList.contains("hover:text-[#f91880]") || actionItem.closest(".hover\\:text-\\[\\#f91880\\]")) {
@@ -162,9 +283,8 @@ export function initTweetActions() {
         if (span) span.textContent = formatNum(parseNum(span.textContent) + 1);
         if (post.id) {
           fetch(`${API_BASE_URL}/api/posts/${post.id}/like`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ isLiked: true })
+            method: "POST",
+            headers: { "Authorization": `Bearer ${getToken()}` }
           }).catch(err => console.warn("Backend sync error:", err));
         }
       } else {
@@ -174,9 +294,8 @@ export function initTweetActions() {
         if (span) span.textContent = formatNum(Math.max(0, parseNum(span.textContent) - 1));
         if (post.id) {
           fetch(`${API_BASE_URL}/api/posts/${post.id}/like`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ isLiked: false })
+            method: "POST",
+            headers: { "Authorization": `Bearer ${getToken()}` }
           }).catch(err => console.warn("Backend sync error:", err));
         }
       }
@@ -196,9 +315,8 @@ export function initTweetActions() {
         showToast("You reposted");
         if (post.id) {
           fetch(`${API_BASE_URL}/api/posts/${post.id}/repost`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ isReposted: true })
+            method: "POST",
+            headers: { "Authorization": `Bearer ${getToken()}` }
           }).catch(err => console.warn("Backend sync error:", err));
         }
       } else {
@@ -208,9 +326,8 @@ export function initTweetActions() {
         showToast("Removed repost");
         if (post.id) {
           fetch(`${API_BASE_URL}/api/posts/${post.id}/repost`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ isReposted: false })
+            method: "POST",
+            headers: { "Authorization": `Bearer ${getToken()}` }
           }).catch(err => console.warn("Backend sync error:", err));
         }
       }
@@ -226,18 +343,29 @@ export function initTweetActions() {
         post.dataset.bookmarked = "true";
         icon.classList.add("filter", "brightness-200", "scale-110");
         showToast("Added to your Bookmarks");
+        if (post.id) {
+          fetch(`${API_BASE_URL}/api/posts/${post.id}/bookmark`, {
+            method: "POST",
+            headers: { "Authorization": `Bearer ${getToken()}` }
+          }).catch(err => console.warn("Backend sync error:", err));
+        }
       } else {
         post.dataset.bookmarked = "false";
         icon.classList.remove("filter", "brightness-200", "scale-110");
         showToast("Removed from your Bookmarks");
+        if (post.id) {
+          fetch(`${API_BASE_URL}/api/posts/${post.id}/bookmark`, {
+            method: "POST",
+            headers: { "Authorization": `Bearer ${getToken()}` }
+          }).catch(err => console.warn("Backend sync error:", err));
+        }
       }
       return;
     }
 
     // 4. REPLY ACTION
     if (actionItem === post.querySelector(".actions > div:first-child") || actionItem.closest(".actions > div:first-child")) {
-      const handle = post.querySelector(".authorRow span.text-\\[\\#71767b\\]")?.textContent?.split("·")[0]?.trim() || "@user";
-      showReplyModal(post, handle);
+      showPostDetailModal(post.id, post);
       return;
     }
   });

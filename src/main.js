@@ -5,8 +5,10 @@ import { initXVideoPlayers } from "./modules/videoPlayer.js";
 import { initCreatePost } from "./modules/createPost.js";
 import { initTweetActions } from "./modules/tweetActions.js";
 import { initAuth } from "./modules/auth.js";
+import { initInteractiveFeatures } from "./modules/interactiveFeatures.js";
+import { initGrokUI } from "./modules/grokUI.js";
 
-// Main Entry Point: Initialize Auth, Layout, Dynamic Feed, Custom X Video Players, Post Creation, and Tweet Actions when DOM is ready
+// Main Entry Point: Initialize Auth, Layout, Dynamic Feed, Custom X Video Players, Post Creation, Tweet Actions, and Interactive Navigation features when DOM is ready
 document.addEventListener("DOMContentLoaded", () => {
   initAuth();
   initLayout();
@@ -14,4 +16,6 @@ document.addEventListener("DOMContentLoaded", () => {
   initXVideoPlayers();
   initCreatePost();
   initTweetActions();
+  initInteractiveFeatures();
+  initGrokUI();
 });

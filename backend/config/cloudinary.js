@@ -1,17 +1,10 @@
 import { v2 as cloudinary } from "cloudinary";
 import dotenv from "dotenv";
+import path from "path";
 
+// Explicitly load backend/.env or root .env
+dotenv.config({ path: path.join(process.cwd(), "backend", ".env") });
 dotenv.config();
-
-/**
- * Configure Cloudinary using environment variables.
- * You can get free credentials at https://cloudinary.com/
- */
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
 
 /**
  * Helper function to upload a file buffer from Multer directly to Cloudinary via stream.
@@ -21,10 +14,16 @@ cloudinary.config({
  */
 export const uploadToCloudinary = (fileBuffer, resourceType = "auto") => {
   return new Promise((resolve, reject) => {
-    // Check if Cloudinary API keys are configured
+    // Ensure configuration is fresh when upload is invoked
     if (!process.env.CLOUDINARY_CLOUD_NAME || process.env.CLOUDINARY_CLOUD_NAME === "your_cloudinary_cloud_name") {
-      return reject(new Error("Cloudinary API credentials are not set in .env or Render dashboard"));
+      return reject(new Error("Cloudinary API credentials are not set in .env"));
     }
+
+    cloudinary.config({
+      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+      api_key: process.env.CLOUDINARY_API_KEY,
+      api_secret: process.env.CLOUDINARY_API_SECRET,
+    });
 
     console.log(`☁️ Starting direct Cloudinary stream upload (cloud_name: ${process.env.CLOUDINARY_CLOUD_NAME})...`);
     const uploadStream = cloudinary.uploader.upload_stream(

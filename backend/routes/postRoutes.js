@@ -1,9 +1,26 @@
 import express from "express";
 import { Post } from "../models/Post.js";
 import { User } from "../models/User.js";
-import { optionalAuth } from "../middleware/authMiddleware.js";
+import { Reply } from "../models/Reply.js";
+import { optionalAuth, protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
+
+const parseCount = (str) => {
+  if (!str || str === "0") return 0;
+  str = String(str).trim().toUpperCase();
+  if (str.endsWith("K")) return parseFloat(str) * 1000;
+  if (str.endsWith("M")) return parseFloat(str) * 1000000;
+  return parseInt(str.replace(/,/g, ""), 10) || 0;
+};
+
+const formatCount = (num) => {
+  if (num <= 0) return "0";
+  if (num >= 1000000) return (num / 1000000).toFixed(1).replace(/\.0$/, "") + "M";
+  if (num >= 10000) return (num / 1000).toFixed(1).replace(/\.0$/, "") + "K";
+  if (num >= 1000) return (num / 1000).toFixed(1) + "K";
+  return Math.round(num).toString();
+};
 
 /**
  * @route   GET /api/posts
@@ -158,8 +175,83 @@ router.get("/", async (req, res) => {
 });
 
 /**
+ * @route   GET /api/posts/search
+ * @desc    Search posts by text, author, handle, or hashtags
+ * @access  Public
+ */
+router.get("/search", async (req, res) => {
+  try {
+    const q = (req.query.q || "").trim();
+    if (!q) {
+      const posts = await Post.find().sort({ createdAt: -1 });
+      return res.status(200).json(posts);
+    }
+    const regex = new RegExp(q, "i");
+    const posts = await Post.find({
+      $or: [
+        { text: { $regex: regex } },
+        { author: { $regex: regex } },
+        { handle: { $regex: regex } },
+        { "media.title": { $regex: regex } }
+      ]
+    }).sort({ createdAt: -1 });
+    res.status(200).json(posts);
+  } catch (error) {
+    console.error("Search error:", error);
+    res.status(500).json({ message: "Server error searching posts" });
+  }
+});
+
+/**
+ * @route   GET /api/posts/feed/following
+ * @desc    Get posts from users that the current user is following
+ * @access  Protected
+ */
+router.get("/feed/following", protect, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user || !user.following || user.following.length === 0) {
+      return res.status(200).json([]);
+    }
+    // Match posts whose handle (case-insensitive) is inside user.following
+    const handlesRegex = user.following.map(h => new RegExp(`^${h}$`, "i"));
+    const posts = await Post.find({ handle: { $in: handlesRegex } }).sort({ createdAt: -1 });
+    res.status(200).json(posts);
+  } catch (error) {
+    console.error("Following feed error:", error);
+    res.status(500).json({ message: "Server error fetching following feed" });
+  }
+});
+
+/**
+ * @route   GET /api/posts/user/bookmarks
+ * @desc    Get all bookmarked posts for the current user
+ * @access  Protected
+ */
+router.get("/user/bookmarks", protect, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).populate("bookmarks");
+    if (!user || !user.bookmarks) {
+      return res.status(200).json([]);
+    }
+    // Also support querying by bookmarkedBy array directly on posts
+    const posts = await Post.find({
+      $or: [
+        { _id: { $in: user.bookmarks } },
+        { bookmarkedBy: req.user.id }
+      ]
+    }).sort({ createdAt: -1 });
+    res.status(200).json(posts);
+  } catch (error) {
+    console.error("Bookmarks fetch error:", error);
+    res.status(500).json({ message: "Server error fetching bookmarks" });
+  }
+});
+
+/**
  * @route   POST /api/posts
  * @desc    Create a new tweet and save to MongoDB
+ * @access  Public (Will use authenticated JWT profile if provided)
  * @access  Public (Will use authenticated JWT profile if provided)
  */
 router.post("/", optionalAuth, async (req, res) => {
@@ -313,6 +405,190 @@ router.delete("/:id", async (req, res) => {
   } catch (error) {
     console.error("Error deleting post:", error);
     res.status(500).json({ message: "Server error while deleting post" });
+  }
+});
+
+/**
+ * @route   POST /api/posts/:id/like
+ * @desc    Toggle like/unlike on a post for the authenticated user
+ * @access  Protected
+ */
+router.post("/:id/like", protect, async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+    if (!post) return res.status(404).json({ message: "Post not found" });
+
+    const userId = req.user.id;
+    const isLiked = post.likedBy.some(id => id.toString() === userId.toString());
+    let currentLikes = parseCount(post.stats?.likes || "0");
+
+    if (isLiked) {
+      post.likedBy = post.likedBy.filter(id => id.toString() !== userId.toString());
+      currentLikes = Math.max(0, currentLikes - 1);
+    } else {
+      post.likedBy.push(userId);
+      currentLikes += 1;
+    }
+
+    if (!post.stats) post.stats = {};
+    post.stats.likes = formatCount(currentLikes);
+    await post.save();
+
+    res.status(200).json({
+      liked: !isLiked,
+      likesCount: post.stats.likes,
+      likedBy: post.likedBy,
+    });
+  } catch (error) {
+    console.error("Like error:", error);
+    res.status(500).json({ message: "Server error toggling like" });
+  }
+});
+
+/**
+ * @route   POST /api/posts/:id/repost
+ * @desc    Toggle repost/unrepost on a post for the authenticated user
+ * @access  Protected
+ */
+router.post("/:id/repost", protect, async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+    if (!post) return res.status(404).json({ message: "Post not found" });
+
+    const userId = req.user.id;
+    const isReposted = post.repostedBy.some(id => id.toString() === userId.toString());
+    let currentReposts = parseCount(post.stats?.reposts || "0");
+
+    if (isReposted) {
+      post.repostedBy = post.repostedBy.filter(id => id.toString() !== userId.toString());
+      currentReposts = Math.max(0, currentReposts - 1);
+    } else {
+      post.repostedBy.push(userId);
+      currentReposts += 1;
+    }
+
+    if (!post.stats) post.stats = {};
+    post.stats.reposts = formatCount(currentReposts);
+    await post.save();
+
+    res.status(200).json({
+      reposted: !isReposted,
+      repostsCount: post.stats.reposts,
+      repostedBy: post.repostedBy,
+    });
+  } catch (error) {
+    console.error("Repost error:", error);
+    res.status(500).json({ message: "Server error toggling repost" });
+  }
+});
+
+/**
+ * @route   POST /api/posts/:id/bookmark
+ * @desc    Toggle bookmark/unbookmark on a post for the authenticated user
+ * @access  Protected
+ */
+router.post("/:id/bookmark", protect, async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+    const user = await User.findById(req.user.id);
+    if (!post || !user) return res.status(404).json({ message: "Post or User not found" });
+
+    const userId = req.user.id;
+    const isBookmarked = post.bookmarkedBy.some(id => id.toString() === userId.toString());
+
+    if (isBookmarked) {
+      post.bookmarkedBy = post.bookmarkedBy.filter(id => id.toString() !== userId.toString());
+      user.bookmarks = (user.bookmarks || []).filter(id => id.toString() !== post._id.toString());
+    } else {
+      post.bookmarkedBy.push(userId);
+      if (!user.bookmarks) user.bookmarks = [];
+      user.bookmarks.push(post._id);
+    }
+
+    await post.save();
+    await user.save();
+
+    res.status(200).json({
+      bookmarked: !isBookmarked,
+      bookmarkedBy: post.bookmarkedBy,
+      userBookmarks: user.bookmarks,
+    });
+  } catch (error) {
+    console.error("Bookmark error:", error);
+    res.status(500).json({ message: "Server error toggling bookmark" });
+  }
+});
+
+/**
+ * @route   POST /api/posts/:id/replies
+ * @desc    Create a threaded comment/reply on a post
+ * @access  Protected
+ */
+router.post("/:id/replies", protect, async (req, res) => {
+  try {
+    const { text } = req.body;
+    if (!text || !text.trim()) {
+      return res.status(400).json({ message: "Reply text cannot be empty" });
+    }
+
+    const post = await Post.findById(req.params.id);
+    if (!post) return res.status(404).json({ message: "Post not found" });
+
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const reply = new Reply({
+      postId: post._id,
+      userId: user._id,
+      author: user.username,
+      handle: user.handle,
+      avatar: user.avatar || "/assets/user/headShot.jpg",
+      verified: user.verified || false,
+      text: text.trim(),
+    });
+
+    const savedReply = await reply.save();
+
+    let currentReplies = parseCount(post.stats?.replies || "0");
+    if (!post.stats) post.stats = {};
+    post.stats.replies = formatCount(currentReplies + 1);
+    await post.save();
+
+    res.status(201).json(savedReply);
+  } catch (error) {
+    console.error("Reply creation error:", error);
+    res.status(500).json({ message: "Server error creating reply" });
+  }
+});
+
+/**
+ * @route   GET /api/posts/:id/replies
+ * @desc    Get all threaded replies for a specific post
+ * @access  Public
+ */
+router.get("/:id/replies", async (req, res) => {
+  try {
+    const replies = await Reply.find({ postId: req.params.id }).sort({ createdAt: 1 });
+    res.status(200).json(replies);
+  } catch (error) {
+    console.error("Fetch replies error:", error);
+    res.status(500).json({ message: "Server error fetching replies" });
+  }
+});
+
+/**
+ * @route   GET /api/posts/:id
+ * @desc    Get single post detail by ID
+ * @access  Public
+ */
+router.get("/:id", async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+    if (!post) return res.status(404).json({ message: "Post not found" });
+    res.status(200).json(post);
+  } catch (error) {
+    console.error("Fetch post error:", error);
+    res.status(500).json({ message: "Server error fetching post" });
   }
 });
 

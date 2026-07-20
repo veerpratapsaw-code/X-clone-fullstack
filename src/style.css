@@ -59,7 +59,31 @@ input[type="range"].x-volume-slider::-moz-range-thumb:hover {
   }
 }
 
-/* Universal Clean Scrollbar Utility (Hides bulky system scrollbars like Twitter/X) */
+/* Universal Custom Thin Scrollbar (Replaces ugly default webkit scrollbars across whole website) */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #313233ad #000000;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #000000;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #313233ad;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #536471;
+}
+
+/* Universal Clean Scrollbar Utility (Hides scrollbar completely when applied) */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }

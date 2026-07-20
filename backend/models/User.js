@@ -37,10 +37,31 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "Hey there! I am using X.",
     },
+    dob: {
+      type: String,
+      default: "",
+    },
+    location: {
+      type: String,
+      default: "",
+    },
+    website: {
+      type: String,
+      default: "",
+    },
+    interests: [{ type: String }],
     verified: {
       type: Boolean,
       default: false,
     },
+    bookmarks: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Post",
+      },
+    ],
+    following: [{ type: String }],
+    followers: [{ type: String }],
   },
   {
     timestamps: true, // Automatically creates `createdAt` and `updatedAt` timestamps

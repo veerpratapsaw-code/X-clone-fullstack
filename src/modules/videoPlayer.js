@@ -14,33 +14,39 @@ export function initXVideoPlayers() {
       (entries) => {
         entries.forEach((entry) => {
           const video = entry.target;
+          video._isIntersecting = entry.isIntersecting;
           const container = video.closest(".x-video-container");
           if (!container) return;
 
           if (entry.isIntersecting) {
-            if (video.paused) {
+            if (video.paused && video.readyState >= 2) {
               video.muted = xGlobalSound.muted;
               video.volume = xGlobalSound.muted ? 0 : xGlobalSound.volume;
               if (video.__updateVolumeUI) video.__updateVolumeUI();
 
-              video.play().catch(() => {
-                video.muted = true;
-                video.volume = 0;
-                if (video.__updateVolumeUI) video.__updateVolumeUI();
-                video.play().catch(() => {});
-              });
+              const playPromise = video.play();
+              if (playPromise !== undefined) {
+                playPromise.catch(() => {
+                  video.muted = true;
+                  video.volume = 0;
+                  if (video.__updateVolumeUI) video.__updateVolumeUI();
+                  video.play().catch(() => {});
+                });
+              }
             }
           } else {
             if (!video.paused) {
               video.pause();
             }
             try {
-              video.currentTime = 0;
+              if (video.currentTime > 0 && !isNaN(video.currentTime)) {
+                video.currentTime = 0;
+              }
             } catch (err) {}
           }
         });
       },
-      { threshold: 0.6 }
+      { threshold: 0.5 }
     );
   }
 
@@ -82,6 +88,23 @@ export function initXVideoPlayers() {
     // Bind event controllers from modularized helpers
     bindVideoEvents(video, container, overlay, centerBadge);
     bindVideoSettings(video, container, overlay);
+
+    // When video data finishes loading, if it is currently in view according to IntersectionObserver, start autoplay!
+    const tryAutoplay = () => {
+      if (video._isIntersecting && video.paused) {
+        video.muted = xGlobalSound.muted;
+        video.volume = xGlobalSound.muted ? 0 : xGlobalSound.volume;
+        if (video.__updateVolumeUI) video.__updateVolumeUI();
+        video.play().catch(() => {
+          video.muted = true;
+          video.volume = 0;
+          if (video.__updateVolumeUI) video.__updateVolumeUI();
+          video.play().catch(() => {});
+        });
+      }
+    };
+    video.addEventListener("canplay", tryAutoplay, { once: true });
+    video.addEventListener("loadeddata", tryAutoplay, { once: true });
 
     // Observe video for autoplay when scrolling
     if (sharedVideoObserver && !video._observed) {

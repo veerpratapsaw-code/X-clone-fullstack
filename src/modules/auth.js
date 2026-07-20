@@ -1,5 +1,5 @@
-// Authentication Module for Frontend
 import { API_BASE_URL } from "../config.js";
+import { showLandingAndOnboarding } from "./onboardingScreen.js";
 
 // JWT and User Auth State Management
 
@@ -251,6 +251,6 @@ export const showAuthModal = (initialMode = "login", isCompulsory = false) => {
 export function initAuth() {
   updateUserProfilePill();
   if (!getToken()) {
-    showAuthModal("login", true);
+    showLandingAndOnboarding();
   }
 }

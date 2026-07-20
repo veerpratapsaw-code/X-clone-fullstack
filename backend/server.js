@@ -8,6 +8,8 @@ import { connectDB } from "./config/db.js";
 import postRoutes from "./routes/postRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
+import grokRoutes from "./routes/grokRoutes.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -54,6 +56,8 @@ app.use("/uploads", express.static("uploads"));
 app.use("/api/auth", authRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/upload", uploadRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/grok", grokRoutes);
 
 // Health Check endpoint with diagnostic status
 app.get("/", (req, res) => {
