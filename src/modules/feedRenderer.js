@@ -1,5 +1,6 @@
 import { initialPosts } from "./feedData.js";
 import { API_BASE_URL } from "../config.js";
+import { initXVideoPlayers } from "./videoPlayer.js";
 
 export function renderPostCard(post) {
   const sanitizeUrl = (url) => {
@@ -141,6 +142,7 @@ export async function initFeed() {
       container.appendChild(card);
     });
     console.log(`✅ Loaded ${posts.length} live posts directly from MongoDB!`);
+    initXVideoPlayers();
   } catch (err) {
     console.warn("⚠️ Backend API offline/error. Using local fallback feedData:", err.message);
     // 2. Fall back cleanly to local JS feed data if backend isn't running
@@ -148,5 +150,6 @@ export async function initFeed() {
       const card = renderPostCard(post);
       container.appendChild(card);
     });
+    initXVideoPlayers();
   }
 }

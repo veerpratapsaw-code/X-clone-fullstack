@@ -2,9 +2,47 @@ import { createOverlayMarkup } from "./videoTemplate.js";
 import { bindVideoEvents, xGlobalSound } from "./videoEvents.js";
 import { bindVideoSettings } from "./videoSettings.js";
 
+let sharedVideoObserver = null;
+
 // Main Video Player Initialization & Autoplay IntersectionObserver
 export function initXVideoPlayers() {
   const videos = document.querySelectorAll(".tweetMedia video, .post video");
+
+  // Create singleton IntersectionObserver if supported
+  if ("IntersectionObserver" in window && !sharedVideoObserver) {
+    sharedVideoObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const video = entry.target;
+          const container = video.closest(".x-video-container");
+          if (!container) return;
+
+          if (entry.isIntersecting) {
+            if (video.paused) {
+              video.muted = xGlobalSound.muted;
+              video.volume = xGlobalSound.muted ? 0 : xGlobalSound.volume;
+              if (video.__updateVolumeUI) video.__updateVolumeUI();
+
+              video.play().catch(() => {
+                video.muted = true;
+                video.volume = 0;
+                if (video.__updateVolumeUI) video.__updateVolumeUI();
+                video.play().catch(() => {});
+              });
+            }
+          } else {
+            if (!video.paused) {
+              video.pause();
+            }
+            try {
+              video.currentTime = 0;
+            } catch (err) {}
+          }
+        });
+      },
+      { threshold: 0.6 }
+    );
+  }
 
   videos.forEach((video) => {
     if (video.dataset.xInit === "true") return;
@@ -44,43 +82,11 @@ export function initXVideoPlayers() {
     // Bind event controllers from modularized helpers
     bindVideoEvents(video, container, overlay, centerBadge);
     bindVideoSettings(video, container, overlay);
+
+    // Observe video for autoplay when scrolling
+    if (sharedVideoObserver && !video._observed) {
+      sharedVideoObserver.observe(video);
+      video._observed = true;
+    }
   });
-
-  // Autoplay with Mute when Scrolling into View (IntersectionObserver)
-  if ("IntersectionObserver" in window) {
-    const videoObserver = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          const video = entry.target;
-          const container = video.closest(".x-video-container");
-          if (!container) return;
-
-          if (entry.isIntersecting) {
-            if (video.paused) {
-              video.muted = xGlobalSound.muted;
-              video.volume = xGlobalSound.muted ? 0 : xGlobalSound.volume;
-              if (video.__updateVolumeUI) video.__updateVolumeUI();
-
-              video.play().catch(() => {
-                video.muted = true;
-                video.volume = 0;
-                if (video.__updateVolumeUI) video.__updateVolumeUI();
-                video.play().catch(() => {});
-              });
-            }
-          } else {
-            if (!video.paused) {
-              video.pause();
-            }
-            try {
-              video.currentTime = 0;
-            } catch (err) {}
-          }
-        });
-      },
-      { threshold: 0.6 }
-    );
-
-    videos.forEach((video) => videoObserver.observe(video));
-  }
 }
