@@ -23,9 +23,10 @@ export const uploadToCloudinary = (fileBuffer, resourceType = "auto") => {
   return new Promise((resolve, reject) => {
     // Check if Cloudinary API keys are configured
     if (!process.env.CLOUDINARY_CLOUD_NAME || process.env.CLOUDINARY_CLOUD_NAME === "your_cloudinary_cloud_name") {
-      return reject(new Error("Cloudinary API credentials are not set in .env"));
+      return reject(new Error("Cloudinary API credentials are not set in .env or Render dashboard"));
     }
 
+    console.log(`☁️ Starting direct Cloudinary stream upload (cloud_name: ${process.env.CLOUDINARY_CLOUD_NAME})...`);
     const uploadStream = cloudinary.uploader.upload_stream(
       {
         folder: "x_clone_media",
@@ -33,7 +34,7 @@ export const uploadToCloudinary = (fileBuffer, resourceType = "auto") => {
       },
       (error, result) => {
         if (error) {
-          console.error("Cloudinary upload error:", error);
+          console.error(`❌ Cloudinary API Error: ${error.message || JSON.stringify(error)}`);
           return reject(error);
         }
         resolve(result);

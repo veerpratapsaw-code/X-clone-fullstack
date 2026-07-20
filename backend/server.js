@@ -2,11 +2,15 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import path from "path";
+import { fileURLToPath } from "url";
 import mongoose from "mongoose";
 import { connectDB } from "./config/db.js";
 import postRoutes from "./routes/postRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Load environment variables from .env or backend/.env
 dotenv.config({ path: path.join(process.cwd(), "backend", ".env") });
@@ -38,8 +42,9 @@ app.use(cors({
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 
-// 3. Serve local uploads statically as fallback when Cloudinary is not configured
-app.use("/uploads", express.static(path.join(process.cwd(), "backend", "uploads")));
+// 3. Serve local uploads statically using absolute path as fallback when Cloudinary is not configured
+const absoluteUploadsDir = path.resolve(__dirname, "uploads");
+app.use("/uploads", express.static(absoluteUploadsDir));
 app.use("/uploads", express.static("uploads"));
 
 // Routes

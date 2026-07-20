@@ -2,8 +2,11 @@ import express from "express";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import { fileURLToPath } from "url";
 import { uploadToCloudinary } from "../config/cloudinary.js";
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const router = express.Router();
 
 // Use memory storage so we can stream directly to Cloudinary or save locally
@@ -39,8 +42,8 @@ router.post("/", upload.single("file"), async (req, res) => {
     } catch (cloudError) {
       console.warn(`⚠️ Cloudinary not configured or failed (${cloudError.message}). Falling back to local disk storage...`);
 
-      // 2. Fallback: Save file to backend/uploads directory locally
-      const uploadsDir = path.join(process.cwd(), "backend", "uploads");
+      // 2. Fallback: Save file to backend/uploads directory locally using absolute path resolution
+      const uploadsDir = path.resolve(__dirname, "../uploads");
       if (!fs.existsSync(uploadsDir)) {
         fs.mkdirSync(uploadsDir, { recursive: true });
       }
