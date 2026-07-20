@@ -1,110 +1,29 @@
 export const initialPosts = [
   {
     id: "post-1",
-    author: "Edgar Dobriban",
-    handle: "@EdgarDobriban",
-    time: "Jul 14",
-    avatar: "/assets/user/akshay_kumar.jpg",
+    author: "Sardar Vallabhbhai Patel",
+    handle: "@sardarpatel",
+    time: "1h",
+    avatar: "/assets/user/sardar Vallabh bhai patel.jpg",
     verified: true,
-    repostLabel: "Paul Graham reposted",
-    text: `AI has helped resolve an important question in statistics. In the area of multiple hypothesis testing, the goal of controlling the false discovery rate (FDR) has been introduced in a seminal paper by Benjamini and Hochberg (1995). They also introduced a method the <span class="text-[#1d9bf0] hover:underline cursor-pointer ml-1">Show more</span>`,
+    repostLabel: null,
+    text: `True wisdom lies in understanding the eternal truth of action without attachment to results. As the Bhagavad Gita teaches us, perform your duty with absolute determination and honesty. 🙏📚 #BhagavadGita #Wisdom #Duty #Truth`,
     media: {
-      type: "article",
-      title: "Benjamini–Hochberg Procedure Can Fail to Control FDR for Correlated Two-Sided Gaussian",
-      subtitle: "Edgar Dobriban* · July 14, 2026",
-      abstract: "Abstract: We show that the Benjamini-Hochberg procedure can fail to control the False Discovery Rate (FDR) at its nominal level for correlated two-sided Gaussian tests..."
+      type: "video",
+      url: "/assets/posts_videos/bhagwat_gita.mp4"
     },
     stats: {
-      replies: "42",
-      reposts: "128",
-      likes: "1.4K",
-      views: "84K"
+      replies: "4.1K",
+      reposts: "31.8K",
+      likes: "198K",
+      views: "1.9M"
     }
   },
   {
     id: "post-2",
-    author: "ISRO",
-    handle: "@isro",
-    time: "2h",
-    avatar: "/assets/user/Cristiano-Ronaldo.jpg",
-    verified: true,
-    repostLabel: null,
-    text: `Chandrayaan-4 mission design finalized! 🚀 Our next lunar mission aims to demonstrate sample return technology and deep space autonomous docking. Congratulations to the entire scientific community across India. 🇮🇳 #ISRO #SpaceExploration`,
-    media: null,
-    stats: {
-      replies: "3.2K",
-      reposts: "14.8K",
-      likes: "89.2K",
-      views: "1.2M"
-    }
-  },
-  {
-    id: "post-3",
-    author: "Sardar Vallabhbhai Patel",
-    handle: "@sardarpatel",
-    time: "3h",
-    avatar: "/assets/user/sardar_patel.jpg",
-    verified: true,
-    repostLabel: null,
-    text: `Manpower without unity is not a strength unless it is harmonized and united properly, then it becomes a spiritual power. Let us work tirelessly for the strength and unity of our nation! 🇮🇳✨ #Unity #Strength #Leadership`,
-    media: {
-      type: "video",
-      url: "/assets/posts_videos/how_to_become_king.mp4"
-    },
-    stats: {
-      replies: "1.8K",
-      reposts: "12.4K",
-      likes: "94.2K",
-      views: "820K"
-    }
-  },
-  {
-    id: "post-4",
-    author: "Akshay Kumar",
-    handle: "@akshaykumar",
-    time: "4h",
-    avatar: "/assets/user/akshay_kumar.jpg",
-    verified: true,
-    repostLabel: null,
-    text: `Discipline and early mornings are the real secret to lifelong health and energy. Never compromise on your fitness regime, no matter where you are! 💪🥊 #Fitness #Discipline #Health`,
-    media: {
-      type: "image",
-      url: "https://images.unsplash.com/photo-1549719386-74dfcbf7dbed?w=1200&auto=format&fit=crop&q=80",
-      alt: "Boxing training"
-    },
-    stats: {
-      replies: "2.4K",
-      reposts: "18.1K",
-      likes: "115K",
-      views: "1.1M"
-    }
-  },
-  {
-    id: "post-5",
-    author: "Dipika Padukone",
-    handle: "@deepikapadukone",
-    time: "5h",
-    avatar: "/assets/user/dipika.jpg",
-    verified: true,
-    repostLabel: null,
-    text: `Finding peace amidst the chaos of everyday life. Nothing heals the soul quite like the serenity of mountain peaks and breathtaking nature views. 🏔️✨ #Nature #Peace #Travel`,
-    media: {
-      type: "image",
-      url: "https://images.unsplash.com/photo-1504893524553-b855bce32c67?w=1200&auto=format&fit=crop&q=80",
-      alt: "Kirkjufell mountain"
-    },
-    stats: {
-      replies: "3.2K",
-      reposts: "24.5K",
-      likes: "142K",
-      views: "1.4M"
-    }
-  },
-  {
-    id: "post-6",
     author: "Cristiano Ronaldo",
     handle: "@Cristiano",
-    time: "6h",
+    time: "3h",
     avatar: "/assets/user/Cristiano-Ronaldo.jpg",
     verified: true,
     repostLabel: null,
@@ -121,10 +40,91 @@ export const initialPosts = [
     }
   },
   {
+    id: "post-3",
+    author: "Akshay Kumar",
+    handle: "@akshaykumar",
+    time: "4h",
+    avatar: "/assets/user/akshay_kumar.jpg",
+    verified: true,
+    repostLabel: null,
+    text: `Risk assessment and emotional control are key when navigating fast-moving markets and building businesses. Stay focused, do your research, and keep learning! 📈💡 #Trading #Business #Mindset #Finance`,
+    media: {
+      type: "video",
+      url: "/assets/posts_videos/trading.mp4"
+    },
+    stats: {
+      replies: "1.1K",
+      reposts: "9.2K",
+      likes: "67.5K",
+      views: "610K"
+    }
+  },
+  {
+    id: "post-4",
+    author: "Taklu Baba (Tech Guru)",
+    handle: "@taklubaba",
+    time: "5h",
+    avatar: "/assets/user/takluBaba.png",
+    verified: true,
+    repostLabel: null,
+    text: `How do you become a king in your industry? Absolute discipline, focus, and relentless execution every single morning. No excuses, just results! 👑🔥 #Leadership #Discipline #Success`,
+    media: {
+      type: "video",
+      url: "/assets/posts_videos/how_to_become_king.mp4"
+    },
+    stats: {
+      replies: "840",
+      reposts: "6.4K",
+      likes: "52.1K",
+      views: "430K"
+    }
+  },
+  {
+    id: "post-5",
+    author: "Veer Pratap Saw",
+    handle: "@veerpratapsaw",
+    time: "7h",
+    avatar: "/assets/user/headShot.jpg",
+    verified: true,
+    repostLabel: null,
+    text: `When the pressure rises, true champions step up. There are no excuses when you step onto the field—give everything you have until the final whistle blows! 🚀👊 #NoExcuses #FullStack #Mindset`,
+    media: {
+      type: "video",
+      url: "/assets/posts_videos/no_excuses.mp4"
+    },
+    stats: {
+      replies: "1.2K",
+      reposts: "11.4K",
+      likes: "84.5K",
+      views: "720K"
+    }
+  },
+  {
+    id: "post-6",
+    author: "Dipika Padukone",
+    handle: "@deepikapadukone",
+    time: "8h",
+    avatar: "/assets/user/dipika.jpg",
+    verified: true,
+    repostLabel: null,
+    text: `Finding serenity amidst the chaos of everyday life. Nothing heals the soul quite like the tranquility of mountain peaks and breathtaking nature views. 🏔️✨ #Nature #Peace #Travel`,
+    media: {
+      type: "image",
+      url: "https://images.unsplash.com/photo-1504893524553-b855bce32c67?w=1200&auto=format&fit=crop&q=80",
+      alt: "Kirkjufell mountain"
+    },
+    stats: {
+      replies: "3.2K",
+      reposts: "24.5K",
+      likes: "142K",
+      views: "1.4M"
+    }
+  },
+  {
     id: "post-7",
     author: "Nandani Gupta",
     handle: "@nandanigupta",
-    time: "8h",
+    time: "10h",
     avatar: "/assets/user/nandani_gupta.jpg",
     verified: true,
     repostLabel: null,
@@ -143,104 +143,145 @@ export const initialPosts = [
   },
   {
     id: "post-8",
-    author: "Veer Pratap Saw",
-    handle: "@veerpratapsaw",
-    time: "11h",
-    avatar: "/assets/user/headShot.jpg",
+    author: "Anushka Sharma",
+    handle: "@anushkasharma",
+    time: "12h",
+    avatar: "/assets/user/anushka sharma.png",
     verified: true,
     repostLabel: null,
-    text: `Artificial Intelligence is transforming how we build software and analyze complex data strategies. Here is a deep dive into modern neural network architectures and strategic roadmaps for 2026. 🤖🚀 #AI #Tech #Innovation`,
+    text: `Morning sunlight and clean eating are my ultimate energy boosters. Taking care of your mental peace is the highest self-love you can practice every day. ☀️🧘‍♀️ #SelfLove #Wellness #Peace`,
     media: {
       type: "image",
-      url: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1200&auto=format&fit=crop&q=80",
-      alt: "AI technology"
+      url: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=1200&auto=format&fit=crop&q=80",
+      alt: "Morning yoga meditation"
     },
     stats: {
-      replies: "156",
-      reposts: "1.4K",
-      likes: "8.9K",
-      views: "92K"
+      replies: "1.5K",
+      reposts: "14.2K",
+      likes: "98.1K",
+      views: "940K"
     }
   },
   {
     id: "post-9",
-    author: "Sardar Vallabhbhai Patel",
-    handle: "@sardarpatel",
+    author: "Donald J. Trump",
+    handle: "@realDonaldTrump",
     time: "14h",
-    avatar: "/assets/user/sardar_patel.jpg",
+    avatar: "/assets/user/Donald_Trump.png",
     verified: true,
     repostLabel: null,
-    text: `True wisdom lies in understanding the eternal truth of action without attachment to results. As the Bhagavad Gita teaches us, perform your duty with absolute determination and honesty. 🙏📚 #BhagavadGita #Wisdom #Duty #Truth`,
+    text: `We are making American innovation stronger and faster than ever before! The economy is booming, tech infrastructure is leading the world, and tremendous things are ahead. Believe me! 🇺🇸🦅 #USA #Innovation #Leadership`,
     media: {
-      type: "video",
-      url: "/assets/posts_videos/bhagwat_gita.mp4"
+      type: "image",
+      url: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1200&auto=format&fit=crop&q=80",
+      alt: "Skyscrapers"
     },
     stats: {
-      replies: "4.1K",
-      reposts: "31.8K",
-      likes: "198K",
-      views: "1.9M"
+      replies: "28.4K",
+      reposts: "95.1K",
+      likes: "510K",
+      views: "6.8M"
     }
   },
   {
     id: "post-10",
-    author: "Akshay Kumar",
-    handle: "@akshaykumar",
-    time: "17h",
-    avatar: "/assets/user/akshay_kumar.jpg",
+    author: "Lata Mangeshkar",
+    handle: "@latamangeshkar",
+    time: "16h",
+    avatar: "/assets/user/LataMangeskar.png",
     verified: true,
     repostLabel: null,
-    text: `Risk assessment and emotional control are key when navigating fast-moving markets and building businesses. Stay focused, do your research, and keep learning! 📈💡 #Trading #Business #Mindset #Finance`,
+    text: `Music is the divine language that unites hearts across the world across generations. May peace and harmony resonate in every soul today and forever. 🎶🙏 #Music #Melody #Divine`,
     media: {
-      type: "video",
-      url: "/assets/posts_videos/trading.mp4"
+      type: "image",
+      url: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=1200&auto=format&fit=crop&q=80",
+      alt: "Studio microphone"
     },
     stats: {
-      replies: "1.1K",
-      reposts: "9.2K",
-      likes: "67.5K",
-      views: "610K"
+      replies: "5.6K",
+      reposts: "42.1K",
+      likes: "280K",
+      views: "2.4M"
     }
   },
   {
     id: "post-11",
-    author: "Dipika Padukone",
-    handle: "@deepikapadukone",
-    time: "19h",
-    avatar: "/assets/user/dipika.jpg",
+    author: "Kyra Advani",
+    handle: "@kyraadvani",
+    time: "18h",
+    avatar: "/assets/user/kyrea gunue.png",
     verified: true,
     repostLabel: null,
-    text: `Letting go and trusting the flow. Nature’s majestic waterfalls remind us of power, persistence, and grace all happening simultaneously. 🌊✨ #Waterfall #Nature #Persistence`,
+    text: `Wrapped up an amazing weekend shoot! Truly grateful for the wonderful team and all the love you guys shower on every project. Big things coming soon! 🎬✨ #BehindTheScenes #Grateful #Cinema`,
     media: {
       type: "image",
-      url: "https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?w=1200&auto=format&fit=crop&q=80",
-      alt: "Majestic waterfall"
+      url: "https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?w=1200&auto=format&fit=crop&q=80",
+      alt: "Film shoot setup"
     },
     stats: {
-      replies: "1.9K",
-      reposts: "15.6K",
-      likes: "108K",
-      views: "840K"
+      replies: "620",
+      reposts: "4.5K",
+      likes: "38.2K",
+      views: "390K"
     }
   },
   {
     id: "post-12",
-    author: "Cristiano Ronaldo",
-    handle: "@Cristiano",
-    time: "22h",
-    avatar: "/assets/user/Cristiano-Ronaldo.jpg",
+    author: "Vikramaditya Motwane",
+    handle: "@vikramaditya",
+    time: "20h",
+    avatar: "/assets/user/headShotio.jpg",
     verified: true,
     repostLabel: null,
-    text: `When the pressure rises, champions step up. There are no excuses when you step onto the field—give everything you have until the final whistle blows! 🔥👊 #NoExcuses #Champion #Mindset`,
+    text: `Storytelling in modern cinema is undergoing a massive revolution with digital color grading and immersive virtual production techniques. Exciting times for filmmakers globally! 🎥🎞️ #Filmmaking #Cinema #Tech`,
     media: {
-      type: "video",
-      url: "/assets/posts_videos/no_excuses.mp4"
+      type: "image",
+      url: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=1200&auto=format&fit=crop&q=80",
+      alt: "Cinema hall"
     },
     stats: {
-      replies: "9.4K",
-      reposts: "64.1K",
-      likes: "320K",
-      views: "3.1M"
+      replies: "310",
+      reposts: "2.1K",
+      likes: "15.8K",
+      views: "180K"
+    }
+  },
+  {
+    id: "post-13",
+    author: "Parineeti Chopra",
+    handle: "@parineetichopra",
+    time: "22h",
+    avatar: "/assets/user/halkat choopra.png",
+    verified: true,
+    repostLabel: null,
+    text: `Sometimes you just need a spontaneous road trip with good playlists and great friends to hit the refresh button on life! Driving through the scenic highways today. 🚗💨 #RoadTrip #Vibes #Friends`,
+    media: {
+      type: "image",
+      url: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=1200&auto=format&fit=crop&q=80",
+      alt: "Road trip adventure"
+    },
+    stats: {
+      replies: "940",
+      reposts: "8.1K",
+      likes: "64.3K",
+      views: "580K"
+    }
+  },
+  {
+    id: "post-14",
+    author: "Ananya (Attitude Girl)",
+    handle: "@attitudegirl",
+    time: "23h",
+    avatar: "/assets/user/@attidude_girl.png",
+    verified: true,
+    repostLabel: null,
+    text: `Your energy introduces you before you even speak a word. Keep your standards high, your focus sharp, and let your success make all the noise! 💅✨ #Attitude #Confidence #GoodVibes`,
+    media: null,
+    stats: {
+      replies: "512",
+      reposts: "3.4K",
+      likes: "28.9K",
+      views: "290K"
     }
   }
 ];
