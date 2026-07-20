@@ -167,6 +167,23 @@ export const showAuthModal = (initialMode = "login", isCompulsory = false) => {
     modal.querySelector("#switch-to-register")?.addEventListener("click", () => { mode = "register"; renderModalContent(); });
     modal.querySelector("#switch-to-login")?.addEventListener("click", () => { mode = "login"; renderModalContent(); });
 
+    // Auto-prefix '@' symbol on handle input field so user doesn't have to write it manually
+    const handleInput = modal.querySelector("#auth-handle");
+    if (handleInput) {
+      handleInput.addEventListener("blur", () => {
+        let val = handleInput.value.trim();
+        if (val && !val.startsWith("@")) {
+          handleInput.value = "@" + val;
+        }
+      });
+      handleInput.addEventListener("input", (e) => {
+        let val = handleInput.value;
+        if (val && !val.startsWith("@") && val.length === 1 && e.inputType !== "deleteContentBackward") {
+          handleInput.value = "@" + val;
+        }
+      });
+    }
+
     // Handle Form Submit
     modal.querySelector("#auth-form")?.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -179,10 +196,15 @@ export const showAuthModal = (initialMode = "login", isCompulsory = false) => {
       submitTxt.textContent = "Processing...";
 
       try {
-        const emailOrHandle = modal.querySelector("#auth-email")?.value.trim();
+        let emailOrHandle = modal.querySelector("#auth-email")?.value.trim();
         const password = modal.querySelector("#auth-password")?.value.trim();
 
         if (mode === "login") {
+          // If login input looks like a username handle (not an email or phone number) and doesn't start with @, add it
+          if (emailOrHandle && !emailOrHandle.includes("@") && !/^\d+$/.test(emailOrHandle)) {
+            emailOrHandle = "@" + emailOrHandle;
+          }
+
           const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -196,7 +218,11 @@ export const showAuthModal = (initialMode = "login", isCompulsory = false) => {
           window.location.reload();
         } else {
           const username = modal.querySelector("#auth-username")?.value.trim();
-          const handle = modal.querySelector("#auth-handle")?.value.trim();
+          let handle = modal.querySelector("#auth-handle")?.value.trim();
+          if (handle && !handle.startsWith("@")) {
+            handle = "@" + handle;
+          }
+
           const res = await fetch(`${API_BASE_URL}/api/auth/register`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
