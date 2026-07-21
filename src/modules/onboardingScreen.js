@@ -220,7 +220,7 @@ function openMultiStepOnboardingWizard() {
       "https://cdn.pixabay.com/photo/2026/02/05/22/12/olivcelso-desert-10106837_1280.png",
       "https://cdn.pixabay.com/photo/2026/03/03/10/12/tylijura-car-10153221_960_720.jpg",
       "https://cdn.pixabay.com/photo/2026/02/15/05/03/pheladii-man-10124061_1280.jpg",
-      "https://stockcake.com/i/joyful-anime-girl_1732866_1246669"
+      "/assets/user/virat.jpg"
     ];
 
     return `

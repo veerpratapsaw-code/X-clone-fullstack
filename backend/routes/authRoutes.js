@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import { User } from "../models/User.js";
 import { Post } from "../models/Post.js";
 import { protect } from "../middleware/authMiddleware.js";
+import { systemAccounts, seedAllSystemAccountsAndPosts } from "../seed/seedSystemData.js";
 
 const router = express.Router();
 
@@ -216,6 +217,29 @@ router.get("/me", protect, async (req, res) => {
   } catch (error) {
     console.error("Get profile error:", error);
     res.status(500).json({ message: "Server error retrieving user profile" });
+  }
+});
+
+/**
+ * @route   GET /api/auth/system-users
+ * @desc    Get all system seed accounts (Human & AI Bots) along with their credentials details and trigger sync
+ * @access  Public
+ */
+router.get("/system-users", async (req, res) => {
+  try {
+    await seedAllSystemAccountsAndPosts();
+    const users = await User.find({
+      handle: { $in: systemAccounts.map(a => a.handle) }
+    }).select("-password");
+    res.status(200).json({
+      message: "System accounts verified and synced successfully",
+      count: users.length,
+      users,
+      defaultPassword: "Password123!"
+    });
+  } catch (error) {
+    console.error("System users endpoint error:", error);
+    res.status(500).json({ message: "Server error syncing system users" });
   }
 });
 

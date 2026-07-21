@@ -38,9 +38,13 @@ export function renderPostCard(post) {
 
   const avatarUrl = sanitizeUrl(post.avatar || "/assets/user/headShot.jpg");
 
+  const postId = post.id || post._id || "";
   const postCard = document.createElement("div");
   postCard.className = "post p-4 border-b border-[#313233ad] hover:bg-[#080808] transition-colors flex gap-3 cursor-pointer";
-  if (post.id) postCard.id = post.id;
+  if (postId) {
+    postCard.id = postId;
+    postCard.dataset.id = postId;
+  }
   if (isLiked) postCard.dataset.liked = "true";
   if (isReposted) postCard.dataset.reposted = "true";
   if (isBookmarked) postCard.dataset.bookmarked = "true";
@@ -81,8 +85,11 @@ export function renderPostCard(post) {
       `;
     } else if (post.media.type === "image") {
       mediaHtml = `
-        <div class="tweetMedia mt-3 rounded-2xl border border-[#313233ad] overflow-hidden bg-[#16181c] flex items-center justify-center max-h-[600px] w-fit max-w-full">
-          <img src="${mediaUrl}" alt="${post.media.alt || ''}" class="max-w-full max-h-[600px] w-auto h-auto object-contain mx-auto block" />
+        <div class="tweetMedia mt-3 rounded-2xl border border-[#313233ad] overflow-hidden bg-[#16181c] min-h-[260px] flex items-center justify-center max-h-[600px] w-fit max-w-full relative group">
+          <div class="lazy-placeholder absolute inset-0 bg-[#1e2024] animate-pulse rounded-2xl flex items-center justify-center">
+            <svg class="size-6 text-[#71767b] animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+          </div>
+          <img data-src="${mediaUrl}" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'%3E%3C/svg%3E" alt="${post.media.alt || ''}" class="lazy-image opacity-0 transition-opacity duration-300 max-w-full max-h-[600px] w-auto h-auto object-contain mx-auto block relative z-10" />
         </div>
       `;
     }
@@ -112,23 +119,23 @@ export function renderPostCard(post) {
       <div class="tweetText text-sm text-[#e7e9ea] mt-1 leading-normal">${post.text}</div>
       ${mediaHtml}
       <div class="actions flex justify-between items-center text-[#71767b] text-xs mt-3 max-w-md">
-        <div class="flex items-center gap-1 hover:text-[#1d9bf0] group cursor-pointer transition-colors">
+        <div class="flex items-center gap-1 hover:text-[#1d9bf0] group cursor-pointer transition-colors replyAction" data-id="${postId}">
           <div class="p-2 group-hover:bg-[#1d9cf01e] rounded-full"><svg viewBox="0 0 24 24" aria-hidden="true" class="size-4 fill-current"><path d="M20.7 11.7c0-4.48-3.844-8.2-8.699-8.2-4.854 0-8.698 3.72-8.698 8.2v.015l-.001.014c-.02.667.09 1.225.25 1.767.083.28.176.545.276.839.098.285.202.595.288.918.177.663.284 1.401.156 2.271-.086.582-.274 1.191-.582 1.855 1.264.375 2.55.053 4.013-.599l.455-.203.437.242c1.07.594 1.917 1.08 3.406 1.08 4.855 0 8.7-3.72 8.7-8.199zm2 0c0 5.683-4.84 10.2-10.699 10.2-1.784 0-2.96-.555-3.95-1.095-1.876.768-4.02 1.2-6.245-.075l-.885-.505.524-.875c.54-.904.77-1.581.848-2.118.078-.526.02-.98-.11-1.463-.066-.25-.15-.502-.247-.788-.095-.277-.204-.59-.301-.92-.199-.674-.36-1.449-.332-2.39C1.322 6.002 6.154 1.5 12.002 1.5c5.859 0 10.7 4.518 10.7 10.2z"></path></svg></div>
           <span>${post.stats?.replies || "0"}</span>
         </div>
-        <div class="flex items-center gap-1 ${isReposted ? 'text-[#00ba7c]' : ''} hover:text-[#00ba7c] group cursor-pointer transition-colors">
+        <div class="flex items-center gap-1 ${isReposted ? 'text-[#00ba7c]' : ''} hover:text-[#00ba7c] group cursor-pointer transition-colors repostAction" data-id="${postId}">
           <div class="p-2 group-hover:bg-[#00ba7c1e] rounded-full"><svg viewBox="0 0 24 24" aria-hidden="true" class="size-4 fill-current"><path d="M4.5 3.88l4.432 4.14-1.364 1.46L5.5 7.55V16c0 1.1.896 2 2 2H13v2H7.5c-2.209 0-4-1.79-4-4V7.55L1.432 9.48.068 8.02 4.5 3.88zM16.5 6H11V4h5.5c2.209 0 4 1.79 4 4v8.45l2.068-1.93 1.364 1.46-4.432 4.14-4.432-4.14 1.364-1.46 2.068 1.93V8c0-1.1-.896-2-2-2z"></path></svg></div>
           <span>${post.stats?.reposts || "0"}</span>
         </div>
-        <div class="flex items-center gap-1 ${isLiked ? 'text-[#f91880]' : ''} hover:text-[#f91880] group cursor-pointer transition-colors">
+        <div class="flex items-center gap-1 ${isLiked ? 'text-[#f91880]' : ''} hover:text-[#f91880] group cursor-pointer transition-colors likeAction" data-id="${postId}">
           <div class="p-2 group-hover:bg-[#f918801e] rounded-full"><svg viewBox="0 0 24 24" aria-hidden="true" class="size-4 fill-current"><path d="${likeSvgPath}"></path></svg></div>
           <span>${post.stats?.likes || "0"}</span>
         </div>
-        <div class="flex items-center gap-1 hover:text-[#1d9bf0] group cursor-pointer transition-colors">
+        <div class="flex items-center gap-1 hover:text-[#1d9bf0] group cursor-pointer transition-colors viewsAction" data-id="${postId}">
           <div class="p-2 group-hover:bg-[#1d9cf01e] rounded-full"><svg viewBox="0 0 24 24" aria-hidden="true" class="size-4 fill-current"><path d="M8.75 21V3h2v18h-2zM18 21V8.5h2V21h-2zM4 21l.004-10h2L6 21H4zm9.248 0v-7h2v7h-2z"></path></svg></div>
           <span>${post.stats?.views || "0"}</span>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 bookmarkAction" data-id="${postId}">
           <div class="p-2 hover:bg-[#1d9cf01e] hover:text-[#1d9bf0] rounded-full cursor-pointer transition-colors"><img class="size-4 opacity-70 hover:opacity-100 ${isBookmarked ? 'filter brightness-200 scale-110' : ''}" src="/assets/svg/bookmarks.svg" alt="Bookmark" /></div>
         </div>
       </div>
@@ -158,6 +165,7 @@ export async function initFeed() {
     });
     console.log(`✅ Loaded ${posts.length} live posts directly from MongoDB!`);
     initXVideoPlayers();
+    observeLazyImages();
   } catch (err) {
     console.warn("⚠️ Backend API offline/error. Using local fallback feedData:", err.message);
     // 2. Fall back cleanly to local JS feed data if backend isn't running
@@ -166,5 +174,49 @@ export async function initFeed() {
       container.appendChild(card);
     });
     initXVideoPlayers();
+    observeLazyImages();
   }
+}
+
+/**
+ * Preemptive Lazy Loading using IntersectionObserver
+ * Triggers ~2 cards / images ahead (900px rootMargin) for ultra-fast pre-downloading before scrolling into viewport.
+ */
+const preemptiveObserver = new IntersectionObserver((entries, observer) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const img = entry.target;
+      const actualSrc = img.getAttribute("data-src");
+      if (actualSrc) {
+        const tempImg = new Image();
+        tempImg.onload = () => {
+          img.src = actualSrc;
+          img.classList.remove("opacity-0");
+          img.classList.add("opacity-100");
+          const placeholder = img.parentElement?.querySelector(".lazy-placeholder");
+          if (placeholder) placeholder.remove();
+        };
+        tempImg.onerror = () => {
+          img.src = actualSrc;
+          img.classList.remove("opacity-0");
+          img.classList.add("opacity-100");
+          const placeholder = img.parentElement?.querySelector(".lazy-placeholder");
+          if (placeholder) placeholder.remove();
+        };
+        tempImg.src = actualSrc;
+        img.removeAttribute("data-src");
+      }
+      observer.unobserve(img);
+    }
+  });
+}, {
+  root: null,
+  rootMargin: "900px 0px 900px 0px", // 900px before reaching viewport (~2 cards above/below)
+  threshold: 0.01
+});
+
+export function observeLazyImages() {
+  document.querySelectorAll(".lazy-image[data-src]").forEach(img => {
+    preemptiveObserver.observe(img);
+  });
 }

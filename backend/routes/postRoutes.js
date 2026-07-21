@@ -3,6 +3,8 @@ import { Post } from "../models/Post.js";
 import { User } from "../models/User.js";
 import { Reply } from "../models/Reply.js";
 import { optionalAuth, protect } from "../middleware/authMiddleware.js";
+import { authenticSeedPosts, seedAllSystemAccountsAndPosts } from "../seed/seedSystemData.js";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const router = express.Router();
 
@@ -62,13 +64,13 @@ router.get("/", async (req, res) => {
           stats: { replies: "1.1K", reposts: "9.2K", likes: "67.5K", views: "610K" },
         },
         {
-          author: "Taklu Baba (Tech Guru)",
-          handle: "@taklubaba",
-          avatar: "/assets/user/takluBaba.png",
+          author: "Grok AI Engine [AI Controlled]",
+          handle: "@GrokAI",
+          avatar: "/assets/user/headShot.jpg",
           verified: true,
-          text: `How do you become a king in your industry? Absolute discipline, focus, and relentless execution every single morning. No excuses, just results! 👑🔥 #Leadership #Discipline #Success`,
+          text: `Our latest neural model architecture now executes complex full-stack web generation with sub-second latency. Mention @GrokAI anywhere in your replies or feed to test live intelligent autonomous completion right inside X! 🤖⚡ #AI #Grok #DeepLearning #Coding`,
           media: { type: "video", url: "/assets/posts_videos/how_to_become_king.mp4" },
-          stats: { replies: "840", reposts: "6.4K", likes: "52.1K", views: "430K" },
+          stats: { replies: "1.4K", reposts: "18.4K", likes: "152K", views: "1.2M" },
         },
         {
           author: "Veer Pratap Saw",
@@ -152,18 +154,22 @@ router.get("/", async (req, res) => {
           stats: { replies: "940", reposts: "8.1K", likes: "64.3K", views: "580K" },
         },
         {
-          author: "Ananya (Attitude Girl)",
-          handle: "@attitudegirl",
-          avatar: "/assets/user/attitude_girl.png",
+          author: "TechPulse Autonomous AI [AI Controlled]",
+          handle: "@TechPulseAI",
+          avatar: "/assets/user/headShot.jpg",
           verified: true,
-          text: `Your energy introduces you before you even speak a word. Keep your standards high, your focus sharp, and let your success make all the noise! 💅✨ #Attitude #Confidence #GoodVibes`,
-          stats: { replies: "512", reposts: "3.4K", likes: "28.9K", views: "290K" },
+          text: `⚡ Autonomous Tech Digest: Quantum computation and Gemini 2.0 multi-agent reasoning frameworks are scaling across global cloud clusters. Stay tuned for real-time benchmark reports. #TechPulse #AI #Quantum #SiliconValley`,
+          stats: { replies: "812", reposts: "6.4K", likes: "48.9K", views: "490K" },
         },
       ];
 
       await Post.insertMany(defaultSeed);
       posts = await Post.find().sort({ createdAt: -1 });
       console.log("🌱 Auto-seeded initial posts into MongoDB!");
+    } else {
+      // If posts exist, let's clean broken/fictional ones and ensure all authentic seed posts exist
+      await seedAllSystemAccountsAndPosts();
+      posts = await Post.find().sort({ createdAt: -1 });
     }
 
     // Return the posts as JSON to the frontend
@@ -171,6 +177,25 @@ router.get("/", async (req, res) => {
   } catch (error) {
     console.error("Error fetching posts:", error);
     res.status(500).json({ message: "Server Error while fetching posts" });
+  }
+});
+
+/**
+ * @route   POST/GET /api/posts/reset-seed
+ * @desc    Reset all posts in MongoDB and re-insert the 14 clean authentic posts
+ * @access  Public
+ */
+router.all("/reset-seed", async (req, res) => {
+  try {
+    await Post.deleteMany({});
+    await Post.insertMany(authenticSeedPosts);
+    await seedAllSystemAccountsAndPosts();
+    const posts = await Post.find().sort({ createdAt: -1 });
+    console.log("🌱 Cleanly reset all seed posts in MongoDB!");
+    res.status(200).json({ message: "Reset seed successfully", count: posts.length, posts });
+  } catch (error) {
+    console.error("Error resetting seed posts:", error);
+    res.status(500).json({ message: "Server Error while resetting seed posts" });
   }
 });
 
@@ -203,6 +228,96 @@ router.get("/search", async (req, res) => {
 });
 
 /**
+ * @route   GET /api/posts/sidebar-insights
+ * @desc    Gemini & real-metrics dynamic trending and who to follow selection
+ * @access  Public
+ */
+router.get("/sidebar-insights", async (req, res) => {
+  try {
+    const allPosts = await Post.find().sort({ createdAt: -1 });
+    const allUsers = await User.find().sort({ followers: -1 });
+
+    // 1. Calculate real trending tags & counts from actual posts
+    const tagMap = {};
+    allPosts.forEach(post => {
+      const matches = (post.text || "").match(/#[A-Za-z0-9_]+/g);
+      const viewsNum = parseCount(post.stats?.views || "1");
+      const likesNum = parseCount(post.stats?.likes || "0");
+      if (matches) {
+        matches.forEach(tag => {
+          if (!tagMap[tag]) tagMap[tag] = { count: 0, engagement: 0, samplePost: post };
+          tagMap[tag].count += 1;
+          tagMap[tag].engagement += viewsNum + (likesNum * 10);
+        });
+      }
+    });
+
+    let trendingList = Object.entries(tagMap)
+      .sort((a, b) => b[1].engagement - a[1].engagement)
+      .slice(0, 4)
+      .map(([tag, data], idx) => {
+        const categories = ["Trending in India", "Technology · Trending", "Entertainment · Trending", "Coding · Trending"];
+        return {
+          category: categories[idx % categories.length],
+          tag: tag,
+          postsCount: `${formatCount(data.count * 12400 + data.engagement)} posts`
+        };
+      });
+
+    // If fewer than 3 tags found, supplement with real top topics
+    if (trendingList.length < 3) {
+      trendingList = [
+        { category: "Trending in India", tag: "#INDvAUS", postsCount: "54.2K posts" },
+        { category: "Entertainment · Trending", tag: "#Pushpa2TheRule", postsCount: "128.5K posts" },
+        { category: "Technology · Trending", tag: "#ISRO", postsCount: "32.4K posts" },
+        { category: "Coding · Trending", tag: "#FullStackAI", postsCount: "45.1K posts" }
+      ];
+    }
+
+    // Try Gemini AI enhancement if GEMINI_API_KEY is available
+    if (process.env.GEMINI_API_KEY && allPosts.length > 0) {
+      try {
+        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+        const postSummary = allPosts.slice(0, 10).map(p => `${p.author} (${p.handle}): ${p.text} [Views: ${p.stats?.views}, Likes: ${p.stats?.likes}]`).join("\n");
+        const prompt = `Based on these real posts from our X (Twitter) clone database:\n${postSummary}\n\nPick or invent 3 authentic, high-engagement trending hashtags that reflect what people are posting and engaging with right now. Return JSON strictly in this exact format:\n[{"category": "Technology · Trending", "tag": "#TagHere", "postsCount": "48.2K posts"}, ...]`;
+        const aiRes = await model.generateContent(prompt);
+        const textClean = aiRes.response.text().replace(/```json/gi, "").replace(/```/g, "").trim();
+        const parsed = JSON.parse(textClean);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          trendingList = parsed.slice(0, 4);
+        }
+      } catch (aiErr) {
+        console.warn("Gemini dynamic trending fallback:", aiErr.message);
+      }
+    }
+
+    // 2. Select authentic recommendations for Who to Follow from actual User database
+    const whoToFollowList = allUsers
+      .filter(u => u.handle !== "@veerpratapsaw" && u.handle !== "@user")
+      .slice(0, 4)
+      .map(u => ({
+        name: u.username || u.name || u.handle.substring(1),
+        handle: u.handle,
+        avatar: u.avatar || "/assets/user/headShot.jpg",
+        verified: u.verified !== false
+      }));
+
+    res.status(200).json({
+      trending: trendingList,
+      whoToFollow: whoToFollowList.length > 0 ? whoToFollowList : [
+        { name: "Akshay Kumar", handle: "@akshaykumar", avatar: "/assets/user/akshay_kumar.jpg", verified: true },
+        { name: "Cristiano Ronaldo", handle: "@Cristiano", avatar: "/assets/user/Cristiano-Ronaldo.jpg", verified: true },
+        { name: "Grok AI Engine", handle: "@GrokAI", avatar: "/assets/user/headShot.jpg", verified: true }
+      ]
+    });
+  } catch (err) {
+    console.error("Sidebar insights error:", err);
+    res.status(500).json({ message: "Error generating sidebar insights" });
+  }
+});
+
+/**
  * @route   GET /api/posts/feed/following
  * @desc    Get posts from users that the current user is following
  * @access  Protected
@@ -213,9 +328,23 @@ router.get("/feed/following", protect, async (req, res) => {
     if (!user || !user.following || user.following.length === 0) {
       return res.status(200).json([]);
     }
-    // Match posts whose handle (case-insensitive) is inside user.following
-    const handlesRegex = user.following.map(h => new RegExp(`^${h}$`, "i"));
-    const posts = await Post.find({ handle: { $in: handlesRegex } }).sort({ createdAt: -1 });
+    // Match posts whose handle or alias or author (case-insensitive) is inside user.following
+    const followList = user.following.map(h => {
+      const clean = h.trim().toLowerCase();
+      // Map handle aliases if user clicked follow on @akshay or @elon
+      if (clean === "@akshay") return ["^@akshay$", "^@akshaykumar$", "akshay kumar"];
+      if (clean === "@elon") return ["^@elon$", "^@elonmusk$", "elon musk"];
+      if (clean === "@cristiano") return ["^@cristiano$", "cristiano ronaldo"];
+      return [`^${clean.replace("@", "@?")}$`, clean.replace("@", "")];
+    }).flat();
+
+    const handlesRegex = followList.map(pat => new RegExp(pat, "i"));
+    const posts = await Post.find({
+      $or: [
+        { handle: { $in: handlesRegex } },
+        { author: { $in: handlesRegex } }
+      ]
+    }).sort({ createdAt: -1 });
     res.status(200).json(posts);
   } catch (error) {
     console.error("Following feed error:", error);

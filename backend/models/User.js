@@ -54,6 +54,16 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    accountType: {
+      type: String,
+      enum: ["human", "ai_bot"],
+      default: "human",
+    },
+    controlledBy: {
+      type: String,
+      enum: ["user", "ai_agent"],
+      default: "user",
+    },
     bookmarks: [
       {
         type: mongoose.Schema.Types.ObjectId,

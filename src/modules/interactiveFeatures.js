@@ -17,10 +17,88 @@ const showToast = (message) => {
 };
 
 /**
- * Initializes Right Sidebar "Who to follow" buttons with MongoDB persistence
+ * Initializes Right Sidebar "Who to follow" and "What’s happening" trending bar with live backend insights & MongoDB persistence
  */
-export function initWhoToFollow() {
+export async function initWhoToFollow() {
   const whoToFollowBox = document.querySelector(".Whotofollow");
+  const whatsHappeningBox = document.querySelector(".WhatsHappening");
+
+  // Fetch live insights from backend (Gemini AI + real database metrics)
+  let sidebarData = null;
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/posts/sidebar-insights`);
+    sidebarData = await res.json();
+  } catch (err) {
+    console.warn("Could not fetch sidebar insights:", err);
+  }
+
+  // Populate What's happening dynamic trending bar
+  if (whatsHappeningBox && sidebarData && sidebarData.trending) {
+    const header = whatsHappeningBox.querySelector(".text-xl.font-extrabold") || { outerHTML: `<div class="content px-5 my-5 text-xl font-extrabold">What’s happening</div>` };
+    whatsHappeningBox.innerHTML = `
+      <div class="content px-5 my-5 text-xl font-extrabold">
+        What’s happening
+      </div>
+      ${sidebarData.trending.map(item => `
+        <div class="content px-5 py-3 my-1 hover:bg-[#111] cursor-pointer transition-colors trending-item" data-tag="${item.tag}">
+          <div class="name text-[10px] text-gray-400 flex justify-between items-center">
+            <span>${item.category}</span>
+            <span class="text-[9px] bg-[#1d9bf0]/10 text-[#1d9bf0] px-1.5 py-0.5 rounded-full font-bold">LIVE</span>
+          </div>
+          <div class="username flex justify-between font-bold text-white mt-0.5">
+            ${item.tag}
+            <img class="size-4 opacity-60 hover:opacity-100 transition-opacity" src="/assets/svg/morefilled.svg" alt="More" />
+          </div>
+          <div class="posts text-[11px] text-gray-500 mt-0.5">${item.postsCount}</div>
+        </div>
+      `).join('')}
+      <div class="px-5 py-3 my-1 text-[#1d9bf0] text-sm cursor-pointer transition-colors hover:bg-[#111] rounded-b-3xl">
+        Show more
+      </div>
+    `;
+
+    // Clicking a trending tag filters the search live
+    whatsHappeningBox.querySelectorAll(".trending-item").forEach(item => {
+      item.addEventListener("click", () => {
+        const tag = item.dataset.tag;
+        const searchInput = document.querySelector(".right input[type='text']");
+        if (searchInput && tag) {
+          searchInput.value = tag;
+          searchInput.dispatchEvent(new Event("input", { bubbles: true }));
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+      });
+    });
+  }
+
+  // Populate Who to follow dynamic accounts
+  if (whoToFollowBox && sidebarData && sidebarData.whoToFollow) {
+    whoToFollowBox.innerHTML = `
+      <div class="content px-5 my-5 text-xl font-extrabold">
+        Who to follow
+      </div>
+      ${sidebarData.whoToFollow.map(u => `
+        <div class="content flex items-center justify-between px-5 py-3 my-1 hover:bg-[#111] cursor-pointer transition-colors follow-sidebar-row" data-handle="${u.handle}">
+          <div class="flex items-center min-w-0 flex-1">
+            <div class="photo text-[10px] text-gray-400 shrink-0 mr-3">
+              <img class="size-10 border border-[#313233ad] rounded-full object-cover object-center" src="${u.avatar}" alt="${u.name}" />
+            </div>
+            <div class="text flex flex-col min-w-0 mr-2">
+              <div class="text-[13px] font-bold text-white truncate flex items-center gap-1">
+                <span>${u.name}</span>
+                ${u.verified ? `<img class="w-3.5 shrink-0" src="/assets/svg/lock.svg" alt="Verified" />` : ''}
+              </div>
+              <div class="text-[11px] text-gray-500 truncate mt-0.5 font-normal">${u.handle}</div>
+            </div>
+          </div>
+          <div class="btn shrink-0 border-0 text-black bg-white font-bold rounded-full h-8 px-4 flex items-center justify-center text-xs hover:bg-[#eff3f4] transition-colors cursor-pointer" data-handle="${u.handle}">
+            Follow
+          </div>
+        </div>
+      `).join('')}
+    `;
+  }
+
   if (!whoToFollowBox) return;
 
   const followItems = whoToFollowBox.querySelectorAll(".content.flex.items-center.justify-between");
@@ -29,31 +107,16 @@ export function initWhoToFollow() {
   let userFollowing = [];
   const currentUser = getCurrentUser();
   if (currentUser && getToken()) {
-    fetch(`${API_BASE_URL}/api/users/profile/${encodeURIComponent(currentUser.handle || "@user")}`)
-      .then(res => res.json())
-      .then(data => {
-        if (data && data.user && data.user.following) {
-          userFollowing = data.user.following.map(h => h.toLowerCase());
-          updateButtonsInitial();
-        }
-      })
-      .catch(err => console.warn("Could not load user following state:", err));
-  }
-
-  const updateButtonsInitial = () => {
-    followItems.forEach(item => {
-      const handleEl = item.querySelector(".text-\\[11px\\].text-gray-500");
-      const handle = handleEl?.textContent?.trim() || "";
-      const btn = item.querySelector(".btn");
-      if (!btn || !handle) return;
-
-      if (userFollowing.includes(handle.toLowerCase())) {
-        setButtonFollowingState(btn, true);
-      } else {
-        setButtonFollowingState(btn, false);
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/users/profile/${encodeURIComponent(currentUser.handle || "@user")}`);
+      const data = await res.json();
+      if (data && data.user && data.user.following) {
+        userFollowing = data.user.following.map(h => h.toLowerCase());
       }
-    });
-  };
+    } catch (err) {
+      console.warn("Could not load user following state:", err);
+    }
+  }
 
   const setButtonFollowingState = (btn, isFollowing) => {
     if (isFollowing) {
@@ -75,11 +138,15 @@ export function initWhoToFollow() {
   followItems.forEach(item => {
     const btn = item.querySelector(".btn");
     const handleEl = item.querySelector(".text-\\[11px\\].text-gray-500");
-    const nameEl = item.querySelector(".text-\\[13px\\].font-bold");
-    const handle = handleEl?.textContent?.trim() || "";
-    const name = nameEl?.textContent?.trim() || handle;
+    const handle = btn?.dataset.handle || handleEl?.textContent?.trim() || "";
 
     if (!btn || !handle) return;
+
+    if (userFollowing.includes(handle.toLowerCase())) {
+      setButtonFollowingState(btn, true);
+    } else {
+      setButtonFollowingState(btn, false);
+    }
 
     btn.addEventListener("click", async (e) => {
       e.stopPropagation();
@@ -274,11 +341,11 @@ export function showEditProfileModal(currentUser, onSaveCallback) {
 
   const defaultAvatars = [
     "/assets/user/headShot.jpg",
-    "https://cdn.pixabay.com/photo/2026/06/18/10/04/kitosonita-beach-10337616_960_720.jpg",
-    "https://cdn.pixabay.com/photo/2026/02/05/22/12/olivcelso-desert-10106837_1280.png",
-    "https://cdn.pixabay.com/photo/2026/03/03/10/12/tylijura-car-10153221_960_720.jpg",
-    "https://cdn.pixabay.com/photo/2026/02/15/05/03/pheladii-man-10124061_1280.jpg",
-    "https://stockcake.com/i/joyful-anime-girl_1732866_1246669"
+    "/assets/user/Cristiano-Ronaldo.jpg",
+    "/assets/user/akshay_kumar.jpg",
+    "/assets/user/dipika.jpg",
+    "/assets/user/virat.jpg",
+    "/assets/user/headShotio.jpg"
   ];
 
   let currentAvatar = currentUser.avatar || "/assets/user/headShot.jpg";
@@ -714,11 +781,12 @@ export function restoreHomeFeed() {
  */
 function renderFollowDiscoverScreen(mainContainer) {
   const creators = [
-    { handle: "@Cristiano", name: "Cristiano Ronaldo", bio: "Football player & athlete. Al Nassr FC.", followers: "112.4M", avatar: "/assets/user/Cristiano-Ronaldo.jpg", verified: true },
-    { handle: "@ElonMusk", name: "Elon Musk", bio: "Accelerating sustainable energy & AI. X Corp, Tesla, SpaceX.", followers: "198.2M", avatar: "/assets/user/headShot.jpg", verified: true },
-    { handle: "@AkshayKumar", name: "Akshay Kumar", bio: "Indian actor & martial artist. Entertaining audiences globally.", followers: "68.9M", avatar: "/assets/user/akshay_kumar.jpg", verified: true },
-    { handle: "@OpenAI", name: "OpenAI", bio: "Building artificial general intelligence that benefits all of humanity.", followers: "14.5M", avatar: "/assets/user/headShot.jpg", verified: true },
-    { handle: "@SundarPichai", name: "Sundar Pichai", bio: "CEO of Google and Alphabet. Deeply excited about AI breakthroughs.", followers: "5.4M", avatar: "/assets/user/virat.jpg", verified: true }
+    { handle: "@GrokAI", name: "Grok AI Engine [AI Controlled]", bio: "Real-time AI neural reasoning and coding assistant powered by Gemini. Controlled autonomously by agent.", followers: "42.8M", avatar: "/assets/user/headShot.jpg", verified: true },
+    { handle: "@Cristiano", name: "Cristiano Ronaldo [Human Controlled]", bio: "Football player & athlete. Al Nassr FC. Controlled by human user.", followers: "112.4M", avatar: "/assets/user/Cristiano-Ronaldo.jpg", verified: true },
+    { handle: "@ElonMusk", name: "Elon Musk [Human Controlled]", bio: "Accelerating sustainable energy & AI. X Corp, Tesla, SpaceX.", followers: "198.2M", avatar: "/assets/user/headShot.jpg", verified: true },
+    { handle: "@GeminiLive", name: "Gemini DeepMind [AI Controlled]", bio: "Multimodal AI breakthroughs, reasoning engines, and autonomous multi-agent systems.", followers: "28.5M", avatar: "/assets/user/headShotio.jpg", verified: true },
+    { handle: "@AkshayKumar", name: "Akshay Kumar [Human Controlled]", bio: "Indian actor & film producer. Entertaining audiences globally.", followers: "68.9M", avatar: "/assets/user/akshay_kumar.jpg", verified: true },
+    { handle: "@TechPulseAI", name: "TechPulse Autonomous AI [AI Controlled]", bio: "Real-time daily tech digest and Silicon Valley intelligence tracker.", followers: "14.5M", avatar: "/assets/user/virat.jpg", verified: true }
   ];
 
   mainContainer.innerHTML = `
@@ -744,7 +812,11 @@ function renderFollowDiscoverScreen(mainContainer) {
   `;
 
   mainContainer.querySelectorAll(".follow-screen-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
+    btn.addEventListener("click", async () => {
+      if (!getToken()) {
+        showAuthModal("login", true);
+        return;
+      }
       const isFollowing = btn.textContent === "Following";
       if (isFollowing) {
         btn.textContent = "Follow";
@@ -755,6 +827,14 @@ function renderFollowDiscoverScreen(mainContainer) {
         btn.className = "follow-screen-btn border border-[#536471] bg-transparent text-white font-bold px-4 py-1.5 rounded-full text-xs transition-colors shrink-0 cursor-pointer hover:border-red-500 hover:text-red-500";
         showToast(`Followed ${btn.dataset.handle}`);
       }
+      try {
+        await fetch(`${API_BASE_URL}/api/users/${encodeURIComponent(btn.dataset.handle)}/follow`, {
+          method: "POST",
+          headers: { "Authorization": `Bearer ${getToken()}` }
+        });
+      } catch (err) {
+        console.warn("Follow screen API sync error:", err);
+      }
     });
   });
 }
@@ -764,9 +844,10 @@ function renderFollowDiscoverScreen(mainContainer) {
  */
 function renderChatMessagesScreen(mainContainer) {
   const chats = [
-    { handle: "@vps", name: "Veer Pratap Saw", lastMsg: "Hey! Just deployed our Grok AI and full-stack engine 🚀", time: "2m ago", avatar: "/assets/user/headShot.jpg", unread: true },
-    { handle: "@Cristiano", name: "Cristiano Ronaldo", lastMsg: "SIUUU! Great updates on the feed aesthetics today.", time: "1h ago", avatar: "/assets/user/Cristiano-Ronaldo.jpg", unread: false },
-    { handle: "@AkshayKumar", name: "Akshay Kumar", lastMsg: "Are we joining the live Twitter space at 10 PM?", time: "3h ago", avatar: "/assets/user/akshay_kumar.jpg", unread: false }
+    { handle: "@GrokAI", name: "Grok AI Engine [AI Controlled]", lastMsg: "⚡ Mention me anytime in posts for real-time code and neural completion!", time: "1m ago", avatar: "/assets/user/headShot.jpg", unread: true },
+    { handle: "@vps", name: "Veer Pratap Saw [Human Controlled]", lastMsg: "Hey! Just deployed our Grok AI and full-stack engine 🚀", time: "2m ago", avatar: "/assets/user/headShot.jpg", unread: true },
+    { handle: "@Cristiano", name: "Cristiano Ronaldo [Human Controlled]", lastMsg: "SIUUU! Great updates on the feed aesthetics today.", time: "1h ago", avatar: "/assets/user/Cristiano-Ronaldo.jpg", unread: false },
+    { handle: "@GeminiLive", name: "Gemini DeepMind [AI Controlled]", lastMsg: "Multimodal video analysis model checkpoint ready for testing.", time: "3h ago", avatar: "/assets/user/headShotio.jpg", unread: false }
   ];
 
   mainContainer.innerHTML = `
@@ -1114,21 +1195,44 @@ export function showPremiumModal() {
 }
 
 /**
- * Show More Menu Popover (`More` pill)
+ * Show More Menu Popover (`More` pill) anchored to left sidebar
  */
 function showMoreMenuPopover(anchorItem) {
   document.querySelectorAll(".x-more-popover").forEach(el => el.remove());
   const popover = document.createElement("div");
-  popover.className = "x-more-popover absolute bottom-16 left-4 w-60 bg-black border border-[#313233ad] rounded-2xl shadow-2xl z-50 overflow-hidden animate-[fadeInPop_0.15s_ease-out] divide-y divide-[#313233ad]/40 text-sm font-bold text-white";
+  popover.className = "x-more-popover fixed w-60 bg-[#000000] border border-[#313233ad] rounded-2xl shadow-2xl z-[500] overflow-hidden animate-[fadeInPop_0.15s_ease-out] divide-y divide-[#313233ad]/40 text-sm font-bold text-white";
+  
+  if (anchorItem && anchorItem.getBoundingClientRect) {
+    const rect = anchorItem.getBoundingClientRect();
+    popover.style.left = `${Math.max(12, rect.left)}px`;
+    popover.style.bottom = `${window.innerHeight - rect.top + 10}px`;
+  } else {
+    popover.style.left = "16px";
+    popover.style.bottom = "80px";
+  }
+
   popover.innerHTML = `
-    <div class="p-3 px-4 hover:bg-[#181818] cursor-pointer flex items-center gap-3">⚙️ Settings and privacy</div>
-    <div class="p-3 px-4 hover:bg-[#181818] cursor-pointer flex items-center gap-3">💸 Monetization</div>
-    <div class="p-3 px-4 hover:bg-[#181818] cursor-pointer flex items-center gap-3">❓ Help Center</div>
-    <div class="p-3 px-4 hover:bg-[#181818] cursor-pointer flex items-center gap-3">🌙 Display & Dark mode</div>
+    <div class="p-3.5 px-4 hover:bg-[#181818] cursor-pointer flex items-center gap-3 transition-colors">⚙️ Settings and privacy</div>
+    <div class="p-3.5 px-4 hover:bg-[#181818] cursor-pointer flex items-center gap-3 transition-colors">💸 Monetization</div>
+    <div class="p-3.5 px-4 hover:bg-[#181818] cursor-pointer flex items-center gap-3 transition-colors">❓ Help Center</div>
+    <div class="p-3.5 px-4 hover:bg-[#181818] cursor-pointer flex items-center gap-3 transition-colors">🌙 Display & Dark mode</div>
   `;
   document.body.appendChild(popover);
-  const close = () => popover.remove();
-  setTimeout(() => window.addEventListener("click", close, { once: true }), 10);
+
+  popover.querySelectorAll("div").forEach(item => {
+    item.addEventListener("click", () => {
+      showToast(`${item.textContent.trim()} selected`);
+      popover.remove();
+    });
+  });
+
+  const close = (e) => {
+    if (!popover.contains(e.target) && (!anchorItem || !anchorItem.contains(e.target))) {
+      popover.remove();
+      window.removeEventListener("click", close);
+    }
+  };
+  setTimeout(() => window.addEventListener("click", close), 10);
 }
 
 /**

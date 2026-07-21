@@ -1,5 +1,5 @@
 import { initXVideoPlayers } from "./videoPlayer.js";
-import { renderPostCard } from "./feedRenderer.js";
+import { renderPostCard, observeLazyImages } from "./feedRenderer.js";
 import { initTweetActions } from "./tweetActions.js";
 import { getToken, getCurrentUser } from "./auth.js";
 import { API_BASE_URL } from "../config.js";
@@ -228,6 +228,7 @@ export function initCreatePost() {
     if (mediaObj?.type === "video") {
       initXVideoPlayers();
     }
+    observeLazyImages();
     initTweetActions();
 
     // Reset Form & Button

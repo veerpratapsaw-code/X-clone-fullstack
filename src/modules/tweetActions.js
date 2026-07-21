@@ -247,9 +247,11 @@ export function initTweetActions() {
       return;
     }
 
-    const actionItem = e.target.closest(".actions > div, .actions .hover\\:bg-\\[\\#1d9cf01e\\], img[alt='Bookmark'], img[src*='bookmarks.svg']");
+    const actionItem = e.target.closest(".actions > div, .actions .hover\\:bg-\\[\\#1d9cf01e\\], .likeAction, .repostAction, .bookmarkAction, .replyAction, .viewsAction, img[alt='Bookmark'], img[src*='bookmarks.svg']");
     const post = e.target.closest(".post");
     if (!post) return;
+
+    const postId = post.dataset.id || post.id || "";
 
     // Check auth requirement for actions
     if (actionItem && !getToken()) {
@@ -261,7 +263,7 @@ export function initTweetActions() {
     if (!actionItem) {
       // If clicking inside the tweet body (not on an action icon or media or link), open Post Detail Modal
       if (!e.target.closest("video, img, button, a")) {
-        showPostDetailModal(post.id, post);
+        showPostDetailModal(postId, post);
       }
       return;
     }
@@ -269,8 +271,8 @@ export function initTweetActions() {
     e.stopPropagation();
 
     // 1. LIKE / HEART ACTION
-    if (actionItem.classList.contains("hover:text-[#f91880]") || actionItem.closest(".hover\\:text-\\[\\#f91880\\]")) {
-      const likeBtn = actionItem.closest(".hover\\:text-\\[\\#f91880\\]");
+    if (actionItem.classList.contains("likeAction") || actionItem.closest(".likeAction") || actionItem.classList.contains("hover:text-[#f91880]") || actionItem.closest(".hover\\:text-\\[\\#f91880\\]")) {
+      const likeBtn = actionItem.closest(".likeAction, .hover\\:text-\\[\\#f91880\\]") || actionItem;
       const span = likeBtn.querySelector("span");
       const svgPath = likeBtn.querySelector("svg path");
       const isLiked = post.dataset.liked === "true";
@@ -281,8 +283,8 @@ export function initTweetActions() {
         likeBtn.querySelector("svg, img")?.classList.add("animate-[heartPop_0.35s_ease-out]");
         if (svgPath) svgPath.setAttribute("d", "M20.884 13.19c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z");
         if (span) span.textContent = formatNum(parseNum(span.textContent) + 1);
-        if (post.id) {
-          fetch(`${API_BASE_URL}/api/posts/${post.id}/like`, {
+        if (postId) {
+          fetch(`${API_BASE_URL}/api/posts/${postId}/like`, {
             method: "POST",
             headers: { "Authorization": `Bearer ${getToken()}` }
           }).catch(err => console.warn("Backend sync error:", err));
@@ -292,8 +294,8 @@ export function initTweetActions() {
         likeBtn.classList.remove("text-[#f91880]");
         if (svgPath) svgPath.setAttribute("d", "M16.697 5.5c-1.222-.06-2.679.51-3.89 2.16l-.805 1.09-.806-1.09C9.984 6.01 8.526 5.44 7.304 5.5c-1.243.07-2.349.78-2.91 1.91-.552 1.12-.633 2.78.479 4.82 1.074 1.97 3.257 4.27 7.129 6.61 3.87-2.34 6.052-4.64 7.126-6.61 1.111-2.04 1.03-3.7.477-4.82-.561-1.13-1.666-1.84-2.908-1.91zm4.187 7.69c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z");
         if (span) span.textContent = formatNum(Math.max(0, parseNum(span.textContent) - 1));
-        if (post.id) {
-          fetch(`${API_BASE_URL}/api/posts/${post.id}/like`, {
+        if (postId) {
+          fetch(`${API_BASE_URL}/api/posts/${postId}/like`, {
             method: "POST",
             headers: { "Authorization": `Bearer ${getToken()}` }
           }).catch(err => console.warn("Backend sync error:", err));
@@ -303,8 +305,8 @@ export function initTweetActions() {
     }
 
     // 2. REPOST / QUOTE ACTION
-    if (actionItem.classList.contains("hover:text-[#00ba7c]") || actionItem.closest(".hover\\:text-\\[\\#00ba7c\\]")) {
-      const repostBtn = actionItem.closest(".hover\\:text-\\[\\#00ba7c\\]");
+    if (actionItem.classList.contains("repostAction") || actionItem.closest(".repostAction") || actionItem.classList.contains("hover:text-[#00ba7c]") || actionItem.closest(".hover\\:text-\\[\\#00ba7c\\]")) {
+      const repostBtn = actionItem.closest(".repostAction, .hover\\:text-\\[\\#00ba7c\\]") || actionItem;
       const span = repostBtn.querySelector("span");
       const isReposted = post.dataset.reposted === "true";
 
@@ -313,8 +315,8 @@ export function initTweetActions() {
         repostBtn.classList.add("text-[#00ba7c]");
         if (span) span.textContent = formatNum(parseNum(span.textContent) + 1);
         showToast("You reposted");
-        if (post.id) {
-          fetch(`${API_BASE_URL}/api/posts/${post.id}/repost`, {
+        if (postId) {
+          fetch(`${API_BASE_URL}/api/posts/${postId}/repost`, {
             method: "POST",
             headers: { "Authorization": `Bearer ${getToken()}` }
           }).catch(err => console.warn("Backend sync error:", err));
@@ -324,8 +326,8 @@ export function initTweetActions() {
         repostBtn.classList.remove("text-[#00ba7c]");
         if (span) span.textContent = formatNum(Math.max(0, parseNum(span.textContent) - 1));
         showToast("Removed repost");
-        if (post.id) {
-          fetch(`${API_BASE_URL}/api/posts/${post.id}/repost`, {
+        if (postId) {
+          fetch(`${API_BASE_URL}/api/posts/${postId}/repost`, {
             method: "POST",
             headers: { "Authorization": `Bearer ${getToken()}` }
           }).catch(err => console.warn("Backend sync error:", err));
@@ -335,7 +337,7 @@ export function initTweetActions() {
     }
 
     // 3. BOOKMARK ACTION
-    if (actionItem.matches("img[alt='Bookmark'], img[src*='bookmarks.svg'], .hover\\:bg-\\[\\#1d9cf01e\\]") || actionItem.closest(".actions > div:last-child")) {
+    if (actionItem.classList.contains("bookmarkAction") || actionItem.closest(".bookmarkAction") || actionItem.matches("img[alt='Bookmark'], img[src*='bookmarks.svg'], .hover\\:bg-\\[\\#1d9cf01e\\]") || actionItem.closest(".actions > div:last-child")) {
       const isBookmarked = post.dataset.bookmarked === "true";
       const icon = actionItem.querySelector("img, svg") || actionItem;
 
@@ -343,8 +345,8 @@ export function initTweetActions() {
         post.dataset.bookmarked = "true";
         icon.classList.add("filter", "brightness-200", "scale-110");
         showToast("Added to your Bookmarks");
-        if (post.id) {
-          fetch(`${API_BASE_URL}/api/posts/${post.id}/bookmark`, {
+        if (postId) {
+          fetch(`${API_BASE_URL}/api/posts/${postId}/bookmark`, {
             method: "POST",
             headers: { "Authorization": `Bearer ${getToken()}` }
           }).catch(err => console.warn("Backend sync error:", err));
@@ -353,8 +355,8 @@ export function initTweetActions() {
         post.dataset.bookmarked = "false";
         icon.classList.remove("filter", "brightness-200", "scale-110");
         showToast("Removed from your Bookmarks");
-        if (post.id) {
-          fetch(`${API_BASE_URL}/api/posts/${post.id}/bookmark`, {
+        if (postId) {
+          fetch(`${API_BASE_URL}/api/posts/${postId}/bookmark`, {
             method: "POST",
             headers: { "Authorization": `Bearer ${getToken()}` }
           }).catch(err => console.warn("Backend sync error:", err));
@@ -364,8 +366,8 @@ export function initTweetActions() {
     }
 
     // 4. REPLY ACTION
-    if (actionItem === post.querySelector(".actions > div:first-child") || actionItem.closest(".actions > div:first-child")) {
-      showPostDetailModal(post.id, post);
+    if (actionItem.classList.contains("replyAction") || actionItem.closest(".replyAction") || actionItem === post.querySelector(".actions > div:first-child") || actionItem.closest(".actions > div:first-child")) {
+      showPostDetailModal(postId, post);
       return;
     }
   });
