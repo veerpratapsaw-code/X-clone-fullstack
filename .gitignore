@@ -6,3 +6,4 @@ backend/.env
 backend/uploads/
 *.log
 .DS_Store
+ACCOUNTS_AND_PASSWORDS.md

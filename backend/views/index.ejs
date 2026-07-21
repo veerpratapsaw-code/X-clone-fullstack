@@ -4,6 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Server of X by Veer</title>
+  <link rel="icon" type="image/svg+xml" href='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><style>.t{fill:%231d9bf0;stroke:%231d9bf0;stroke-width:3.2;stroke-linejoin:round}.l{fill:%230c7abf;stroke:%230c7abf;stroke-width:3.2;stroke-linejoin:round}.r{fill:%2306588f;stroke:%2306588f;stroke-width:3.2;stroke-linejoin:round}.w{fill:%23ffffff}.p{stroke:%23ffffff;stroke-width:3.6;stroke-linecap:round}</style></defs><g><polygon class="t" points="50,56 86,70 50,84 14,70"/><polygon class="l" points="14,70 50,84 50,95 14,81"/><polygon class="r" points="50,84 86,70 86,81 50,95"/><line class="p" x1="22" y1="76" x2="33" y2="80.3"/><circle class="w" cx="40" cy="83.3" r="2.2"/></g><g><polygon class="t" points="50,31 86,45 50,59 14,45"/><polygon class="l" points="14,45 50,59 50,70 14,56"/><polygon class="r" points="50,59 86,45 86,56 50,70"/><line class="p" x1="22" y1="51" x2="33" y2="55.3"/><circle class="w" cx="40" cy="58.3" r="2.2"/></g><g><polygon class="t" points="50,6 86,20 50,34 14,20"/><polygon class="l" points="14,20 50,34 50,45 14,31"/><polygon class="r" points="50,34 86,20 86,31 50,45"/><line class="p" x1="22" y1="26" x2="33" y2="30.3"/><circle class="w" cx="40" cy="33.3" r="2.2"/></g></svg>' />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=datacenter_v1" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png?v=datacenter_v1" />
+  <link rel="icon" type="image/png" sizes="64x64" href="/favicon.png?v=datacenter_v1" />
+  <link rel="shortcut icon" href="/favicon.ico?v=datacenter_v1" />
+  <link rel="apple-touch-icon" href="/favicon.png?v=datacenter_v1" />
   <style>
     :root {
       color-scheme: dark;
@@ -92,16 +98,15 @@
     }
 
     .x-mark {
-      width: 40px;
-      height: 40px;
+      width: 42px;
+      height: 42px;
       display: grid;
       place-items: center;
-      border-radius: 8px;
-      background: var(--ink);
-      color: #000;
-      font-size: 24px;
-      font-weight: 950;
-      line-height: 1;
+      border-radius: 10px;
+      background: rgba(29, 155, 240, 0.08);
+      border: 1px solid rgba(29, 155, 240, 0.28);
+      box-shadow: 0 0 16px rgba(29, 155, 240, 0.16);
+      padding: 5px;
     }
 
     .brand strong {
@@ -554,9 +559,41 @@
     <section class="section hero" aria-label="Server landing">
       <nav class="nav">
         <div class="brand">
-          <div class="x-mark">
-            <svg viewBox="0 0 24 24" aria-hidden="true" style="width: 22px; height: 22px; fill: #000;">
-              <path d="M21.742 21.75l-7.563-11.179 7.056-8.321h-2.456l-5.691 6.714-4.54-6.714H2.359l7.29 10.776L2.25 21.75h2.456l6.035-7.118 4.818 7.118h6.191-.008zM7.739 3.818L18.81 20.182h-2.447L5.29 3.818h2.447z"></path>
+          <div class="x-mark" title="Server of X Data Center">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" style="width: 32px; height: 32px; flex-shrink: 0;">
+              <defs>
+                <style>
+                  .srv-top { fill: #1d9bf0; stroke: #1d9bf0; stroke-width: 3.2; stroke-linejoin: round; }
+                  .srv-left { fill: #0c7abf; stroke: #0c7abf; stroke-width: 3.2; stroke-linejoin: round; }
+                  .srv-right { fill: #06588f; stroke: #06588f; stroke-width: 3.2; stroke-linejoin: round; }
+                  .srv-led { fill: #ffffff; }
+                  .srv-pill { stroke: #ffffff; stroke-width: 3.6; stroke-linecap: round; }
+                </style>
+              </defs>
+              <!-- Layer 3 (Bottom Slab) -->
+              <g>
+                <polygon class="srv-top" points="50,56 86,70 50,84 14,70"/>
+                <polygon class="srv-left" points="14,70 50,84 50,95 14,81"/>
+                <polygon class="srv-right" points="50,84 86,70 86,81 50,95"/>
+                <line class="srv-pill" x1="22" y1="76" x2="33" y2="80.3"/>
+                <circle class="srv-led" cx="40" cy="83.3" r="2.2"/>
+              </g>
+              <!-- Layer 2 (Middle Slab) -->
+              <g>
+                <polygon class="srv-top" points="50,31 86,45 50,59 14,45"/>
+                <polygon class="srv-left" points="14,45 50,59 50,70 14,56"/>
+                <polygon class="srv-right" points="50,59 86,45 86,56 50,70"/>
+                <line class="srv-pill" x1="22" y1="51" x2="33" y2="55.3"/>
+                <circle class="srv-led" cx="40" cy="58.3" r="2.2"/>
+              </g>
+              <!-- Layer 1 (Top Slab) -->
+              <g>
+                <polygon class="srv-top" points="50,6 86,20 50,34 14,20"/>
+                <polygon class="srv-left" points="14,20 50,34 50,45 14,31"/>
+                <polygon class="srv-right" points="50,34 86,20 86,31 50,45"/>
+                <line class="srv-pill" x1="22" y1="26" x2="33" y2="30.3"/>
+                <circle class="srv-led" cx="40" cy="33.3" r="2.2"/>
+              </g>
             </svg>
           </div>
           <div>

@@ -85,6 +85,7 @@ router.get("/profile/:handle", async (req, res) => {
         username: samplePost.author,
         handle: samplePost.handle,
         avatar: samplePost.avatar || "/assets/user/headShot.jpg",
+        banner: samplePost.banner || "",
         bio: "Hey there! I am using X.",
         verified: samplePost.verified || false,
         followers: [],

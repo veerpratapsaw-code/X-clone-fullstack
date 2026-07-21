@@ -14,6 +14,14 @@
 </head>
 
 <body class="font-['Open_Sans',sans-serif] bg-black">
+  <!-- Initial App Loading Splash Screen -->
+  <div id="x-loading-splash" class="fixed inset-0 z-[99999] bg-black flex items-center justify-center transition-opacity duration-500 ease-out pointer-events-none">
+    <div class="animate-pulse w-20 h-20 text-white flex items-center justify-center">
+      <svg viewBox="0 0 24 24" aria-hidden="true" class="w-full h-full fill-current">
+        <path d="M21.742 21.75l-7.563-11.179 7.056-8.321h-2.456l-5.691 6.714-4.54-6.714H2.359l7.29 10.776L2.25 21.75h2.456l6.035-7.118 4.818 7.118h6.191-.008zM7.739 3.818L18.81 20.182h-2.447L5.29 3.818h2.447z"></path>
+      </svg>
+    </div>
+  </div>
   <section class="container flex text-white mx-auto bg-black p-0 min-h-screen justify-center">
     <section
       class="left sticky top-0 h-screen hidden sm:flex flex-col justify-between border-r border-[#313233ad] bg-[#010101] w-[68px] xl:w-[275px] overflow-y-auto shrink-0 no-scrollbar [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
@@ -51,11 +59,6 @@
             </li>
             <li
               class="flex w-fit cursor-pointer items-center justify-center xl:justify-start gap-5 rounded-full p-3 xl:px-4 xl:py-3 transition-colors hover:bg-[#1d1d1d]">
-              <img src="/assets/svg/chat.svg" alt="" class="size-7 shrink-0 invert" />
-              <span class="hidden xl:inline">Chat</span>
-            </li>
-            <li
-              class="flex w-fit cursor-pointer items-center justify-center xl:justify-start gap-5 rounded-full p-3 xl:px-4 xl:py-3 transition-colors hover:bg-[#1d1d1d]">
               <img src="/assets/svg/grok.svg" alt="" class="size-7 shrink-0 invert" />
               <span class="hidden xl:inline">Grok</span>
             </li>
@@ -63,11 +66,6 @@
               class="flex w-fit cursor-pointer items-center justify-center xl:justify-start gap-5 rounded-full p-3 xl:px-4 xl:py-3 transition-colors hover:bg-[#1d1d1d]">
               <img src="/assets/svg/bookmarks.svg" alt="" class="size-7 shrink-0 invert" />
               <span class="hidden xl:inline">Bookmarks</span>
-            </li>
-            <li
-              class="flex w-fit cursor-pointer items-center justify-center xl:justify-start gap-5 rounded-full p-3 xl:px-4 xl:py-3 transition-colors hover:bg-[#1d1d1d]">
-              <img src="/assets/svg/creatorstudio.svg" alt="" class="size-7 shrink-0 invert" />
-              <span class="hidden xl:inline">Creator Studio</span>
             </li>
             <li
               class="flex w-fit cursor-pointer items-center justify-center xl:justify-start gap-5 rounded-full p-3 xl:px-4 xl:py-3 transition-colors hover:bg-[#1d1d1d]">
@@ -79,11 +77,6 @@
               <img src="/assets/svg/profile.svg" alt="" class="size-7 shrink-0 invert" />
               <span class="hidden xl:inline">Profile</span>
             </li>
-            <li
-              class="flex w-fit cursor-pointer items-center justify-center xl:justify-start gap-5 rounded-full p-3 xl:px-4 xl:py-3 transition-colors hover:bg-[#1d1d1d]">
-              <img src="/assets/svg/more.svg" alt="" class="size-7 shrink-0 invert" />
-              <span class="hidden xl:inline">More</span>
-            </li>
           </ul>
         </div>
         <div class="postbtn w-full px-2 xl:px-4 mt-4 flex justify-center xl:justify-start">
@@ -94,69 +87,46 @@
           </button>
         </div>
       </div>
-      
+
     </section>
-    <section class="right-section flex-1 max-w-[950px] flex justify-center min-h-screen">
-      <div class="main w-full max-sm:w-[100vw] bg-black sm:border-r border-[#313233ad] min-h-screen pb-20 sm:pb-0">
+    <section class="right-section flex-1 max-w-[950px] flex min-h-screen">
+      <div class="main flex-1 min-w-0 max-w-[600px] max-sm:w-[100vw] max-sm:max-w-none bg-black sm:border-r border-[#313233ad] min-h-screen pb-20 sm:pb-0">
+
         <!-- Top Sticky Header Tabs -->
         <!-- Top Sticky Header Container -->
-        <div class="top sticky top-0 z-10 w-full bg-[#000000dd] backdrop-blur-md flex flex-col border-b border-[#313233ad]">
+        <div
+          class="top sticky top-0 z-40 w-full bg-[#000000dd] backdrop-blur-md flex flex-col border-b border-[#313233ad]">
           <!-- Authentic Mobile Top Bar (max-sm / max-xs only) matching real X screenshot -->
-          <div class="hidden max-sm:flex items-center justify-between px-4 h-[53px] w-full border-b border-[#313233ad]/40 relative">
-            <!-- Left: Profile Avatar -->
-            <div class="cursor-pointer shrink-0">
-              <img class="size-8 rounded-full object-cover border border-[#313233ad]" src="/assets/user/headShot.jpg" alt="Profile" />
+          <div
+            class="hidden max-sm:flex items-center justify-between px-4 h-[53px] w-full border-b border-[#313233ad]/40 relative">
+            <!-- Left: Profile Avatar (Opens Profile) -->
+            <div class="cursor-pointer shrink-0 mobile-profile-avatar" data-label="Profile" title="Profile">
+              <img class="size-8 rounded-full object-cover border border-[#313233ad]" src="/assets/user/headShot.jpg"
+                alt="Profile" />
             </div>
             <!-- Center: Perfectly Centered X Logo -->
             <div class="text-white shrink-0 absolute left-1/2 -translate-x-1/2">
               <svg viewBox="0 0 24 24" aria-hidden="true" class="size-6 fill-current">
-                <path d="M21.742 21.75l-7.563-11.179 7.056-8.321h-2.456l-5.691 6.714-4.54-6.714H2.359l7.29 10.776L2.25 21.75h2.456l6.035-7.118 4.818 7.118h6.191-.008zM7.739 3.818L18.81 20.182h-2.447L5.29 3.818h2.447z"></path>
+                <path
+                  d="M21.742 21.75l-7.563-11.179 7.056-8.321h-2.456l-5.691 6.714-4.54-6.714H2.359l7.29 10.776L2.25 21.75h2.456l6.035-7.118 4.818 7.118h6.191-.008zM7.739 3.818L18.81 20.182h-2.447L5.29 3.818h2.447z">
+                </path>
               </svg>
             </div>
-            <!-- Right: Subscribe Pill Button -->
-            <div class="shrink-0">
-              <button class="border border-[#313233ad] rounded-full px-3.5 py-1.5 font-bold text-xs text-white hover:bg-[#181818] transition-colors cursor-pointer">
-                Subscribe
-              </button>
-            </div>
+            <!-- Right: Clean spacing -->
+            <div class="size-8 shrink-0"></div>
           </div>
 
           <!-- Tabs Row -->
-          <div class="w-full flex items-center px-2 overflow-x-auto no-scrollbar [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          <div
+            class="w-full flex items-center border-b border-[#313233ad]/40 overflow-x-auto no-scrollbar">
             <div
-              class="tab flex-1 min-w-fit px-4 flex justify-center items-center py-4 relative hover:bg-[#181818] cursor-pointer transition-colors text-sm font-bold text-white">
+              class="tab w-1/2 flex justify-center items-center py-4 relative hover:bg-[#181818] cursor-pointer transition-colors text-sm font-bold text-white">
               <span>For you</span>
-            </div>
-            <div
-              class="tab flex-1 min-w-fit px-4 flex justify-center items-center py-4 relative hover:bg-[#181818] cursor-pointer transition-colors text-sm font-bold text-white">
-              <span>Following</span>
               <div class="absolute bottom-0 h-1 w-14 rounded-full bg-[#1d9bf0]"></div>
             </div>
             <div
-              class="tab flex-1 min-w-fit px-4 flex justify-center items-center py-4 relative hover:bg-[#181818] cursor-pointer transition-colors text-sm font-bold text-[#71767b] hover:text-white">
-              <span>Tech</span>
-            </div>
-            <div
-              class="tab flex-1 min-w-fit px-4 flex justify-center items-center py-4 relative hover:bg-[#181818] cursor-pointer transition-colors text-sm font-bold text-[#71767b] hover:text-white">
-              <span>Gaming</span>
-            </div>
-            <div
-              class="tab flex-1 min-w-fit px-4 flex justify-center items-center py-4 relative hover:bg-[#181818] cursor-pointer transition-colors text-sm font-bold text-[#71767b] hover:text-white">
-              <span>Travel</span>
-            </div>
-            <div
-              class="tab flex-1 min-w-fit px-4 flex justify-center items-center py-4 relative hover:bg-[#181818] cursor-pointer transition-colors text-sm font-bold text-[#71767b] hover:text-white">
-              <span>Stocks</span>
-            </div>
-            <div
-              class="tab flex-1 min-w-fit px-4 flex justify-center items-center py-4 relative hover:bg-[#181818] cursor-pointer transition-colors text-sm font-bold text-[#71767b] hover:text-white">
-              <span>Science</span>
-            </div>
-            <div
-              class="p-3 hover:bg-[#181818] rounded-full cursor-pointer transition-colors text-[#71767b] hover:text-white shrink-0 ml-auto">
-              <svg viewBox="0 0 24 24" aria-hidden="true" class="size-5 fill-current">
-                <path d="M11 11V4h2v7h7v2h-7v7h-2v-7H4v-2h7z"></path>
-              </svg>
+              class="tab w-1/2 flex justify-center items-center py-4 relative hover:bg-[#181818] cursor-pointer transition-colors text-sm font-bold text-[#71767b] hover:text-white">
+              <span>Following</span>
             </div>
           </div>
         </div>
@@ -164,8 +134,7 @@
         <!-- Tweet Creation Section ("What's happening?") -->
         <div class="createPost flex px-4 pt-4 pb-3 border-b border-[#313233ad] gap-3">
           <div class="avatar shrink-0">
-            <img class="size-10 rounded-full object-cover" src="/assets/user/headShot.jpg"
-              alt="Your profile photo" />
+            <img class="size-10 rounded-full object-cover" src="/assets/user/headShot.jpg" alt="Your profile photo" />
           </div>
           <div class="content flex-1 flex flex-col justify-between min-w-0">
             <div class="textarea py-2">
@@ -180,31 +149,39 @@
             <div class="toolbar flex items-center justify-between mt-3 pt-2 border-t border-[#313233ad]/40">
               <div class="icons flex items-center gap-1">
                 <!-- Media Icon -->
-                <div class="media-icon-btn p-2 cursor-pointer transition-all duration-200 hover:scale-[1.15] hover:brightness-150" title="Media">
+                <div
+                  class="media-icon-btn p-2 cursor-pointer transition-all duration-200 hover:scale-[1.15] hover:brightness-150"
+                  title="Media">
                   <img src="/assets/svg/media.svg" alt="Media" class="size-5" />
                 </div>
                 <!-- GIF Icon -->
-                <div class="p-2 max-xs:p-1.5 cursor-pointer transition-all duration-200 hover:scale-[1.15] hover:brightness-150">
+                <div
+                  class="p-2 max-xs:p-1.5 cursor-pointer transition-all duration-200 hover:scale-[1.15] hover:brightness-150">
                   <img src="/assets/svg/gif.svg" alt="GIF" class="size-5" />
                 </div>
                 <!-- Poll Icon -->
-                <div class="p-2 max-xs:p-1.5 cursor-pointer transition-all duration-200 hover:scale-[1.15] hover:brightness-150">
+                <div
+                  class="p-2 max-xs:p-1.5 cursor-pointer transition-all duration-200 hover:scale-[1.15] hover:brightness-150">
                   <img src="/assets/svg/poll.svg" alt="Poll" class="size-5" />
                 </div>
                 <!-- Emoji Icon -->
-                <div class="p-2 max-xs:p-1.5 cursor-pointer transition-all duration-200 hover:scale-[1.15] hover:brightness-150">
+                <div
+                  class="p-2 max-xs:p-1.5 cursor-pointer transition-all duration-200 hover:scale-[1.15] hover:brightness-150">
                   <img src="/assets/svg/emoji.svg" alt="Emoji" class="size-5" />
                 </div>
                 <!-- Grok Icon -->
-                <div class="p-2 max-xs:p-1.5 cursor-pointer transition-all duration-200 hover:scale-[1.15] hover:brightness-150">
+                <div
+                  class="p-2 max-xs:p-1.5 cursor-pointer transition-all duration-200 hover:scale-[1.15] hover:brightness-150">
                   <img src="/assets/svg/grok.svg" alt="Grok" class="size-5" />
                 </div>
                 <!-- Schedule Icon -->
-                <div class="p-2 max-xs:p-1.5 cursor-pointer transition-all duration-200 hover:scale-[1.15] hover:brightness-150">
+                <div
+                  class="p-2 max-xs:p-1.5 cursor-pointer transition-all duration-200 hover:scale-[1.15] hover:brightness-150">
                   <img src="/assets/svg/schedule.svg" alt="Schedule" class="size-5" />
                 </div>
                 <!-- Location Icon -->
-                <div class="p-2 max-xs:p-1.5 cursor-pointer transition-all duration-200 hover:scale-[1.15] hover:brightness-150">
+                <div
+                  class="p-2 max-xs:p-1.5 cursor-pointer transition-all duration-200 hover:scale-[1.15] hover:brightness-150">
                   <img src="/assets/svg/location.svg" alt="Location" class="size-5" />
                 </div>
               </div>
@@ -212,13 +189,18 @@
                 <!-- Character Counter Ring & Over-limit Display -->
                 <div class="char-counter hidden items-center justify-center min-w-[24px] h-6 px-0.5">
                   <svg class="char-counter-svg size-6 -rotate-90 shrink-0" viewBox="0 0 36 36">
-                    <path class="text-[#333639]" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                    <path class="char-counter-ring text-[#1d9bf0] transition-all duration-150" stroke-dasharray="0, 100" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                    <path class="text-[#333639]" stroke-width="3" stroke="currentColor" fill="none"
+                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                    <path class="char-counter-ring text-[#1d9bf0] transition-all duration-150" stroke-dasharray="0, 100"
+                      stroke-width="3" stroke="currentColor" fill="none"
+                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                   </svg>
                   <span class="char-counter-text absolute text-[10px] font-bold text-[#71767b] hidden"></span>
                 </div>
                 <div class="postBtn">
-                  <button class="bg-[#1d9bf0] text-white font-bold px-4 py-1.5 rounded-full text-sm cursor-pointer opacity-50 transition-all duration-200" disabled>
+                  <button
+                    class="bg-[#1d9bf0] text-white font-bold px-4 py-1.5 rounded-full text-sm cursor-pointer opacity-50 transition-all duration-200"
+                    disabled>
                     Post
                   </button>
                 </div>
@@ -241,7 +223,7 @@
       <div
         class="right hidden lg:flex w-[350px] flex-col items-center bg-black border-[#313233ad] border-l shrink-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         <!-- search bar is here  -->
-        <div class="sticky top-0 z-20 w-full flex justify-center bg-black/80 backdrop-blur-md py-2">
+        <div class="sticky top-0 z-40 w-full flex justify-center bg-black/80 backdrop-blur-md py-2">
           <input
             class="h-8 border-2 w-[80%] border-[#313233ad] focus:border-blue-500 focus:outline-none rounded-full p-5 px-5 text-[10px]"
             type="text" placeholder="Search" />
@@ -281,7 +263,7 @@
                   class="relative bottom-1.75 hover:filter-[brightness(0)_saturate(100%)_invert(52%)_sepia(91%)_saturate(2250%)_hue-rotate(176deg)_brightness(97%)_contrast(94%)] transition-all duration-100 hover:bg-[#1d9cf01e] rounded-full p-1 border-0"
                   src="/assets/svg/morefilled.svg" alt="More options" />
               </div>
-              <div class="posts text-[11px] text-gray-500 mt-0.5">
+              <div class="trending-posts text-[11px] text-gray-500 mt-0.5">
                 54.2K posts
               </div>
             </div>
@@ -297,7 +279,7 @@
                   class="relative bottom-1.75 hover:filter-[brightness(0)_saturate(100%)_invert(52%)_sepia(91%)_saturate(2250%)_hue-rotate(176deg)_brightness(97%)_contrast(94%)] transition-all duration-100 hover:bg-[#1d9cf01e] rounded-full p-1 border-0"
                   src="/assets/svg/morefilled.svg" alt="More options" />
               </div>
-              <div class="posts text-[11px] text-gray-500 mt-0.5">
+              <div class="trending-posts text-[11px] text-gray-500 mt-0.5">
                 128.5K posts
               </div>
             </div>
@@ -313,14 +295,9 @@
                   class="relative bottom-1.75 hover:filter-[brightness(0)_saturate(100%)_invert(52%)_sepia(91%)_saturate(2250%)_hue-rotate(176deg)_brightness(97%)_contrast(94%)] transition-all duration-100 hover:bg-[#1d9cf01e] rounded-full p-1 border-0"
                   src="/assets/svg/morefilled.svg" alt="More options" />
               </div>
-              <div class="posts text-[11px] text-gray-500 mt-0.5">
+              <div class="trending-posts text-[11px] text-gray-500 mt-0.5">
                 32.4K posts
               </div>
-            </div>
-
-            <!-- Show More -->
-            <div class="px-5 py-3 my-1 text-[#1d9bf0] text-sm cursor-pointer transition-colors rounded-b-3xl">
-              Show more
             </div>
           </div>
           <div class="Whotofollow pb-2 border-2 rounded-3xl border-[#313233ad] w-[80%] m-4 mx-0">
@@ -341,7 +318,7 @@
                     Akshay Kumar
                   </div>
                   <div class="text-[11px] text-gray-500 truncate mt-0.5 font-normal">
-                    @akshay
+                    @akshaykumar
                   </div>
                 </div>
               </div>
@@ -399,10 +376,6 @@
                 Follow
               </div>
             </div>
-            <!-- Show More -->
-            <div class="px-5 py-3 my-1 text-[#1d9bf0] text-sm cursor-pointer transition-colors rounded-b-3xl">
-              Show more
-            </div>
           </div>
           <!-- seperator or <hr> tag is here  -->
           <div class="w-[80%] bg-[#313233ad] h-0.5"></div>
@@ -423,28 +396,31 @@
     </section>
   </section>
 
-  <!-- Mobile Bottom Navigation Bar (< 640px) -->
-  <nav class="fixed bottom-0 left-0 right-0 z-50 bg-black/95 backdrop-blur-md border-t border-[#313233ad] flex justify-around items-center h-[53px] sm:hidden px-2">
-    <div class="p-2 text-white hover:text-[#1d9bf0] cursor-pointer transition-colors" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+  <!-- Mobile Bottom Navigation Bar (< 640px) with 100% PC Feature Parity -->
+  <!-- Mobile Bottom Navigation Bar (< 640px) with exactly 5 icons matching real X -->
+  <nav class="fixed bottom-0 left-0 right-0 z-50 bg-black/95 backdrop-blur-md border-t border-[#313233ad] flex items-center justify-around sm:hidden px-2 h-[56px]">
+    <div class="p-2 shrink-0 text-white hover:text-[#1d9bf0] cursor-pointer transition-colors" data-label="Home" title="Home">
       <img src="/assets/svg/homefilled.svg" alt="Home" class="size-6 invert" />
     </div>
-    <div class="p-2  hover:text-[#1d9bf0] cursor-pointer transition-colors">
+    <div class="p-2 shrink-0 hover:text-[#1d9bf0] cursor-pointer transition-colors" data-label="Explore" title="Explore">
       <img src="/assets/svg/explore.svg" alt="Explore" class="size-6 invert opacity-80 hover:opacity-100" />
     </div>
-    <div class="p-2  hover:text-[#1d9bf0] cursor-pointer transition-colors">
-      <img src="/assets/svg/grok.svg" alt="Grok" class="size-6 invert opacity-80 hover:opacity-100" />
-    </div>
-    <div class="p-2  hover:text-[#1d9bf0] cursor-pointer transition-colors">
+    <div class="p-2 shrink-0 hover:text-[#1d9bf0] cursor-pointer transition-colors" data-label="Notifications" title="Notifications">
       <img src="/assets/svg/notifications.svg" alt="Notifications" class="size-6 invert opacity-80 hover:opacity-100" />
     </div>
-    <div class="p-1 cursor-pointer">
-      <img src="/assets/svg/chat.svg" class="invert-75" alt="">
+    <div class="p-2 shrink-0 hover:text-[#1d9bf0] cursor-pointer transition-colors" data-label="Grok" title="Grok">
+      <img src="/assets/svg/grok.svg" alt="Grok" class="size-6 invert opacity-80 hover:opacity-100" />
+    </div>
+    <div class="p-2 shrink-0 hover:text-[#1d9bf0] cursor-pointer transition-colors" data-label="Bookmarks" title="Bookmarks">
+      <img src="/assets/svg/bookmarks.svg" alt="Bookmarks" class="size-6 invert opacity-80 hover:opacity-100" />
     </div>
   </nav>
 
-  <!-- Mobile Floating Post Button  -->
-  <button onclick="document.querySelector('.createPost textarea')?.focus(); window.scrollTo({top: 0, behavior: 'smooth'});" class="fixed bottom-18 right-4 z-50 size-14 rounded-full bg-[#1d9bf0] hover:bg-[#1a8cd8] active:scale-95 text-white shadow-2xl flex items-center justify-center sm:hidden transition-all cursor-pointer ">
-    <img src="/assets/svg/post.svg" class=" w-5" alt="">
+  <!-- Mobile Floating Post Button matching real X -->
+  <button
+    onclick="const btn = document.querySelector('.postbtn button') || document.querySelector('.createPost textarea'); if (btn && btn.click) { btn.click(); } else if (btn) { btn.focus(); window.scrollTo({top: 0, behavior: 'smooth'}); }"
+    class="fixed bottom-20 right-4 z-50 size-14 rounded-full bg-[#1d9bf0] hover:bg-[#1a8cd8] active:scale-95 text-white shadow-2xl flex items-center justify-center sm:hidden transition-all cursor-pointer border border-white/10">
+    <img src="/assets/svg/post.svg" class="w-6 invert" alt="">
   </button>
 
   <script type="module" src="/src/main.js"></script>

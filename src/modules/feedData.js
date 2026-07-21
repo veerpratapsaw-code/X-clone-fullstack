@@ -13,10 +13,11 @@ export const initialPosts = [
       url: "/assets/posts_videos/bhagwat_gita.mp4"
     },
     stats: {
-      replies: "4.1K",
-      reposts: "31.8K",
-      likes: "198K",
-      views: "1.9M"
+      replies: "0",
+      reposts: "0",
+      likes: "0",
+      bookmarks: "0",
+      views: "1"
     }
   },
   {
@@ -33,10 +34,11 @@ export const initialPosts = [
       url: "/assets/posts_videos/master_a_thing_first.mp4"
     },
     stats: {
-      replies: "14.8K",
-      reposts: "89.2K",
-      likes: "450K",
-      views: "4.2M"
+      replies: "0",
+      reposts: "0",
+      likes: "0",
+      bookmarks: "0",
+      views: "1"
     }
   },
   {
@@ -53,10 +55,11 @@ export const initialPosts = [
       url: "/assets/posts_videos/trading.mp4"
     },
     stats: {
-      replies: "1.1K",
-      reposts: "9.2K",
-      likes: "67.5K",
-      views: "610K"
+      replies: "0",
+      reposts: "0",
+      likes: "0",
+      bookmarks: "0",
+      views: "1"
     }
   },
   {
@@ -73,10 +76,11 @@ export const initialPosts = [
       url: "/assets/posts_videos/how_to_become_king.mp4"
     },
     stats: {
-      replies: "1.4K",
-      reposts: "18.4K",
-      likes: "152K",
-      views: "1.2M"
+      replies: "0",
+      reposts: "0",
+      likes: "0",
+      bookmarks: "0",
+      views: "1"
     }
   },
   {
@@ -93,10 +97,11 @@ export const initialPosts = [
       url: "/assets/posts_videos/no_excuses.mp4"
     },
     stats: {
-      replies: "1.2K",
-      reposts: "11.4K",
-      likes: "84.5K",
-      views: "720K"
+      replies: "0",
+      reposts: "0",
+      likes: "0",
+      bookmarks: "0",
+      views: "1"
     }
   },
   {
@@ -114,10 +119,11 @@ export const initialPosts = [
       alt: "Kirkjufell mountain"
     },
     stats: {
-      replies: "3.2K",
-      reposts: "24.5K",
-      likes: "142K",
-      views: "1.4M"
+      replies: "0",
+      reposts: "0",
+      likes: "0",
+      bookmarks: "0",
+      views: "1"
     }
   },
   {
@@ -135,10 +141,11 @@ export const initialPosts = [
       alt: "Europe travel"
     },
     stats: {
-      replies: "412",
-      reposts: "2.8K",
-      likes: "19.4K",
-      views: "210K"
+      replies: "0",
+      reposts: "0",
+      likes: "0",
+      bookmarks: "0",
+      views: "1"
     }
   },
   {
@@ -156,10 +163,11 @@ export const initialPosts = [
       alt: "Morning yoga meditation"
     },
     stats: {
-      replies: "1.5K",
-      reposts: "14.2K",
-      likes: "98.1K",
-      views: "940K"
+      replies: "0",
+      reposts: "0",
+      likes: "0",
+      bookmarks: "0",
+      views: "1"
     }
   },
   {
@@ -177,10 +185,11 @@ export const initialPosts = [
       alt: "Skyscrapers"
     },
     stats: {
-      replies: "28.4K",
-      reposts: "95.1K",
-      likes: "510K",
-      views: "6.8M"
+      replies: "0",
+      reposts: "0",
+      likes: "0",
+      bookmarks: "0",
+      views: "1"
     }
   },
   {
@@ -198,10 +207,11 @@ export const initialPosts = [
       alt: "Studio microphone"
     },
     stats: {
-      replies: "5.6K",
-      reposts: "42.1K",
-      likes: "280K",
-      views: "2.4M"
+      replies: "0",
+      reposts: "0",
+      likes: "0",
+      bookmarks: "0",
+      views: "1"
     }
   },
   {
@@ -219,10 +229,11 @@ export const initialPosts = [
       alt: "Film shoot setup"
     },
     stats: {
-      replies: "620",
-      reposts: "4.5K",
-      likes: "38.2K",
-      views: "390K"
+      replies: "0",
+      reposts: "0",
+      likes: "0",
+      bookmarks: "0",
+      views: "1"
     }
   },
   {
@@ -240,10 +251,11 @@ export const initialPosts = [
       alt: "Cinema hall"
     },
     stats: {
-      replies: "310",
-      reposts: "2.1K",
-      likes: "15.8K",
-      views: "180K"
+      replies: "0",
+      reposts: "0",
+      likes: "0",
+      bookmarks: "0",
+      views: "1"
     }
   },
   {
@@ -261,10 +273,11 @@ export const initialPosts = [
       alt: "Road trip adventure"
     },
     stats: {
-      replies: "940",
-      reposts: "8.1K",
-      likes: "64.3K",
-      views: "580K"
+      replies: "0",
+      reposts: "0",
+      likes: "0",
+      bookmarks: "0",
+      views: "1"
     }
   },
   {
@@ -278,10 +291,12 @@ export const initialPosts = [
     text: `⚡ Autonomous Tech Digest: Quantum computation and Gemini 2.0 multi-agent reasoning frameworks are scaling across global cloud clusters. Stay tuned for real-time benchmark reports. #TechPulse #AI #Quantum #SiliconValley`,
     media: null,
     stats: {
-      replies: "812",
-      reposts: "6.4K",
-      likes: "48.9K",
-      views: "490K"
+      replies: "0",
+      reposts: "0",
+      likes: "0",
+      bookmarks: "0",
+      views: "1"
     }
   }
 ];
+

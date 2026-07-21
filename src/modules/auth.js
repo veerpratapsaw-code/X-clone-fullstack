@@ -61,10 +61,10 @@ export const updateUserProfilePill = () => {
       </div>
     `;
 
-    // Attach click for logout popover
+    // Attach click for account switch & logout popover
     pill.querySelector("#auth-user-pill")?.addEventListener("click", (e) => {
       e.stopPropagation();
-      showLogoutPopover(pill);
+      showAccountMenuPopover(pill.querySelector("#auth-user-pill") || pill);
     });
   } else {
     pill.innerHTML = `
@@ -76,29 +76,54 @@ export const updateUserProfilePill = () => {
   }
 };
 
-const showLogoutPopover = (anchorEl) => {
+const showAccountMenuPopover = (anchorEl) => {
   document.querySelectorAll(".x-auth-popover").forEach(el => el.remove());
   const user = getCurrentUser();
   if (!user) return;
 
   const popover = document.createElement("div");
-  popover.className = "x-auth-popover absolute bottom-20 left-4 w-64 bg-[#000000] border border-[#313233ad] rounded-2xl shadow-2xl z-50 overflow-hidden animate-[fadeInPop_0.15s_ease-out]";
+  popover.className = "x-auth-popover fixed w-64 bg-[#000000] border border-[#313233ad] rounded-2xl shadow-2xl z-[600] overflow-hidden animate-[fadeInPop_0.15s_ease-out] text-sm text-white divide-y divide-[#313233ad]/40";
+  
+  if (anchorEl && anchorEl.getBoundingClientRect) {
+    const rect = anchorEl.getBoundingClientRect();
+    popover.style.left = `${Math.max(12, rect.left)}px`;
+    popover.style.bottom = `${window.innerHeight - rect.top + 10}px`;
+  } else {
+    popover.style.left = "16px";
+    popover.style.bottom = "80px";
+  }
+
   popover.innerHTML = `
-    <div class="p-3 border-b border-[#313233ad]/50 text-xs text-[#71767b] font-mono">
-      Logged in as <span class="text-white font-bold">${user.handle}</span>
+    <div class="p-3.5 bg-[#0e1013] text-xs font-mono">
+      <div class="text-[#71767b]">Signed in as</div>
+      <div class="font-bold text-white truncate text-sm mt-0.5">${user.username} (${user.handle})</div>
     </div>
-    <button class="w-full text-left px-4 py-3 text-sm text-[#f91880] hover:bg-[#181818] font-bold flex items-center gap-2.5 transition-colors cursor-pointer" id="do-logout-btn">
-      <svg class="size-4 fill-current" viewBox="0 0 24 24"><path d="M16 13v-2H7V8l-5 4 5 4v-3h9zM20 3h-9c-1.1 0-2 .9-2 2v4h2V5h9v14h-9v-4H9v4c0 1.1.9 2 2 2h9c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>
-      Log out ${user.handle}
-    </button>
+    <div class="p-1">
+      <button class="w-full text-left px-3.5 py-2.5 text-xs text-white hover:bg-[#181818] font-bold transition-colors cursor-pointer rounded-xl flex items-center gap-2" id="open-profile-btn">
+        <span>👤 View Profile</span>
+      </button>
+      <button class="w-full text-left px-3.5 py-2.5 text-xs text-[#f91880] hover:bg-[#181818] font-bold transition-colors cursor-pointer rounded-xl flex items-center gap-2" id="do-logout-btn">
+        <svg class="size-4 fill-current" viewBox="0 0 24 24"><path d="M16 13v-2H7V8l-5 4 5 4v-3h9zM20 3h-9c-1.1 0-2 .9-2 2v4h2V5h9v14h-9v-4H9v4c0 1.1.9 2 2 2h9c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>
+        <span>Log out ${user.handle}</span>
+      </button>
+    </div>
   `;
 
   document.body.appendChild(popover);
+
+  popover.querySelector("#open-profile-btn")?.addEventListener("click", () => {
+    popover.remove();
+    const profilePill = Array.from(document.querySelectorAll(".left ul li, .nav li")).find(li => li.textContent.includes("Profile"));
+    if (profilePill) profilePill.click();
+  });
+
   popover.querySelector("#do-logout-btn").addEventListener("click", logout);
 
-  const closePopover = () => {
-    popover.remove();
-    window.removeEventListener("click", closePopover);
+  const closePopover = (e) => {
+    if (!popover.contains(e.target) && (!anchorEl || !anchorEl.contains(e.target))) {
+      popover.remove();
+      window.removeEventListener("click", closePopover);
+    }
   };
   setTimeout(() => window.addEventListener("click", closePopover), 10);
 };
@@ -248,9 +273,40 @@ export const showAuthModal = (initialMode = "login", isCompulsory = false) => {
   document.body.appendChild(modal);
 };
 
-export function initAuth() {
+export async function initAuth() {
   updateUserProfilePill();
-  if (!getToken()) {
+  const token = getToken();
+  const user = getCurrentUser();
+
+  if (!token && !user) {
     showLandingAndOnboarding();
+    return;
+  }
+
+  // Hydrate latest user data from MongoDB on startup so profile changes, avatars, and header banners never vanish on refresh
+  try {
+    if (token || (user && user.handle)) {
+      const queryHandle = user && user.handle ? `?handle=${encodeURIComponent(user.handle)}` : '';
+      const res = await fetch(`${API_BASE_URL}/api/auth/me${queryHandle}`, {
+        headers: { "Authorization": `Bearer ${token || 'demo_token_seed'}` }
+      });
+      if (res.ok) {
+        const liveUser = await res.json();
+        setAuthData(token || "demo_token_seed", liveUser);
+        return;
+      }
+    }
+    if (user && user.handle) {
+      const resProfile = await fetch(`${API_BASE_URL}/api/users/profile/${encodeURIComponent(user.handle)}`);
+      if (resProfile.ok) {
+        const liveProfile = await resProfile.json();
+        const userData = liveProfile.user || liveProfile;
+        if (userData && (userData.username || userData.handle)) {
+          setAuthData(token || "demo_token_seed", userData);
+        }
+      }
+    }
+  } catch (err) {
+    console.warn("Backend auth check offline or error, using local persisted user state:", err.message);
   }
 }

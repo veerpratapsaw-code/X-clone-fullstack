@@ -30,7 +30,7 @@ export function showGrokScreen() {
   // Build the authentic X Grok UI structure
   mainContainer.innerHTML = `
     <!-- Grok Sticky Header -->
-    <div class="sticky top-0 z-20 w-full bg-[#000000dd] backdrop-blur-md flex items-center justify-between px-4 py-3 border-b border-[#313233ad]">
+    <div class="sticky top-0 z-40 w-full bg-[#000000dd] backdrop-blur-md flex items-center justify-between px-4 py-3 border-b border-[#313233ad]">
       <div class="flex items-center gap-3">
         <button class="grok-back-btn p-2 hover:bg-[#181818] rounded-full transition-colors text-white xl:hidden">
           <svg class="size-5 fill-current" viewBox="0 0 24 24"><path d="M7.414 13l5.043 5.04-1.414 1.42L3.586 12l7.457-7.46 1.414 1.42L7.414 11H21v2H7.414z"/></svg>

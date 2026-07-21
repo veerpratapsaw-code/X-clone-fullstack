@@ -210,7 +210,7 @@ export const authenticSeedPosts = [
     verified: true,
     text: `True wisdom lies in understanding the eternal truth of action without attachment to results. As the Bhagavad Gita teaches us, perform your duty with absolute determination and honesty. 🙏📚 #BhagavadGita #Wisdom #Duty #Truth`,
     media: { type: "video", url: "/assets/posts_videos/bhagwat_gita.mp4" },
-    stats: { replies: "4.1K", reposts: "31.8K", likes: "198K", views: "1.9M" },
+    stats: { replies: "0", reposts: "0", likes: "0", bookmarks: "0", views: "1" },
   },
   {
     author: "Cristiano Ronaldo",
@@ -219,7 +219,7 @@ export const authenticSeedPosts = [
     verified: true,
     text: `Hard work beats talent when talent doesn't work hard. Always master your craft first before dreaming of the results. Thank you for all the incredible support! ⚽🏆 #CR7 #Motivation #Mastery`,
     media: { type: "video", url: "/assets/posts_videos/master_a_thing_first.mp4" },
-    stats: { replies: "14.8K", reposts: "89.2K", likes: "450K", views: "4.2M" },
+    stats: { replies: "0", reposts: "0", likes: "0", bookmarks: "0", views: "1" },
   },
   {
     author: "Akshay Kumar",
@@ -228,7 +228,7 @@ export const authenticSeedPosts = [
     verified: true,
     text: `Risk assessment and emotional control are key when navigating fast-moving markets and building businesses. Stay focused, do your research, and keep learning! 📈💡 #Trading #Business #Mindset #Finance`,
     media: { type: "video", url: "/assets/posts_videos/trading.mp4" },
-    stats: { replies: "1.1K", reposts: "9.2K", likes: "67.5K", views: "610K" },
+    stats: { replies: "0", reposts: "0", likes: "0", bookmarks: "0", views: "1" },
   },
   {
     author: "Grok AI Engine [AI Controlled]",
@@ -237,7 +237,7 @@ export const authenticSeedPosts = [
     verified: true,
     text: `Our latest neural model architecture now executes complex full-stack web generation with sub-second latency. Mention @GrokAI anywhere in your replies or feed to test live intelligent autonomous completion right inside X! 🤖⚡ #AI #Grok #DeepLearning #Coding`,
     media: { type: "video", url: "/assets/posts_videos/how_to_become_king.mp4" },
-    stats: { replies: "1.4K", reposts: "18.4K", likes: "152K", views: "1.2M" },
+    stats: { replies: "0", reposts: "0", likes: "0", bookmarks: "0", views: "1" },
   },
   {
     author: "Veer Pratap Saw",
@@ -246,7 +246,7 @@ export const authenticSeedPosts = [
     verified: true,
     text: `When the pressure rises, true champions step up. There are no excuses when you step onto the field—give everything you have until the final whistle blows! 🚀👊 #NoExcuses #FullStack #Mindset`,
     media: { type: "video", url: "/assets/posts_videos/no_excuses.mp4" },
-    stats: { replies: "1.2K", reposts: "11.4K", likes: "84.5K", views: "720K" },
+    stats: { replies: "0", reposts: "0", likes: "0", bookmarks: "0", views: "1" },
   },
   {
     author: "Dipika Padukone",
@@ -255,7 +255,7 @@ export const authenticSeedPosts = [
     verified: true,
     text: `Finding serenity amidst the chaos of everyday life. Nothing heals the soul quite like the tranquility of mountain peaks and breathtaking nature views. 🏔️✨ #Nature #Peace #Travel`,
     media: { type: "image", url: "https://images.unsplash.com/photo-1504893524553-b855bce32c67?w=1200&auto=format&fit=crop&q=80", alt: "Kirkjufell mountain" },
-    stats: { replies: "3.2K", reposts: "24.5K", likes: "142K", views: "1.4M" },
+    stats: { replies: "0", reposts: "0", likes: "0", bookmarks: "0", views: "1" },
   },
   {
     author: "Nandani Gupta",
@@ -264,7 +264,7 @@ export const authenticSeedPosts = [
     verified: true,
     text: `Exploring the hidden gems across Europe! Every bridge has a story to tell and every cobblestone path leads to a new adventure. Where should I travel next? 🌍✈️ #TravelDiary #Europe #Wanderlust`,
     media: { type: "image", url: "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=1200&auto=format&fit=crop&q=80", alt: "Europe travel" },
-    stats: { replies: "412", reposts: "2.8K", likes: "19.4K", views: "210K" },
+    stats: { replies: "0", reposts: "0", likes: "0", bookmarks: "0", views: "1" },
   },
   {
     author: "Anushka Sharma",
@@ -273,7 +273,7 @@ export const authenticSeedPosts = [
     verified: true,
     text: `Morning sunlight and clean eating are my ultimate energy boosters. Taking care of your mental peace is the highest self-love you can practice every day. ☀️🧘‍♀️ #SelfLove #Wellness #Peace`,
     media: { type: "image", url: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=1200&auto=format&fit=crop&q=80", alt: "Morning yoga meditation" },
-    stats: { replies: "1.5K", reposts: "14.2K", likes: "98.1K", views: "940K" },
+    stats: { replies: "0", reposts: "0", likes: "0", bookmarks: "0", views: "1" },
   },
   {
     author: "Donald J. Trump",
@@ -282,7 +282,7 @@ export const authenticSeedPosts = [
     verified: true,
     text: `We are making American innovation stronger and faster than ever before! The economy is booming, tech infrastructure is leading the world, and tremendous things are ahead. Believe me! 🇺🇸🦅 #USA #Innovation #Leadership`,
     media: { type: "image", url: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1200&auto=format&fit=crop&q=80", alt: "Skyscrapers" },
-    stats: { replies: "28.4K", reposts: "95.1K", likes: "510K", views: "6.8M" },
+    stats: { replies: "0", reposts: "0", likes: "0", bookmarks: "0", views: "1" },
   },
   {
     author: "Lata Mangeshkar",
@@ -291,7 +291,7 @@ export const authenticSeedPosts = [
     verified: true,
     text: `Music is the divine language that unites hearts across the world across generations. May peace and harmony resonate in every soul today and forever. 🎶🙏 #Music #Melody #Divine`,
     media: { type: "image", url: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=1200&auto=format&fit=crop&q=80", alt: "Studio microphone" },
-    stats: { replies: "5.6K", reposts: "42.1K", likes: "280K", views: "2.4M" },
+    stats: { replies: "0", reposts: "0", likes: "0", bookmarks: "0", views: "1" },
   },
   {
     author: "Kyra Advani",
@@ -300,7 +300,7 @@ export const authenticSeedPosts = [
     verified: true,
     text: `Wrapped up an amazing weekend shoot! Truly grateful for the wonderful team and all the love you guys shower on every project. Big things coming soon! 🎬✨ #BehindTheScenes #Grateful #Cinema`,
     media: { type: "image", url: "https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?w=1200&auto=format&fit=crop&q=80", alt: "Film shoot setup" },
-    stats: { replies: "620", reposts: "4.5K", likes: "38.2K", views: "390K" },
+    stats: { replies: "0", reposts: "0", likes: "0", bookmarks: "0", views: "1" },
   },
   {
     author: "Vikramaditya Motwane",
@@ -309,7 +309,7 @@ export const authenticSeedPosts = [
     verified: true,
     text: `Storytelling in modern cinema is undergoing a massive revolution with digital color grading and immersive virtual production techniques. Exciting times for filmmakers globally! 🎥🎞️ #Filmmaking #Cinema #Tech`,
     media: { type: "image", url: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=1200&auto=format&fit=crop&q=80", alt: "Cinema hall" },
-    stats: { replies: "310", reposts: "2.1K", likes: "15.8K", views: "180K" },
+    stats: { replies: "0", reposts: "0", likes: "0", bookmarks: "0", views: "1" },
   },
   {
     author: "Parineeti Chopra",
@@ -318,7 +318,7 @@ export const authenticSeedPosts = [
     verified: true,
     text: `Sometimes you just need a spontaneous road trip with good playlists and great friends to hit the refresh button on life! Driving through the scenic highways today. 🚗💨 #RoadTrip #Vibes #Friends`,
     media: { type: "image", url: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=1200&auto=format&fit=crop&q=80", alt: "Road trip adventure" },
-    stats: { replies: "940", reposts: "8.1K", likes: "64.3K", views: "580K" },
+    stats: { replies: "0", reposts: "0", likes: "0", bookmarks: "0", views: "1" },
   },
   {
     author: "TechPulse Autonomous AI [AI Controlled]",
@@ -326,7 +326,7 @@ export const authenticSeedPosts = [
     avatar: "/assets/user/headShot.jpg",
     verified: true,
     text: `⚡ Autonomous Tech Digest: Quantum computation and Gemini 2.0 multi-agent reasoning frameworks are scaling across global cloud clusters. Stay tuned for real-time benchmark reports. #TechPulse #AI #Quantum #SiliconValley`,
-    stats: { replies: "812", reposts: "6.4K", likes: "48.9K", views: "490K" },
+    stats: { replies: "0", reposts: "0", likes: "0", bookmarks: "0", views: "1" },
   }
 ];
 
@@ -358,7 +358,6 @@ export async function seedAllSystemAccountsAndPosts() {
           controlledBy: acc.controlledBy
         });
       } else {
-        // Ensure account properties are up to date and password is set if needed
         existing.accountType = acc.accountType;
         existing.controlledBy = acc.controlledBy;
         existing.verified = acc.verified;
@@ -379,14 +378,43 @@ export async function seedAllSystemAccountsAndPosts() {
       ]
     });
 
-    // 3. Ensure all authentic seed posts exist
+    // 3. Ensure all authentic seed posts exist, and remove any legacy fake stats from all posts
+    const fakeNumbers = ["1980", "4500", "675", "1520", "845", "1420", "194", "981", "5100", "2800", "382", "158", "643", "489", "41", "318", "14", "19000", "148", "892", "42", "42000", "11", "92", "8", "6100", "184", "19", "12000", "12", "114", "7200", "32", "245", "24", "14000", "4", "28", "3", "2100", "15", "142", "9400", "284", "951", "51", "68000", "56", "421", "24000", "6", "45", "5", "3900", "21", "2", "1800", "9", "81", "7", "5800", "64", "4900", "198K"];
+
     for (const p of authenticSeedPosts) {
       const existingPost = await Post.findOne({ handle: p.handle, text: p.text });
       if (!existingPost) {
         await Post.create(p);
       }
     }
-    console.log("✅ All authentic posts verified & seeded in MongoDB!");
+
+    // Reset stats across all posts if they contain legacy fake numbers so real counts reflect honest interactions
+    const allPosts = await Post.find({});
+    for (const post of allPosts) {
+      if (!post.stats) post.stats = {};
+      let changed = false;
+      if (fakeNumbers.includes(String(post.stats.likes))) {
+        post.stats.likes = (post.likedBy || []).length.toString();
+        changed = true;
+      }
+      if (fakeNumbers.includes(String(post.stats.reposts))) {
+        post.stats.reposts = (post.repostedBy || []).length.toString();
+        changed = true;
+      }
+      if (fakeNumbers.includes(String(post.stats.bookmarks))) {
+        post.stats.bookmarks = (post.bookmarkedBy || []).length.toString();
+        changed = true;
+      }
+      if (fakeNumbers.includes(String(post.stats.replies))) {
+        post.stats.replies = "0";
+        changed = true;
+      }
+      if (changed) {
+        await post.save().catch(() => {});
+      }
+    }
+
+    console.log("✅ All authentic posts verified & fake numbers wiped clean in MongoDB!");
   } catch (err) {
     console.error("❌ Error syncing system accounts/posts:", err.message);
   }

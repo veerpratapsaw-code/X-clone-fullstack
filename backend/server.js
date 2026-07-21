@@ -52,6 +52,19 @@ const absoluteUploadsDir = path.resolve(__dirname, "uploads");
 app.use("/uploads", express.static(absoluteUploadsDir));
 app.use("/uploads", express.static("uploads"));
 
+// 4. Serve static public assets (favicons and server logos) with exact MIME types to bust browser cache
+const absolutePublicDir = path.resolve(__dirname, "public");
+app.use(express.static(absolutePublicDir));
+app.get(["/favicon.ico", "/favicon.svg", "/favicon.png", "/favicon-32x32.png", "/logo.svg"], (req, res) => {
+  const fileName = req.path.split("/").pop().split("?")[0];
+  const filePath = path.join(absolutePublicDir, fileName);
+  if (fileName.endsWith(".svg")) res.setHeader("Content-Type", "image/svg+xml");
+  else if (fileName.endsWith(".ico")) res.setHeader("Content-Type", "image/x-icon");
+  else if (fileName.endsWith(".png")) res.setHeader("Content-Type", "image/png");
+  res.setHeader("Cache-Control", "public, max-age=0, must-revalidate");
+  res.sendFile(filePath);
+});
+
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/posts", postRoutes);

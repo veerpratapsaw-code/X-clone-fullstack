@@ -2,6 +2,7 @@ import { getToken, getCurrentUser, showAuthModal } from "./auth.js";
 import { API_BASE_URL } from "../config.js";
 import { renderPostCard, initFeed } from "./feedRenderer.js";
 import { initXVideoPlayers } from "./videoPlayer.js";
+import { initialPosts } from "./feedData.js";
 
 // Toast notification helper
 const showToast = (message) => {
@@ -15,6 +16,112 @@ const showToast = (message) => {
 
   setTimeout(() => toast.remove(), 2500);
 };
+
+export function getPersistedUserFollowing() {
+  const user = getCurrentUser();
+  const userKey = "x_user_following_" + (user?.handle || "@default").toLowerCase();
+  try {
+    if (user && Array.isArray(user.following) && user.following.length > 0) {
+      return user.following.map(h => h.toLowerCase());
+    }
+    const data = localStorage.getItem(userKey) || localStorage.getItem("x_user_following");
+    if (data) {
+      const parsed = JSON.parse(data);
+      if (Array.isArray(parsed)) return parsed.map(h => h.toLowerCase());
+    }
+  } catch (e) {}
+  const defaults = ["@cristiano", "@akshaykumar", "@akshay"];
+  try { localStorage.setItem(userKey, JSON.stringify(defaults)); } catch (e) {}
+  return defaults;
+}
+
+export function syncAllFollowButtons(handle, isFollowing) {
+  if (!handle || typeof document === "undefined") return;
+  const norm = handle.toLowerCase();
+  const allBtns = document.querySelectorAll(`[data-handle]`);
+  allBtns.forEach(btn => {
+    const btnHandle = (btn.dataset.handle || "").toLowerCase();
+    if (btnHandle === norm || (btnHandle === "@akshay" && norm === "@akshaykumar") || (btnHandle === "@akshaykumar" && norm === "@akshay")) {
+      if (btn.classList.contains("post-inline-follow-btn") || btn.classList.contains("inline-follow-toggle-btn")) {
+        if (isFollowing) {
+          btn.textContent = "Following";
+          btn.className = "post-inline-follow-btn border border-[#536471] text-white bg-transparent font-bold rounded-full text-[11px] px-2.5 py-0.5 transition-colors shrink-0 ml-2";
+          btn.dataset.following = "true";
+        } else {
+          btn.textContent = "Follow";
+          btn.className = "post-inline-follow-btn border-0 text-black bg-white font-bold rounded-full text-[11px] px-2.5 py-0.5 transition-colors shrink-0 ml-2 hover:bg-[#eff3f4]";
+          btn.dataset.following = "false";
+        }
+      } else if (btn.classList.contains("btn")) {
+        if (isFollowing) {
+          btn.textContent = "Following";
+          btn.className = "btn shrink-0 border border-[#536471] text-white bg-transparent font-bold rounded-full h-8 px-4 flex items-center justify-center text-xs transition-all duration-200 cursor-pointer hover:border-red-600 hover:text-red-600 hover:bg-red-500/10";
+          btn.dataset.following = "true";
+        } else {
+          btn.textContent = "Follow";
+          btn.className = "btn shrink-0 border-0 text-black bg-white font-bold rounded-full h-8 px-4 flex items-center justify-center text-xs hover:bg-[#eff3f4] transition-colors cursor-pointer";
+          btn.dataset.following = "false";
+        }
+      }
+    }
+  });
+}
+
+if (typeof window !== "undefined" && !window._hasFollowBtnDelegate) {
+  window._hasFollowBtnDelegate = true;
+  document.addEventListener("click", async (e) => {
+    const followBtn = e.target.closest(".post-inline-follow-btn, .inline-follow-toggle-btn");
+    if (!followBtn) return;
+    e.stopPropagation();
+    const handle = followBtn.dataset.handle;
+    if (!handle) return;
+
+    const isFollowing = followBtn.dataset.following === "true" || followBtn.textContent.trim() === "Following";
+    const newState = !isFollowing;
+
+    updatePersistedUserFollowing(handle, newState);
+
+    const currentUser = getCurrentUser();
+    if (currentUser && getToken()) {
+      try {
+        await fetch(`${API_BASE_URL}/api/users/${encodeURIComponent(handle)}/follow`, {
+          method: "POST",
+          headers: { "Authorization": `Bearer ${getToken()}` }
+        });
+      } catch (err) {}
+    }
+
+    showToast(newState ? `Followed ${handle}` : `Unfollowed ${handle}`);
+  });
+}
+
+export function updatePersistedUserFollowing(handle, isFollowing) {
+  if (!handle) return [];
+  const list = new Set(getPersistedUserFollowing());
+  const norm = handle.toLowerCase();
+  if (isFollowing) {
+    list.add(norm);
+    if (norm === "@akshay") list.add("@akshaykumar");
+    if (norm === "@akshaykumar") list.add("@akshay");
+  } else {
+    list.delete(norm);
+    if (norm === "@akshay") list.delete("@akshaykumar");
+    if (norm === "@akshaykumar") list.delete("@akshay");
+  }
+  const arr = Array.from(list);
+  const user = getCurrentUser();
+  const userKey = "x_user_following_" + (user?.handle || "@default").toLowerCase();
+  try { localStorage.setItem(userKey, JSON.stringify(arr)); } catch (e) {}
+  try { localStorage.setItem("x_user_following", JSON.stringify(arr)); } catch (e) {}
+  try {
+    if (user) {
+      user.following = arr;
+      setAuthData(getToken(), user);
+    }
+  } catch (e) {}
+  syncAllFollowButtons(handle, isFollowing);
+  return arr;
+}
 
 /**
  * Initializes Right Sidebar "Who to follow" and "What’s happening" trending bar with live backend insights & MongoDB persistence
@@ -52,9 +159,6 @@ export async function initWhoToFollow() {
           <div class="posts text-[11px] text-gray-500 mt-0.5">${item.postsCount}</div>
         </div>
       `).join('')}
-      <div class="px-5 py-3 my-1 text-[#1d9bf0] text-sm cursor-pointer transition-colors hover:bg-[#111] rounded-b-3xl">
-        Show more
-      </div>
     `;
 
     // Clicking a trending tag filters the search live
@@ -104,7 +208,7 @@ export async function initWhoToFollow() {
   const followItems = whoToFollowBox.querySelectorAll(".content.flex.items-center.justify-between");
   
   // Check what handles current user is following right on page load
-  let userFollowing = [];
+  let userFollowing = getPersistedUserFollowing();
   const currentUser = getCurrentUser();
   if (currentUser && getToken()) {
     try {
@@ -112,6 +216,7 @@ export async function initWhoToFollow() {
       const data = await res.json();
       if (data && data.user && data.user.following) {
         userFollowing = data.user.following.map(h => h.toLowerCase());
+        try { localStorage.setItem("x_user_following", JSON.stringify(userFollowing)); } catch (e) {}
       }
     } catch (err) {
       console.warn("Could not load user following state:", err);
@@ -142,7 +247,7 @@ export async function initWhoToFollow() {
 
     if (!btn || !handle) return;
 
-    if (userFollowing.includes(handle.toLowerCase())) {
+    if (userFollowing.includes(handle.toLowerCase()) || (handle.toLowerCase() === "@akshay" && userFollowing.includes("@akshaykumar")) || (handle.toLowerCase() === "@akshaykumar" && userFollowing.includes("@akshay"))) {
       setButtonFollowingState(btn, true);
     } else {
       setButtonFollowingState(btn, false);
@@ -151,30 +256,35 @@ export async function initWhoToFollow() {
     btn.addEventListener("click", async (e) => {
       e.stopPropagation();
 
-      if (!getToken()) {
-        showAuthModal("login", true);
-        return;
-      }
-
       const isFollowing = btn.dataset.following === "true";
       const newFollowingState = !isFollowing;
 
       setButtonFollowingState(btn, newFollowingState);
+      updatePersistedUserFollowing(handle, newFollowingState);
       showToast(newFollowingState ? `Followed ${handle}` : `Unfollowed ${handle}`);
 
-      try {
-        const res = await fetch(`${API_BASE_URL}/api/users/${encodeURIComponent(handle)}/follow`, {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${getToken()}`
+      const activeTabSpan = document.querySelector('.top .tab.text-white span');
+      if (activeTabSpan && activeTabSpan.textContent.trim() === "Following") {
+        const followingTabEl = activeTabSpan.closest('.tab');
+        if (followingTabEl) followingTabEl.click();
+      }
+
+      if (getToken()) {
+        try {
+          const res = await fetch(`${API_BASE_URL}/api/users/${encodeURIComponent(handle)}/follow`, {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${getToken()}`
+            }
+          });
+          const data = await res.json();
+          if (data.following !== undefined) {
+            setButtonFollowingState(btn, data.following);
+            updatePersistedUserFollowing(handle, data.following);
           }
-        });
-        const data = await res.json();
-        if (data.following !== undefined) {
-          setButtonFollowingState(btn, data.following);
+        } catch (err) {
+          console.warn("Follow sync error:", err);
         }
-      } catch (err) {
-        console.warn("Follow sync error:", err);
       }
     });
   });
@@ -184,53 +294,57 @@ export async function initWhoToFollow() {
  * Initializes Search Bar live filtering and backend query
  */
 export function initSearchBar() {
-  const searchInput = document.querySelector(".right input[type='text']");
-  const postsContainer = document.querySelector(".posts");
-  if (!searchInput || !postsContainer) return;
+  if (document.body.dataset.searchBarWired === "true") return;
+  document.body.dataset.searchBarWired = "true";
 
-  let debounceTimer = null;
+  // When clicking, focusing, or typing inside the right column search bar, directly redirect to Explore section search bar!
+  const redirectRightSearchToExplore = (e) => {
+    const rightInput = e.target.closest(".right input[type='text'], #desktop-right-search-input");
+    const rightContainer = e.target.closest(".right .sticky, .right-search-container");
+    if (!rightInput && !rightContainer) return;
 
-  searchInput.addEventListener("input", (e) => {
-    const q = e.target.value.trim();
-    if (debounceTimer) clearTimeout(debounceTimer);
+    // Remove any old popup
+    document.getElementById("x-pc-search-popup")?.remove();
+    document.getElementById("x-mobile-search-screen")?.remove();
 
-    debounceTimer = setTimeout(async () => {
-      if (!q) {
-        // Restore normal live feed when search cleared
-        initFeed();
-        return;
-      }
+    // Get any text already typed
+    const inp = rightInput || rightContainer?.querySelector("input[type='text']");
+    const q = inp ? inp.value.trim() : "";
+    if (inp) {
+      inp.value = "";
+      inp.blur();
+    }
 
-      try {
-        const res = await fetch(`${API_BASE_URL}/api/posts/search?q=${encodeURIComponent(q)}`);
-        const posts = await res.json();
-
-        postsContainer.innerHTML = "";
-        if (!posts || posts.length === 0) {
-          postsContainer.innerHTML = `
-            <div class="p-12 text-center border-b border-[#313233ad]">
-              <h3 class="text-xl font-bold text-white mb-2">No results for "${q}"</h3>
-              <p class="text-sm text-[#71767b]">Try searching for keywords, author names, or hashtags like #BhagavadGita or #CR7.</p>
-            </div>
-          `;
-          return;
+    const mainContainer = document.querySelector(".main");
+    if (mainContainer) {
+      mainContainer.style.maxWidth = "";
+      renderExploreScreen(mainContainer, q);
+      // Highlight Explore pill in navigation
+      document.querySelectorAll(".left ul li, nav[class*='fixed'] [data-label]").forEach(i => {
+        i.classList.remove("bg-[#1d1d1d]", "font-bold", "text-[#1d9bf0]");
+        const label = i.dataset.label || i.querySelector("span")?.textContent?.trim() || "";
+        if (label === "Explore") {
+          i.classList.add("font-bold");
+          if (i.closest("nav[class*='fixed']")) i.classList.add("text-[#1d9bf0]");
         }
+      });
+    }
+  };
 
-        // Show header pill for search results
-        const header = document.createElement("div");
-        header.className = "px-4 py-3 border-b border-[#313233ad] bg-[#080808] text-sm font-bold text-[#1d9bf0]";
-        header.textContent = `Search results for "${q}" (${posts.length})`;
-        postsContainer.appendChild(header);
-
-        posts.forEach(post => {
-          const card = renderPostCard(post);
-          postsContainer.appendChild(card);
-        });
-        initXVideoPlayers();
-      } catch (err) {
-        console.warn("Search fetch error:", err);
-      }
-    }, 300);
+  document.body.addEventListener("focusin", (e) => {
+    if (e.target.closest(".right input[type='text'], #desktop-right-search-input")) {
+      redirectRightSearchToExplore(e);
+    }
+  });
+  document.body.addEventListener("click", (e) => {
+    if (e.target.closest(".right input[type='text'], #desktop-right-search-input, .right-search-container")) {
+      redirectRightSearchToExplore(e);
+    }
+  });
+  document.body.addEventListener("input", (e) => {
+    if (e.target.closest(".right input[type='text'], #desktop-right-search-input")) {
+      redirectRightSearchToExplore(e);
+    }
   });
 }
 
@@ -238,11 +352,9 @@ export function initSearchBar() {
  * Initializes Center Header Tabs ("For you", "Following", category tabs)
  */
 export function initHeaderTabs() {
-  const tabsContainer = document.querySelector(".top .w-full.flex.items-center.px-2");
   const postsContainer = document.querySelector(".posts");
-  if (!tabsContainer || !postsContainer) return;
-
-  const tabs = tabsContainer.querySelectorAll(".tab");
+  const tabs = document.querySelectorAll(".top .tab");
+  if (!postsContainer || !tabs.length) return;
 
   tabs.forEach(tab => {
     tab.addEventListener("click", async () => {
@@ -265,38 +377,101 @@ export function initHeaderTabs() {
       if (tabText === "For you") {
         initFeed();
       } else if (tabText === "Following") {
-        if (!getToken()) {
-          showAuthModal("login", true);
-          return;
+        postsContainer.innerHTML = `<div class="p-12 text-center text-[#71767b] text-sm animate-pulse">Loading following feed...</div>`;
+        const followingHandles = getPersistedUserFollowing();
+        let postsToRender = [];
+        try {
+          if (getToken()) {
+            const res = await fetch(`${API_BASE_URL}/api/posts/feed/following`, {
+              headers: { "Authorization": `Bearer ${getToken()}` }
+            });
+            if (res.ok) {
+              const backendFollowing = await res.json();
+              if (Array.isArray(backendFollowing) && backendFollowing.length > 0) {
+                postsToRender = backendFollowing;
+              }
+            }
+          }
+        } catch (err) {
+          console.warn("Backend following feed offline, using local filter");
         }
 
-        postsContainer.innerHTML = `<div class="p-12 text-center text-[#71767b] text-sm animate-pulse">Loading following feed...</div>`;
-        try {
-          const res = await fetch(`${API_BASE_URL}/api/posts/feed/following`, {
-            headers: { "Authorization": `Bearer ${getToken()}` }
-          });
-          const posts = await res.json();
+        if (postsToRender.length === 0) {
+          let allPosts = [...initialPosts];
+          try {
+            const resAll = await fetch(`${API_BASE_URL}/api/posts`);
+            if (resAll.ok) {
+              const backendPosts = await resAll.json();
+              if (Array.isArray(backendPosts)) {
+                const ids = new Set(backendPosts.map(p => (p._id || p.id)?.toString()));
+                allPosts = [...backendPosts, ...initialPosts.filter(p => !ids.has(p.id?.toString()))];
+              }
+            }
+          } catch (e) {}
 
-          postsContainer.innerHTML = "";
-          if (!posts || posts.length === 0) {
-            postsContainer.innerHTML = `
-              <div class="p-12 text-center border-b border-[#313233ad]">
-                <h3 class="text-lg font-bold text-white mb-2">Welcome to your Following feed!</h3>
-                <p class="text-sm text-[#71767b] max-w-sm mx-auto leading-relaxed">You aren't following anyone yet or they haven't posted. Follow accounts from 'Who to follow' on the right to see their live updates here.</p>
+          postsToRender = allPosts.filter(post => {
+            const h = (post.handle || "").toLowerCase();
+            return followingHandles.some(fh => {
+              const fLow = fh.toLowerCase();
+              if (fLow === h) return true;
+              if (fLow === "@akshay" && h === "@akshaykumar") return true;
+              if (fLow === "@akshaykumar" && h === "@akshay") return true;
+              return false;
+            });
+          });
+        }
+
+        postsContainer.innerHTML = "";
+
+        // Show who we have followed summary
+        const followedSummary = document.createElement("div");
+        followedSummary.className = "p-4 border-b border-[#313233ad] bg-[#0c0d0f]";
+        if (followingHandles.length === 0) {
+          followedSummary.innerHTML = `
+            <div class="text-center py-6">
+              <h3 class="text-lg font-bold text-white mb-1">Welcome to your Following feed!</h3>
+              <p class="text-sm text-[#71767b] max-w-sm mx-auto leading-relaxed">You aren't following anyone yet. Follow accounts right from their posts or from 'Who to follow' to see their live updates and manage them right here.</p>
+            </div>
+          `;
+          postsContainer.appendChild(followedSummary);
+        } else {
+          let summaryHtml = `
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                <span>People You Follow</span>
+                <span class="bg-[#1d9bf0]/20 text-[#1d9bf0] text-xs px-2 py-0.5 rounded-full font-extrabold">${followingHandles.length}</span>
+              </h3>
+            </div>
+            <div class="flex items-center gap-3 overflow-x-auto pb-2 no-scrollbar [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          `;
+          followingHandles.forEach(h => {
+            summaryHtml += `
+              <div class="flex flex-col items-center shrink-0 bg-black border border-[#313233ad] rounded-2xl p-2.5 min-w-[110px] max-w-[130px]">
+                <img class="size-10 rounded-full object-cover border border-[#313233ad] mb-1.5" src="/assets/user/headShot.jpg" onerror="this.src='/assets/user/headShot.jpg'" alt="${h}" />
+                <span class="text-xs font-bold text-white truncate w-full text-center">${h}</span>
+                <button class="mt-2 text-[11px] font-bold px-2.5 py-0.5 rounded-full border border-[#536471] text-white transition-colors cursor-pointer inline-follow-toggle-btn" data-handle="${h}" data-following="true">
+                  Following
+                </button>
               </div>
             `;
-            return;
-          }
+          });
+          summaryHtml += `</div>`;
+          followedSummary.innerHTML = summaryHtml;
+          postsContainer.appendChild(followedSummary);
+        }
 
-          posts.forEach(post => {
-            const card = renderPostCard(post);
+        if (!postsToRender || postsToRender.length === 0) {
+          const noPostsEl = document.createElement("div");
+          noPostsEl.className = "p-12 text-center text-[#71767b] text-sm";
+          noPostsEl.textContent = "No recent posts from accounts you follow.";
+          postsContainer.appendChild(noPostsEl);
+        } else {
+          postsToRender.forEach(post => {
+            const card = renderPostCard({ ...post, id: post._id || post.id });
             postsContainer.appendChild(card);
           });
-          initXVideoPlayers();
-        } catch (err) {
-          console.warn("Following feed error:", err);
-          postsContainer.innerHTML = `<div class="p-8 text-center text-red-400 text-sm">Failed to load following feed</div>`;
         }
+        initXVideoPlayers();
       } else {
         // Category tabs like Tech, Gaming, Travel, Stocks, Science
         postsContainer.innerHTML = `<div class="p-12 text-center text-[#71767b] text-sm animate-pulse">Loading ${tabText} posts...</div>`;
@@ -341,79 +516,124 @@ export function showEditProfileModal(currentUser, onSaveCallback) {
 
   const defaultAvatars = [
     "/assets/user/headShot.jpg",
-    "/assets/user/Cristiano-Ronaldo.jpg",
-    "/assets/user/akshay_kumar.jpg",
-    "/assets/user/dipika.jpg",
-    "/assets/user/virat.jpg",
-    "/assets/user/headShotio.jpg"
+    "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400&auto=format&fit=crop&q=80",
+    "https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?w=400&auto=format&fit=crop&q=80",
+    "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=400&auto=format&fit=crop&q=80",
+    "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=400&auto=format&fit=crop&q=80",
+    "https://images.unsplash.com/photo-1614680376593-902f749f7ffc?w=400&auto=format&fit=crop&q=80"
+  ];
+
+  const defaultBanners = [
+    "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1200&auto=format&fit=crop&q=80",
+    "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=1200&auto=format&fit=crop&q=80",
+    "https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?w=1200&auto=format&fit=crop&q=80",
+    "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1200&auto=format&fit=crop&q=80"
   ];
 
   let currentAvatar = currentUser.avatar || "/assets/user/headShot.jpg";
-
+  if (currentAvatar.toLowerCase().includes("ronaldo") || currentAvatar.toLowerCase().includes("cristiano")) {
+    currentAvatar = "/assets/user/headShot.jpg";
+  }
+  let currentBanner = currentUser.banner || "";
   const modal = document.createElement("div");
   modal.className = "x-edit-profile-modal fixed inset-0 z-[300] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto animate-[fadeInPop_0.2s_ease-out]";
 
   modal.innerHTML = `
-    <div class="bg-[#000000] border border-[#313233ad] rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden my-auto">
-      <div class="flex items-center justify-between px-4 py-3 border-b border-[#313233ad]/60 bg-[#000000]/90 sticky top-0 z-10">
-        <div class="flex items-center gap-4">
-          <button class="close-edit p-2 hover:bg-[#181818] rounded-full text-white cursor-pointer transition-colors">
-            <svg class="size-5 fill-current" viewBox="0 0 24 24"><path d="M10.59 12L4.54 5.96l1.42-1.42L12 10.59l6.04-6.05 1.42 1.42L13.41 12l6.05 6.04-1.42 1.42L12 13.41l-6.04 6.05-1.42-1.42L10.59 12z"/></svg>
+    <div class="bg-[#000000] border border-[#333639] rounded-3xl w-full max-w-xl shadow-2xl overflow-hidden my-auto transition-all">
+      <!-- Top Sticky Header -->
+      <div class="flex items-center justify-between px-5 py-3.5 border-b border-[#333639] bg-[#000000]/95 sticky top-0 z-50 backdrop-blur-md">
+        <div class="flex items-center gap-5">
+          <button class="close-edit p-2 hover:bg-[#181818] rounded-full text-white cursor-pointer transition-colors" title="Close">
+            <svg class="size-5 fill-current" viewBox="0 0 24 24"><path d="M10.59 12L4.54 5.96l1.42-1.42L12 10.59l6.04-6.05 1.42 1.42L13.41 12l6.05 6.04-1.42 1.42L13.41 12l6.05 6.04-1.42 1.42L12 13.41l-6.04 6.05-1.42-1.42L10.59 12z"/></svg>
           </button>
-          <h2 class="text-lg font-bold text-white">Edit profile</h2>
+          <h2 class="text-xl font-bold text-white tracking-tight">Edit profile</h2>
         </div>
-        <button id="save-profile-btn" class="bg-white hover:bg-[#eff3f4] text-black font-bold px-5 py-1.5 rounded-full text-sm transition-colors cursor-pointer">
+        <button id="save-profile-btn" class="bg-white hover:bg-[#eff3f4] text-black font-bold px-6 py-2 rounded-full text-sm transition-all cursor-pointer shadow-sm hover:shadow-md">
           Save
         </button>
       </div>
 
-      <!-- Banner -->
-      <div class="h-28 bg-gradient-to-r from-[#1d9bf0] via-[#0972b8] to-[#16181c] relative"></div>
+      <!-- Header Banner Section -->
+      <div id="edit-banner-container" class="h-44 bg-gradient-to-r from-[#1d9bf0] via-[#0972b8] to-[#16181c] relative overflow-hidden group flex items-center justify-center">
+        ${currentBanner ? `<img id="edit-banner-preview" src="${currentBanner}" onerror="this.remove();" class="absolute inset-0 w-full h-full object-cover" />` : `<img id="edit-banner-preview" src="" class="absolute inset-0 w-full h-full object-cover hidden" />`}
+        <div class="absolute inset-0 bg-black/40 group-hover:bg-black/60 transition-colors flex items-center justify-center gap-4 z-10">
+          <label for="edit-upload-banner-input" class="p-3 bg-black/70 hover:bg-black/90 rounded-full text-white cursor-pointer transition-all border border-white/20 shadow-lg flex items-center gap-2 text-xs font-bold" title="Upload custom header image from your PC">
+            <svg class="size-5 fill-current" viewBox="0 0 24 24"><path d="M3 5.5C3 4.119 4.119 3 5.5 3h13C19.881 3 21 4.119 21 5.5v13c0 1.381-1.119 2.5-2.5 2.5h-13C4.119 21 3 19.881 3 18.5v-13zM5.5 5c-.276 0-.5.224-.5.5v9.086l3-3 3 3 5-5 3 3V5.5c0-.276-.224-.5-.5-.5h-13zM19 15.414l-3-3-5 5-3-3-3 3V18.5c0 .276.224.5.5.5h13c.276 0 .5-.224.5-.5v-3.086zM9.75 7C8.784 7 8 7.784 8 8.75s.784 1.75 1.75 1.75 1.75-.784 1.75-1.75S10.716 7 9.75 7z"></path></svg>
+            <span>Change banner</span>
+          </label>
+          <input type="file" id="edit-upload-banner-input" accept="image/*" class="hidden" />
+          <button type="button" id="remove-banner-btn" class="p-3 bg-black/70 hover:bg-black/90 rounded-full text-white cursor-pointer transition-all border border-white/20 shadow-lg ${currentBanner ? '' : 'hidden'}" title="Remove banner">
+            <svg class="size-5 fill-current" viewBox="0 0 24 24"><path d="M10.59 12L4.54 5.96l1.42-1.42L12 10.59l6.04-6.05 1.42 1.42L13.41 12l6.05 6.04-1.42 1.42L13.41 12l6.05 6.04-1.42 1.42L12 13.41l-6.04 6.05-1.42-1.42L10.59 12z"></path></svg>
+          </button>
+        </div>
+      </div>
 
-      <div class="p-5 space-y-4">
-        <!-- Avatar picker -->
-        <div class="flex flex-col items-center -mt-16 mb-4 relative z-10">
-          <div class="relative group mb-3">
-            <img id="edit-avatar-preview" src="${currentAvatar}" onerror="this.onerror=null;this.src='/assets/user/headShot.jpg';" class="size-24 rounded-full object-cover border-4 border-black bg-black shadow-xl" />
+      <!-- Banner Themes Presets Bar (Spacious, separate block directly under banner) -->
+      <div class="px-6 py-3 bg-[#0d0e10] border-b border-[#333639] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-[#71767b]">
+        <span class="font-bold text-white shrink-0">Banner Themes:</span>
+        <div class="flex gap-2.5 overflow-x-auto no-scrollbar py-1">
+          ${defaultBanners.map((url, idx) => `
+            <div data-banner-url="${url}" class="edit-banner-preset h-9 w-20 rounded-lg overflow-hidden border border-[#333639] hover:border-[#1d9bf0] cursor-pointer shrink-0 transition-all shadow-sm group relative" title="Theme ${idx + 1}">
+              <img src="${url}" class="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      <!-- Profile Avatar & Presets Selection Box (Clean, zero overlap, proper padding) -->
+      <div class="px-6 py-5 bg-[#000000] border-b border-[#333639] flex flex-col sm:flex-row items-center sm:items-start gap-6">
+        <div class="flex flex-col items-center shrink-0">
+          <div class="relative group">
+            <img id="edit-avatar-preview" src="${currentAvatar}" onerror="this.onerror=null;this.src='/assets/user/headShot.jpg';" class="size-24 rounded-full object-cover border-4 border-[#202327] bg-black shadow-xl" />
           </div>
-          <span class="text-xs font-bold text-[#71767b] mb-2">Select a preset or upload from PC:</span>
-          <div class="flex gap-2.5 flex-wrap items-center justify-center mb-3">
-            <!-- Upload from PC button -->
-            <label for="edit-upload-file-input" class="size-11 rounded-full bg-[#1d9bf0]/20 hover:bg-[#1d9bf0]/40 border-2 border-dashed border-[#1d9bf0] flex items-center justify-center cursor-pointer transition-all text-[#1d9bf0]" title="Upload image from PC">
-              <svg class="size-5 fill-current" viewBox="0 0 24 24"><path d="M3 5.5C3 4.119 4.119 3 5.5 3h13C19.881 3 21 4.119 21 5.5v13c0 1.381-1.119 2.5-2.5 2.5h-13C4.119 21 3 19.881 3 18.5v-13zM5.5 5c-.276 0-.5.224-.5.5v9.086l3-3 3 3 5-5 3 3V5.5c0-.276-.224-.5-.5-.5h-13zM19 15.414l-3-3-5 5-3-3-3 3V18.5c0 .276.224.5.5.5h13c.276 0 .5-.224.5-.5v-3.086zM9.75 7C8.784 7 8 7.784 8 8.75s.784 1.75 1.75 1.75 1.75-.784 1.75-1.75S10.716 7 9.75 7z"/></svg>
+          <span class="text-[11px] text-[#71767b] font-medium mt-2">Current Avatar</span>
+        </div>
+
+        <div class="flex-1 space-y-3 w-full">
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <span class="text-xs font-bold text-white uppercase tracking-wider">Profile Photo Presets</span>
+            <!-- Upload button -->
+            <label for="edit-upload-file-input" class="text-xs font-bold bg-[#1d9bf0]/10 hover:bg-[#1d9bf0]/20 text-[#1d9bf0] px-3.5 py-1.5 rounded-full border border-[#1d9bf0]/30 cursor-pointer transition-all flex items-center gap-1.5 shadow-sm" title="Upload custom avatar image from PC">
+              <svg class="size-4 fill-current" viewBox="0 0 24 24"><path d="M3 5.5C3 4.119 4.119 3 5.5 3h13C19.881 3 21 4.119 21 5.5v13c0 1.381-1.119 2.5-2.5 2.5h-13C4.119 21 3 19.881 3 18.5v-13zM5.5 5c-.276 0-.5.224-.5.5v9.086l3-3 3 3 5-5 3 3V5.5c0-.276-.224-.5-.5-.5h-13zM19 15.414l-3-3-5 5-3-3-3 3V18.5c0 .276.224.5.5.5h13c.276 0 .5-.224.5-.5v-3.086zM9.75 7C8.784 7 8 7.784 8 8.75s.784 1.75 1.75 1.75 1.75-.784 1.75-1.75S10.716 7 9.75 7z"></path></svg>
+              <span>Upload from PC</span>
             </label>
             <input type="file" id="edit-upload-file-input" accept="image/*" class="hidden" />
-
-            ${defaultAvatars.map(url => `
-              <img src="${url}" onerror="this.onerror=null;this.src='/assets/user/headShot.jpg';" data-url="${url}" alt="Preset" class="edit-avatar-preset size-11 rounded-full object-cover border-2 ${currentAvatar === url ? 'border-[#1d9bf0] scale-110' : 'border-[#313233ad] opacity-70'} hover:opacity-100 cursor-pointer transition-all" />
+          </div>
+          <div class="flex gap-3 flex-wrap items-center py-1">
+            ${defaultAvatars.map((url, idx) => `
+              <img src="${url}" onerror="this.onerror=null;this.src='/assets/user/headShot.jpg';" data-url="${url}" alt="Preset ${idx+1}" class="edit-avatar-preset size-11 rounded-full object-cover border-2 ${currentAvatar === url ? 'border-[#1d9bf0] scale-110 shadow-md' : 'border-[#333639] opacity-75'} hover:opacity-100 hover:scale-105 cursor-pointer transition-all" title="Universal Avatar ${idx + 1}" />
             `).join('')}
           </div>
-          <input id="edit-avatar-url" type="text" value="${currentAvatar}" placeholder="Or paste image URL..." class="w-full bg-[#16181c] border border-[#313233ad] text-xs text-white px-3 py-2 rounded-xl focus:outline-none" />
-          <div id="edit-upload-status" class="text-[11px] text-[#1d9bf0] font-bold mt-1.5 hidden">Uploading photo from PC...</div>
+          <input id="edit-avatar-url" type="text" value="${currentAvatar}" placeholder="Or paste custom image URL..." class="w-full bg-[#16181c] border border-[#333639] focus:border-[#1d9bf0] text-xs text-white px-3.5 py-2.5 rounded-xl focus:outline-none transition-colors" />
+          <div id="edit-upload-status" class="text-xs text-[#00ba7c] font-bold hidden">Uploading photo to server...</div>
         </div>
+      </div>
 
-        <div>
-          <label class="block text-xs font-bold text-[#71767b] mb-1">Name</label>
-          <input id="edit-username" type="text" value="${currentUser.username || ''}" class="w-full bg-[#16181c] border border-[#313233ad] focus:border-[#1d9bf0] text-white px-4 py-2.5 rounded-xl text-sm focus:outline-none" />
-        </div>
-
-        <div>
-          <label class="block text-xs font-bold text-[#71767b] mb-1">Bio</label>
-          <textarea id="edit-bio" rows="2" placeholder="What makes you tick?" class="w-full bg-[#16181c] border border-[#313233ad] focus:border-[#1d9bf0] text-white px-4 py-2 rounded-xl text-sm focus:outline-none resize-none">${currentUser.bio || ''}</textarea>
-        </div>
-
-        <div class="grid grid-cols-3 gap-3">
+      <!-- Form Fields with spacious, clean boxes -->
+      <div class="p-6 space-y-4">
           <div>
-            <label class="block text-xs font-bold text-[#71767b] mb-1">Location</label>
-            <input id="edit-location" type="text" value="${currentUser.location || ''}" placeholder="New Delhi, India" class="w-full bg-[#16181c] border border-[#313233ad] focus:border-[#1d9bf0] text-white px-3 py-2 rounded-xl text-sm focus:outline-none" />
+            <label class="block text-xs font-bold text-[#71767b] uppercase tracking-wider mb-1.5">Name</label>
+            <input id="edit-username" type="text" value="${currentUser.username || ''}" class="w-full bg-[#000000] border border-[#333639] focus:border-[#1d9bf0] text-white px-4 py-3 rounded-xl text-sm focus:outline-none transition-colors shadow-inner" placeholder="Your display name" />
           </div>
+
           <div>
-            <label class="block text-xs font-bold text-[#71767b] mb-1">Website</label>
-            <input id="edit-website" type="text" value="${currentUser.website || ''}" placeholder="https://..." class="w-full bg-[#16181c] border border-[#313233ad] focus:border-[#1d9bf0] text-white px-3 py-2 rounded-xl text-sm focus:outline-none" />
+            <label class="block text-xs font-bold text-[#71767b] uppercase tracking-wider mb-1.5">Bio</label>
+            <textarea id="edit-bio" rows="3" placeholder="Write a short bio about yourself..." class="w-full bg-[#000000] border border-[#333639] focus:border-[#1d9bf0] text-white px-4 py-3 rounded-xl text-sm focus:outline-none resize-none transition-colors shadow-inner leading-relaxed">${currentUser.bio || ''}</textarea>
           </div>
-          <div>
-            <label class="block text-xs font-bold text-[#71767b] mb-1">Birth date</label>
-            <input id="edit-dob" type="text" value="${currentUser.dob || ''}" placeholder="Jan 1, 2000" class="w-full bg-[#16181c] border border-[#313233ad] focus:border-[#1d9bf0] text-white px-3 py-2 rounded-xl text-sm focus:outline-none" />
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-[#71767b] uppercase tracking-wider mb-1.5">Location</label>
+              <input id="edit-location" type="text" value="${currentUser.location || ''}" placeholder="New Delhi, India" class="w-full bg-[#000000] border border-[#333639] focus:border-[#1d9bf0] text-white px-3.5 py-2.5 rounded-xl text-sm focus:outline-none transition-colors" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-[#71767b] uppercase tracking-wider mb-1.5">Website</label>
+              <input id="edit-website" type="text" value="${currentUser.website || ''}" placeholder="https://..." class="w-full bg-[#000000] border border-[#333639] focus:border-[#1d9bf0] text-white px-3.5 py-2.5 rounded-xl text-sm focus:outline-none transition-colors" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-[#71767b] uppercase tracking-wider mb-1.5">Birth date</label>
+              <input id="edit-dob" type="text" value="${currentUser.dob || ''}" placeholder="June 15, 1998" class="w-full bg-[#000000] border border-[#333639] focus:border-[#1d9bf0] text-white px-3.5 py-2.5 rounded-xl text-sm focus:outline-none transition-colors" />
+            </div>
           </div>
         </div>
       </div>
@@ -424,7 +644,7 @@ export function showEditProfileModal(currentUser, onSaveCallback) {
   modal.querySelector(".close-edit")?.addEventListener("click", close);
   modal.addEventListener("click", (e) => { if (e.target === modal) close(); });
 
-  // Presets click
+  // Avatar presets click
   modal.querySelectorAll(".edit-avatar-preset").forEach(img => {
     img.addEventListener("click", () => {
       currentAvatar = img.getAttribute("data-url");
@@ -432,6 +652,20 @@ export function showEditProfileModal(currentUser, onSaveCallback) {
       modal.querySelectorAll(".edit-avatar-preset").forEach(i => i.classList.remove("border-[#1d9bf0]", "scale-110"));
       img.classList.add("border-[#1d9bf0]", "scale-110");
       modal.querySelector("#edit-avatar-url").value = currentAvatar;
+    });
+  });
+
+  // Banner presets click
+  modal.querySelectorAll(".edit-banner-preset").forEach(div => {
+    div.addEventListener("click", () => {
+      currentBanner = div.getAttribute("data-banner-url");
+      const preview = modal.querySelector("#edit-banner-preview");
+      if (preview) {
+        preview.src = currentBanner;
+        preview.classList.remove("hidden");
+      }
+      const rmBtn = modal.querySelector("#remove-banner-btn");
+      if (rmBtn) rmBtn.classList.remove("hidden");
     });
   });
 
@@ -449,9 +683,14 @@ export function showEditProfileModal(currentUser, onSaveCallback) {
       const file = e.target.files[0];
       if (!file) return;
 
-      const localURL = URL.createObjectURL(file);
-      modal.querySelector("#edit-avatar-preview").src = localURL;
-      currentAvatar = localURL;
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        const dataUrl = evt.target.result;
+        currentAvatar = dataUrl;
+        const preview = modal.querySelector("#edit-avatar-preview");
+        if (preview) preview.src = dataUrl;
+      };
+      reader.readAsDataURL(file);
 
       const statusBox = modal.querySelector("#edit-upload-status");
       if (statusBox) statusBox.classList.remove("hidden");
@@ -475,10 +714,58 @@ export function showEditProfileModal(currentUser, onSaveCallback) {
           }
         }
       } catch (err) {
-        console.error("PC upload error:", err);
+        if (statusBox) {
+          statusBox.textContent = "✅ Photo ready!";
+          setTimeout(() => statusBox.classList.add("hidden"), 2000);
+        }
       }
     });
   }
+
+  const bannerFileInput = modal.querySelector("#edit-upload-banner-input");
+  if (bannerFileInput) {
+    bannerFileInput.addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        const dataUrl = evt.target.result;
+        currentBanner = dataUrl;
+        const preview = modal.querySelector("#edit-banner-preview");
+        if (preview) {
+          preview.src = dataUrl;
+          preview.classList.remove("hidden");
+        }
+        const rmBtn = modal.querySelector("#remove-banner-btn");
+        if (rmBtn) rmBtn.classList.remove("hidden");
+      };
+      reader.readAsDataURL(file);
+
+      const uploadData = new FormData();
+      uploadData.append("file", file);
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/upload`, { method: "POST", body: uploadData });
+        const result = await res.json();
+        if (res.ok && result.url) {
+          currentBanner = result.url;
+          const preview = modal.querySelector("#edit-banner-preview");
+          if (preview) preview.src = result.url;
+        }
+      } catch (err) {}
+    });
+  }
+
+  modal.querySelector("#remove-banner-btn")?.addEventListener("click", () => {
+    currentBanner = "";
+    const preview = modal.querySelector("#edit-banner-preview");
+    if (preview) {
+      preview.src = "";
+      preview.classList.add("hidden");
+    }
+    const rmBtn = modal.querySelector("#remove-banner-btn");
+    if (rmBtn) rmBtn.classList.add("hidden");
+  });
 
   modal.querySelector("#save-profile-btn")?.addEventListener("click", async () => {
     const saveBtn = modal.querySelector("#save-profile-btn");
@@ -486,38 +773,53 @@ export function showEditProfileModal(currentUser, onSaveCallback) {
     saveBtn.disabled = true;
 
     const payload = {
+      handle: currentUser.handle || "@veerpratapsaw",
+      email: currentUser.email || "vps@xclone.com",
       username: modal.querySelector("#edit-username").value.trim() || currentUser.username,
       bio: modal.querySelector("#edit-bio").value.trim(),
       avatar: currentAvatar,
+      banner: currentBanner,
       location: modal.querySelector("#edit-location").value.trim(),
       website: modal.querySelector("#edit-website").value.trim(),
       dob: modal.querySelector("#edit-dob").value.trim()
     };
 
+    let updatedUser = { ...currentUser, ...payload };
+
     try {
+      const tokenToUse = getToken() || "demo_token_seed";
       const res = await fetch(`${API_BASE_URL}/api/auth/profile`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${getToken()}`
+          "Authorization": `Bearer ${tokenToUse}`
         },
         body: JSON.stringify(payload)
       });
       if (res.ok) {
-        const updatedUser = await res.json();
-        const { setAuthData } = await import("./auth.js");
-        setAuthData(getToken(), updatedUser);
-        close();
-        if (onSaveCallback) onSaveCallback();
-      } else {
-        saveBtn.textContent = "Error";
-        saveBtn.disabled = false;
+        const dbUser = await res.json();
+        updatedUser = { ...updatedUser, ...dbUser };
       }
     } catch (err) {
-      console.error("Save profile error:", err);
-      saveBtn.textContent = "Error";
-      saveBtn.disabled = false;
+      console.warn("Save profile backend offline/error, using local persistence:", err.message);
     }
+
+    const { setAuthData, updateUserProfilePill } = await import("./auth.js");
+    setAuthData(getToken(), updatedUser);
+    updateUserProfilePill();
+
+    document.querySelectorAll(".posts .tweetCard").forEach(card => {
+      const authorSpan = card.querySelector(".font-bold.text-white");
+      const handleSpan = card.querySelector(".text-\\[13px\\].text-\\[\\#71767b\\]");
+      const avatarImg = card.querySelector(".photo img");
+      if (handleSpan && (handleSpan.textContent.trim().toLowerCase() === (updatedUser.handle || "").toLowerCase())) {
+        if (authorSpan && updatedUser.username) authorSpan.textContent = updatedUser.username;
+        if (avatarImg && updatedUser.avatar) avatarImg.src = updatedUser.avatar;
+      }
+    });
+
+    close();
+    if (onSaveCallback) onSaveCallback();
   });
 
   document.body.appendChild(modal);
@@ -546,7 +848,7 @@ export async function showUserProfileScreen() {
   modal.innerHTML = `
     <div class="bg-[#000000] border border-[#313233ad] rounded-3xl w-full max-w-2xl shadow-2xl overflow-hidden my-auto">
       <!-- Header -->
-      <div class="flex items-center gap-6 px-4 py-3 border-b border-[#313233ad]/60 bg-[#000000]/90 sticky top-0 z-10 backdrop-blur-sm">
+      <div class="flex items-center gap-6 px-4 py-3 border-b border-[#313233ad]/60 bg-[#000000]/90 sticky top-0 z-40 backdrop-blur-sm">
         <button class="close-profile p-2 hover:bg-[#181818] rounded-full text-white cursor-pointer transition-colors">
           <svg class="size-5 fill-current" viewBox="0 0 24 24"><path d="M10.59 12L4.54 5.96l1.42-1.42L12 10.59l6.04-6.05 1.42 1.42L13.41 12l6.05 6.04-1.42 1.42L13.41 12l6.05 6.04-1.42 1.42L12 13.41l-6.04 6.05-1.42-1.42L10.59 12z"/></svg>
         </button>
@@ -557,7 +859,9 @@ export async function showUserProfileScreen() {
       </div>
 
       <!-- Banner Header -->
-      <div class="h-36 sm:h-48 bg-gradient-to-r from-[#1d9bf0] via-[#0972b8] to-[#16181c] relative"></div>
+      <div class="h-36 sm:h-48 bg-gradient-to-r from-[#1d9bf0] via-[#0972b8] to-[#16181c] relative overflow-hidden">
+        ${currentUser.banner ? `<img src="${currentUser.banner}" class="absolute inset-0 w-full h-full object-cover" />` : ''}
+      </div>
 
       <!-- Avatar & Edit Profile button row -->
       <div class="px-4 pb-4 border-b border-[#313233ad]/60 relative">
@@ -581,7 +885,7 @@ export async function showUserProfileScreen() {
 
         <!-- Follow Stats -->
         <div class="flex items-center gap-6 text-sm">
-          <span class="cursor-pointer hover:underline"><span class="font-bold text-white profile-following-num">${(currentUser.following || []).length}</span> <span class="text-[#71767b]">Following</span></span>
+          <span class="cursor-pointer hover:underline"><span class="font-bold text-white profile-following-num">${getPersistedUserFollowing().length}</span> <span class="text-[#71767b]">Following</span></span>
           <span class="cursor-pointer hover:underline"><span class="font-bold text-white profile-followers-num">${(currentUser.followers || []).length}</span> <span class="text-[#71767b]">Followers</span></span>
         </div>
       </div>
@@ -656,55 +960,299 @@ export async function showUserProfileScreen() {
   }
 }
 
+export function toggleRightSidebarSections(show = true) {
+  const rightSidebar = document.querySelector(".right");
+  if (!rightSidebar) return;
+  const whatsHappening = rightSidebar.querySelector(".WhatsHappening");
+  const whoToFollow = rightSidebar.querySelector(".Whotofollow");
+  if (whatsHappening) whatsHappening.classList.toggle("!hidden", !show);
+  if (whoToFollow) whoToFollow.classList.toggle("!hidden", !show);
+}
+
+export function renderExploreScreen(mainContainer, initialQuery = "") {
+  if (!mainContainer) return;
+  toggleRightSidebarSections(false);
+
+  const trendingTopics = [
+    { category: "Technology · Trending", topic: "#Gemini2Live", posts: "142,500 posts", filter: "AI" },
+    { category: "Space · Trending", topic: "SpaceX Starship V3", posts: "89,200 posts", filter: "News" },
+    { category: "Artificial Intelligence · Live", topic: "Agentic AI & X Corp", posts: "210,400 posts", filter: "AI" },
+    { category: "Sports · Trending", topic: "#CricketWorldCup", posts: "95,800 posts", filter: "Sports" },
+    { category: "Entertainment · Trending", topic: "New Blockbuster Trailer", posts: "44,100 posts", filter: "Entertainment" },
+    { category: "Business · Trending", topic: "Tech Stocks Rally", posts: "67,300 posts", filter: "News" }
+  ];
+
+  const suggestedCreators = [
+    { name: "Cristiano Ronaldo", handle: "@cristiano", avatar: "/assets/user/headShot.jpg", bio: "Football legend · CR7" },
+    { name: "Akshay Kumar", handle: "@akshaykumar", avatar: "/assets/user/headShot.jpg", bio: "Actor · Producer" },
+    { name: "Grok AI", handle: "@grok", avatar: "/assets/user/headShot.jpg", bio: "Real-time AI assistant by xAI" },
+    { name: "Anushka Sharma", handle: "@anushkasharma", avatar: "/assets/user/headShot.jpg", bio: "Artist & Entrepreneur" },
+    { name: "Veer Pratap Saw", handle: "@vps", avatar: "/assets/user/headShot.jpg", bio: "Full Stack Creator & Engineer" }
+  ];
+
+  mainContainer.innerHTML = `
+    <!-- Sticky Explore Header & Search Bar -->
+    <div class="sticky top-0 z-40 w-full bg-[#000000dd] backdrop-blur-md border-b border-[#313233ad] px-4 py-3">
+      <div class="relative flex items-center bg-[#202327] rounded-full border border-transparent focus-within:border-[#1d9bf0] focus-within:bg-black transition-all">
+        <div class="pl-4 pr-3 text-[#71767b]">
+          <svg class="size-5 fill-current" viewBox="0 0 24 24"><path d="M10.25 3.75c-3.59 0-6.5 2.91-6.5 6.5s2.91 6.5 6.5 6.5c1.795 0 3.419-.726 4.596-1.904 1.178-1.177 1.904-2.801 1.904-4.596 0-3.59-2.91-6.5-6.5-6.5zm-8.5 6.5c0-4.694 3.806-8.5 8.5-8.5s8.5 3.806 8.5 8.5c0 1.986-.682 3.815-1.824 5.262l4.781 4.781-1.414 1.414-4.781-4.781c-1.447 1.142-3.276 1.824-5.262 1.824-4.694 0-8.5-3.806-8.5-8.5z"></path></svg>
+        </div>
+        <input id="explore-main-search" type="text" placeholder="Search X across posts, people, and topics..." class="w-full bg-transparent py-2.5 text-sm text-white placeholder-[#71767b] focus:outline-none pr-4" />
+      </div>
+
+      <!-- Explore Sub-Tabs -->
+      <div class="flex items-center gap-6 mt-3 overflow-x-auto no-scrollbar text-sm font-bold border-t border-[#313233ad]/40 pt-2.5">
+        <button class="explore-subtab text-white border-b-2 border-[#1d9bf0] pb-2 shrink-0 cursor-pointer" data-filter="All">Trending</button>
+        <button class="explore-subtab text-[#71767b] hover:text-white pb-2 shrink-0 cursor-pointer transition-colors" data-filter="AI">AI & Tech</button>
+        <button class="explore-subtab text-[#71767b] hover:text-white pb-2 shrink-0 cursor-pointer transition-colors" data-filter="News">News</button>
+        <button class="explore-subtab text-[#71767b] hover:text-white pb-2 shrink-0 cursor-pointer transition-colors" data-filter="Sports">Sports</button>
+        <button class="explore-subtab text-[#71767b] hover:text-white pb-2 shrink-0 cursor-pointer transition-colors" data-filter="Entertainment">Entertainment</button>
+      </div>
+    </div>
+
+    <!-- Explore Scrollable Body -->
+    <div class="explore-body divide-y divide-[#313233ad]/40 pb-24">
+      <!-- Section 1: Trending Topics (Desktop Right Sidebar Feature brought to Mobile & Explore) -->
+      <div class="p-4 bg-gradient-to-b from-[#0e1013] to-black">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-lg font-extrabold text-white flex items-center gap-2">
+            <span>Trending & What’s happening</span>
+            <span class="bg-[#1d9bf0]/20 text-[#1d9bf0] text-xs px-2 py-0.5 rounded-full font-bold">Live</span>
+          </h2>
+        </div>
+        <div id="explore-trending-grid" class="grid grid-cols-1 md:grid-cols-2 gap-2.5"></div>
+      </div>
+
+      <!-- Section 2: Who to Follow (Desktop Right Sidebar Feature brought to Mobile & Explore) -->
+      <div class="p-4 bg-[#0a0b0d]">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-lg font-extrabold text-white flex items-center gap-2">
+            <span>Who to follow & Suggested Creators</span>
+            <span class="text-xs font-normal text-[#71767b]">Curated accounts</span>
+          </h2>
+        </div>
+        <div class="flex items-center gap-3 overflow-x-auto pb-2 no-scrollbar [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          ${suggestedCreators.map(c => `
+            <div class="shrink-0 bg-black border border-[#313233ad] rounded-2xl p-3.5 flex flex-col items-center min-w-[150px] max-w-[170px] hover:border-[#1d9bf0]/50 transition-colors">
+              <img class="size-14 rounded-full object-cover border border-[#313233ad] mb-2" src="${c.avatar}" onerror="this.src='/assets/user/headShot.jpg'" alt="${c.name}" />
+              <div class="font-bold text-white text-sm truncate w-full text-center">${c.name}</div>
+              <div class="text-xs text-[#71767b] truncate w-full text-center">${c.handle}</div>
+              <div class="text-[11px] text-[#8b9299] text-center mt-1 line-clamp-2 h-8">${c.bio}</div>
+              <button class="mt-3 btn shrink-0 border-0 text-black bg-white font-bold rounded-full h-8 px-5 flex items-center justify-center text-xs hover:bg-[#eff3f4] transition-colors cursor-pointer inline-follow-toggle-btn" data-handle="${c.handle}">
+                Follow
+              </button>
+            </div>
+          `).join("")}
+        </div>
+      </div>
+
+      <!-- Section 3: Live Explore Results Feed -->
+      <div class="bg-black">
+        <div class="p-4 border-b border-[#313233ad]/40">
+          <h3 class="text-base font-bold text-white flex items-center gap-2">
+            <span>Explore Feed</span>
+            <span class="text-xs font-normal text-[#71767b]">Top posts across topics</span>
+          </h3>
+        </div>
+        <div id="explore-results-container" class="divide-y divide-[#313233ad]/40"></div>
+      </div>
+    </div>
+  `;
+
+  const followingHandles = getPersistedUserFollowing();
+  mainContainer.querySelectorAll(".inline-follow-toggle-btn").forEach(btn => {
+    const handle = (btn.dataset.handle || "").toLowerCase();
+    if (followingHandles.includes(handle) || (handle === "@akshay" && followingHandles.includes("@akshaykumar")) || (handle === "@akshaykumar" && followingHandles.includes("@akshay"))) {
+      btn.textContent = "Following";
+      btn.className = "mt-3 btn shrink-0 border border-[#536471] text-white bg-transparent font-bold rounded-full h-8 px-5 flex items-center justify-center text-xs transition-all duration-200 cursor-pointer inline-follow-toggle-btn";
+      btn.dataset.following = "true";
+    }
+  });
+
+  const trendingGrid = mainContainer.querySelector("#explore-trending-grid");
+  const renderTrendingTopics = (filter = "All") => {
+    if (!trendingGrid) return;
+    const items = filter === "All" ? trendingTopics : trendingTopics.filter(t => t.filter === filter || t.category.toLowerCase().includes(filter.toLowerCase()));
+    if (items.length === 0) {
+      trendingGrid.innerHTML = `<div class="col-span-2 p-4 text-center text-[#71767b] text-sm">No specific trending topics right now for ${filter}.</div>`;
+      return;
+    }
+    trendingGrid.innerHTML = items.map(t => `
+      <div class="p-3 bg-[#121418] hover:bg-[#181b20] border border-[#313233ad]/60 rounded-2xl cursor-pointer transition-all explore-trending-card" data-topic="${t.topic}">
+        <div class="flex justify-between items-start text-xs text-[#71767b]">
+          <span>${t.category}</span>
+          <span class="text-[#1d9bf0] font-bold">Explore →</span>
+        </div>
+        <div class="font-extrabold text-white text-base mt-1 truncate">${t.topic}</div>
+        <div class="text-xs text-[#71767b] mt-0.5">${t.posts}</div>
+      </div>
+    `).join("");
+
+    trendingGrid.querySelectorAll(".explore-trending-card").forEach(card => {
+      card.addEventListener("click", () => {
+        const topic = card.dataset.topic || "";
+        const searchInput = mainContainer.querySelector("#explore-main-search");
+        if (searchInput) {
+          searchInput.value = topic;
+          renderExplorePosts(topic, "All");
+          searchInput.focus();
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+      });
+    });
+  };
+
+  const resultsContainer = mainContainer.querySelector("#explore-results-container");
+  const renderExplorePosts = async (query = "", categoryFilter = "All") => {
+    if (!resultsContainer) return;
+    resultsContainer.innerHTML = `<div class="p-8 text-center text-[#71767b] text-sm animate-pulse">Searching posts...</div>`;
+
+    let filtered = [];
+    try {
+      let url = `${API_BASE_URL}/api/posts`;
+      if (query) {
+        url = `${API_BASE_URL}/api/posts/search?q=${encodeURIComponent(query)}`;
+      }
+      const res = await fetch(url);
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          filtered = data;
+        }
+      }
+    } catch (err) {
+      console.warn("Explore search backend offline, using local filter");
+      filtered = [...initialPosts];
+    }
+
+    if (query && filtered.length === 0) {
+      const qLow = query.toLowerCase();
+      filtered = initialPosts.filter(p => 
+        (p.text && p.text.toLowerCase().includes(qLow)) ||
+        (p.author && p.author.toLowerCase().includes(qLow)) ||
+        (p.handle && p.handle.toLowerCase().includes(qLow))
+      );
+    } else if (categoryFilter !== "All") {
+      const cLow = categoryFilter.toLowerCase();
+      filtered = filtered.filter(p => {
+        const txt = (p.text || "").toLowerCase();
+        const auth = (p.author || "").toLowerCase();
+        if (cLow === "ai") return txt.includes("ai") || txt.includes("grok") || txt.includes("tech") || txt.includes("coding") || txt.includes("fullstack");
+        if (cLow === "news") return txt.includes("news") || txt.includes("space") || txt.includes("starship") || txt.includes("trading") || txt.includes("business");
+        if (cLow === "sports") return txt.includes("sports") || txt.includes("cr7") || txt.includes("football") || txt.includes("cricket") || auth.includes("ronaldo");
+        if (cLow === "entertainment") return txt.includes("actor") || txt.includes("film") || txt.includes("trailer") || txt.includes("nature") || txt.includes("travel") || auth.includes("akshay") || auth.includes("anushka") || auth.includes("dipika");
+        return true;
+      });
+    }
+
+    if (!resultsContainer) return;
+    resultsContainer.innerHTML = "";
+
+    if (filtered.length === 0) {
+      resultsContainer.innerHTML = `<div class="p-8 text-center text-[#71767b] text-sm">No posts found matching your search. Here are some trending posts:</div>`;
+      initialPosts.slice(0, 4).forEach(post => {
+        const card = renderPostCard({ ...post, id: post._id || post.id });
+        resultsContainer.appendChild(card);
+      });
+      initXVideoPlayers();
+      return;
+    }
+
+    filtered.forEach(post => {
+      const card = renderPostCard({ ...post, id: post._id || post.id });
+      resultsContainer.appendChild(card);
+    });
+    initXVideoPlayers();
+  };
+
+  renderTrendingTopics("All");
+
+  const searchInput = mainContainer.querySelector("#explore-main-search");
+  if (searchInput) {
+    if (initialQuery) {
+      searchInput.value = initialQuery;
+      renderExplorePosts(initialQuery, "All");
+      setTimeout(() => { searchInput.focus(); }, 100);
+    } else {
+      renderExplorePosts("", "All");
+    }
+    searchInput.addEventListener("input", (e) => {
+      renderExplorePosts(e.target.value.trim(), "All");
+    });
+  } else {
+    renderExplorePosts("", "All");
+  }
+
+  mainContainer.querySelectorAll(".explore-subtab").forEach(tab => {
+    tab.addEventListener("click", () => {
+      mainContainer.querySelectorAll(".explore-subtab").forEach(t => {
+        t.className = "explore-subtab text-[#71767b] hover:text-white pb-2 shrink-0 cursor-pointer transition-colors";
+      });
+      tab.className = "explore-subtab text-white border-b-2 border-[#1d9bf0] pb-2 shrink-0 cursor-pointer";
+      const filter = tab.dataset.filter || "All";
+      if (searchInput) searchInput.value = "";
+      renderTrendingTopics(filter);
+      renderExplorePosts("", filter);
+    });
+  });
+}
+
+
 /**
  * Initializes Left Navigation Sidebar Items (Home, Explore, Notifications, Bookmarks, Profile, etc.)
  */
 export function initSidebarNav() {
-  const sidebarItems = document.querySelectorAll(".left ul li, .bottom-nav li, .nav li");
-  
-  sidebarItems.forEach(item => {
-    item.addEventListener("click", async () => {
-      const label = item.querySelector("span")?.textContent?.trim() || item.textContent?.trim() || "";
+  if (document.body.dataset.sidebarNavWired === "true") return;
+  document.body.dataset.sidebarNavWired = "true";
 
-      // Highlight clicked sidebar icon
-      sidebarItems.forEach(i => i.classList.remove("bg-[#1d1d1d]", "font-bold"));
-      item.classList.add("font-bold");
+  document.body.addEventListener("click", async (e) => {
+    const item = e.target.closest(".left ul li, nav[class*='fixed'] [data-label], .mobile-profile-avatar, [data-label]");
+    if (!item) return;
 
-      const mainContainer = document.querySelector(".main");
-      if (!mainContainer) return;
+    // Ignore if clicking on Subscribe or post button which are handled separately
+    if (item.classList.contains("postbtn") || item.closest(".subscribe") || item.closest(".postbtn")) return;
 
-      if (label === "Home") {
-        restoreHomeFeed();
-      } else if (label === "Explore") {
-        restoreHomeFeed();
-        const searchInput = document.querySelector(".right input[type='text']");
-        if (searchInput) {
-          searchInput.focus();
-          window.scrollTo({ top: 0, behavior: "smooth" });
-        }
-        showToast("Explore trending topics and search across X");
-      } else if (label === "Notifications") {
-        renderNotificationsScreen(mainContainer);
-      } else if (label === "Follow") {
-        renderFollowDiscoverScreen(mainContainer);
-      } else if (label === "Chat") {
-        renderChatMessagesScreen(mainContainer);
-      } else if (label === "Grok") {
-        // Grok handled by initGrokUI / showGrokScreen
-      } else if (label === "Bookmarks") {
-        renderBookmarksScreen(mainContainer);
-      } else if (label === "Creator Studio") {
-        renderCreatorStudioScreen(mainContainer);
-      } else if (label === "Premium") {
-        showPremiumModal();
-      } else if (label === "Profile") {
-        showUserProfileScreen();
-      } else if (label === "More") {
-        showMoreMenuPopover(item);
-      } else {
-        showToast(`${label} view opened`);
-      }
-    });
+    const label = item.dataset.label || item.querySelector("span")?.textContent?.trim() || item.textContent?.trim() || "";
+    if (!label) return;
+
+    // Highlight clicked sidebar item
+    document.querySelectorAll(".left ul li, nav[class*='fixed'] [data-label]").forEach(i => i.classList.remove("bg-[#1d1d1d]", "font-bold", "text-[#1d9bf0]"));
+    item.classList.add("font-bold");
+    if (item.closest("nav[class*='fixed']")) item.classList.add("text-[#1d9bf0]");
+
+    const mainContainer = document.querySelector(".main");
+    if (!mainContainer) return;
+
+    if (label === "Explore" || label === "Bookmarks") {
+      toggleRightSidebarSections(false);
+    } else {
+      toggleRightSidebarSections(true);
+    }
+
+    if (label === "Home") {
+      restoreHomeFeed();
+    } else if (label === "Explore") {
+      mainContainer.style.maxWidth = "";
+      renderExploreScreen(mainContainer);
+    } else if (label === "Notifications") {
+      mainContainer.style.maxWidth = "";
+      renderNotificationsScreen(mainContainer);
+    } else if (label === "Follow") {
+      mainContainer.style.maxWidth = "";
+      renderFollowDiscoverScreen(mainContainer);
+    } else if (label === "Grok") {
+      // Grok handled by initGrokUI / showGrokScreen
+    } else if (label === "Bookmarks") {
+      mainContainer.style.maxWidth = "";
+      renderBookmarksScreen(mainContainer);
+    } else if (label === "Premium") {
+      showPremiumModal();
+    } else if (label === "Profile") {
+      mainContainer.style.maxWidth = "";
+      showUserProfileScreen();
+    } else if (label === "More") {
+      showMoreMenuPopover(item);
+    }
   });
 }
 
@@ -714,11 +1262,13 @@ export function initSidebarNav() {
 export function restoreHomeFeed() {
   const mainContainer = document.querySelector(".main");
   if (!mainContainer) return;
+  mainContainer.style.maxWidth = "";
+  toggleRightSidebarSections(true);
 
   // Rebuild Top Tabs + Post Creation Box + Posts Container if replaced
   mainContainer.innerHTML = `
     <!-- Top Sticky Header Container -->
-    <div class="top sticky top-0 z-10 w-full bg-[#000000dd] backdrop-blur-md flex flex-col border-b border-[#313233ad]">
+    <div class="top sticky top-0 z-40 w-full bg-[#000000dd] backdrop-blur-md flex flex-col border-b border-[#313233ad]">
       <!-- Authentic Mobile Top Bar -->
       <div class="hidden max-sm:flex items-center justify-between px-4 h-[53px] w-full border-b border-[#313233ad]/40 relative">
         <div class="cursor-pointer shrink-0">
@@ -731,15 +1281,29 @@ export function restoreHomeFeed() {
           <button class="border border-[#313233ad] rounded-full px-3.5 py-1.5 font-bold text-xs text-white hover:bg-[#181818] transition-colors cursor-pointer">Subscribe</button>
         </div>
       </div>
-
       <!-- Navigation Tabs -->
-      <div class="tabs grid grid-cols-2 text-center text-sm font-bold text-[#71767b]">
-        <div class="tab cursor-pointer hover:bg-[#181818] transition-colors flex justify-center py-3.5 relative text-white">
+      <div class="w-full flex items-center px-2 overflow-x-auto no-scrollbar [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        <div class="tab flex-1 min-w-fit px-4 flex justify-center items-center py-4 relative hover:bg-[#181818] cursor-pointer transition-colors text-sm font-bold text-white">
           <span>For you</span>
-          <div class="absolute bottom-0 h-1 w-14 bg-[#1d9bf0] rounded-full"></div>
+          <div class="absolute bottom-0 h-1 w-14 rounded-full bg-[#1d9bf0]"></div>
         </div>
-        <div class="tab cursor-pointer hover:bg-[#181818] transition-colors flex justify-center py-3.5 relative">
+        <div class="tab flex-1 min-w-fit px-4 flex justify-center items-center py-4 relative hover:bg-[#181818] cursor-pointer transition-colors text-sm font-bold text-[#71767b] hover:text-white">
           <span>Following</span>
+        </div>
+        <div class="tab flex-1 min-w-fit px-4 flex justify-center items-center py-4 relative hover:bg-[#181818] cursor-pointer transition-colors text-sm font-bold text-[#71767b] hover:text-white">
+          <span>Tech</span>
+        </div>
+        <div class="tab flex-1 min-w-fit px-4 flex justify-center items-center py-4 relative hover:bg-[#181818] cursor-pointer transition-colors text-sm font-bold text-[#71767b] hover:text-white">
+          <span>Gaming</span>
+        </div>
+        <div class="tab flex-1 min-w-fit px-4 flex justify-center items-center py-4 relative hover:bg-[#181818] cursor-pointer transition-colors text-sm font-bold text-[#71767b] hover:text-white">
+          <span>Travel</span>
+        </div>
+        <div class="tab flex-1 min-w-fit px-4 flex justify-center items-center py-4 relative hover:bg-[#181818] cursor-pointer transition-colors text-sm font-bold text-[#71767b] hover:text-white">
+          <span>Stocks</span>
+        </div>
+        <div class="tab flex-1 min-w-fit px-4 flex justify-center items-center py-4 relative hover:bg-[#181818] cursor-pointer transition-colors text-sm font-bold text-[#71767b] hover:text-white">
+          <span>Science</span>
         </div>
       </div>
     </div>
@@ -754,8 +1318,8 @@ export function restoreHomeFeed() {
           <div id="media-preview-content" class="w-full flex justify-center"></div>
         </div>
         <div class="flex items-center justify-between border-t border-[#313233ad]/60 pt-3 mt-1">
-          <div class="flex items-center gap-1 sm:gap-3 text-[#1d9bf0]">
-            <label for="post-media-input" class="p-2 hover:bg-[#1d9bf0]/10 rounded-full cursor-pointer transition-colors" title="Media">
+          <div class="flex items-center gap-1 sm:gap-3 text-[#71767b] hover:text-white">
+            <label for="post-media-input" class="p-2 hover:bg-[#181818] rounded-full cursor-pointer transition-colors" title="Media">
               <svg class="size-5 fill-current" viewBox="0 0 24 24"><path d="M3 5.5C3 4.119 4.119 3 5.5 3h13C19.881 3 21 4.119 21 5.5v13c0 1.381-1.119 2.5-2.5 2.5h-13C4.119 21 3 19.881 3 18.5v-13zM5.5 5c-.276 0-.5.224-.5.5v9.086l3-3 3 3 5-5 3 3V5.5c0-.276-.224-.5-.5-.5h-13zM19 15.414l-3-3-5 5-3-3-3 3V18.5c0 .276.224.5.5.5h13c.276 0 .5-.224.5-.5v-3.086zM9.75 7C8.784 7 8 7.784 8 8.75s.784 1.75 1.75 1.75 1.75-.784 1.75-1.75S10.716 7 9.75 7z"/></svg>
             </label>
             <input type="file" id="post-media-input" accept="image/*,video/*" class="hidden" />
@@ -772,6 +1336,7 @@ export function restoreHomeFeed() {
   initFeed();
   // Re-bind top tabs and post creator module
   initHeaderTabs();
+  initSubscribeButtons();
   // Re-import dynamic create post logic if needed or trigger event
   window.dispatchEvent(new Event("x:restore-home"));
 }
@@ -790,7 +1355,7 @@ function renderFollowDiscoverScreen(mainContainer) {
   ];
 
   mainContainer.innerHTML = `
-    <div class="sticky top-0 z-10 w-full bg-[#000000dd] backdrop-blur-md px-4 py-3 border-b border-[#313233ad]">
+    <div class="sticky top-0 z-40 w-full bg-[#000000dd] backdrop-blur-md px-4 py-3 border-b border-[#313233ad]">
       <h1 class="text-xl font-extrabold text-white">Connect & Follow</h1>
       <p class="text-xs text-[#71767b]">Suggested accounts, top creators, and topics for your timeline</p>
     </div>
@@ -840,264 +1405,6 @@ function renderFollowDiscoverScreen(mainContainer) {
 }
 
 /**
- * Render Direct Messages (`Chat` pill)
- */
-function renderChatMessagesScreen(mainContainer) {
-  const chats = [
-    { handle: "@GrokAI", name: "Grok AI Engine [AI Controlled]", lastMsg: "⚡ Mention me anytime in posts for real-time code and neural completion!", time: "1m ago", avatar: "/assets/user/headShot.jpg", unread: true },
-    { handle: "@vps", name: "Veer Pratap Saw [Human Controlled]", lastMsg: "Hey! Just deployed our Grok AI and full-stack engine 🚀", time: "2m ago", avatar: "/assets/user/headShot.jpg", unread: true },
-    { handle: "@Cristiano", name: "Cristiano Ronaldo [Human Controlled]", lastMsg: "SIUUU! Great updates on the feed aesthetics today.", time: "1h ago", avatar: "/assets/user/Cristiano-Ronaldo.jpg", unread: false },
-    { handle: "@GeminiLive", name: "Gemini DeepMind [AI Controlled]", lastMsg: "Multimodal video analysis model checkpoint ready for testing.", time: "3h ago", avatar: "/assets/user/headShotio.jpg", unread: false }
-  ];
-
-  mainContainer.innerHTML = `
-    <div class="sticky top-0 z-10 w-full bg-[#000000dd] backdrop-blur-md px-4 py-3 border-b border-[#313233ad] flex items-center justify-between">
-      <div>
-        <h1 class="text-xl font-extrabold text-white">Messages</h1>
-        <p class="text-xs text-[#71767b]">Real-time direct messaging and private conversations</p>
-      </div>
-      <button class="p-2 hover:bg-[#181818] rounded-full text-white cursor-pointer" title="New Message">
-        <svg class="size-5 fill-current" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
-      </button>
-    </div>
-    <div class="grid grid-cols-1 md:grid-cols-12 min-h-[500px]">
-      <div class="md:col-span-5 border-b md:border-b-0 md:border-r border-[#313233ad] divide-y divide-[#313233ad]/40">
-        ${chats.map((c, idx) => `
-          <div class="chat-thread-item p-4 flex items-center gap-3 ${idx === 0 ? 'bg-[#16181c]' : 'hover:bg-[#080808]'} transition-colors cursor-pointer">
-            <div class="relative shrink-0">
-              <img src="${c.avatar}" class="size-11 rounded-full object-cover border border-[#313233ad]" />
-              ${c.unread ? '<span class="absolute top-0 right-0 size-3 bg-[#1d9bf0] rounded-full border-2 border-black"></span>' : ''}
-            </div>
-            <div class="min-w-0 flex-1">
-              <div class="flex items-center justify-between text-xs mb-0.5">
-                <span class="font-bold text-white truncate">${c.name}</span>
-                <span class="text-[#71767b] shrink-0">${c.time}</span>
-              </div>
-              <p class="text-xs ${c.unread ? 'text-white font-medium' : 'text-[#71767b]'} truncate">${c.lastMsg}</p>
-            </div>
-          </div>
-        `).join('')}
-      </div>
-      <div class="md:col-span-7 flex flex-col justify-between p-4 min-h-[400px] bg-[#050505]">
-        <!-- Active Conversation Header -->
-        <div class="flex items-center gap-3 border-b border-[#313233ad]/50 pb-3 mb-4">
-          <img src="/assets/user/headShot.jpg" class="size-9 rounded-full object-cover border border-[#313233ad]" />
-          <div>
-            <div class="font-bold text-white text-sm">Veer Pratap Saw</div>
-            <div class="text-[11px] text-[#1d9bf0]">Online</div>
-          </div>
-        </div>
-        <!-- Messages -->
-        <div class="flex-1 flex flex-col gap-3 overflow-y-auto max-h-[340px] pr-1" id="chat-messages-box">
-          <div class="flex items-start gap-2.5">
-            <img src="/assets/user/headShot.jpg" class="size-7 rounded-full shrink-0" />
-            <div class="bg-[#16181c] border border-[#313233ad] text-white px-3.5 py-2 rounded-2xl rounded-tl-sm text-xs max-w-[80%]">
-              Hey! Just deployed our Grok AI and full-stack engine 🚀
-            </div>
-          </div>
-        </div>
-        <!-- Input -->
-        <div class="mt-4 flex gap-2">
-          <input type="text" id="chat-input-msg" placeholder="Start a new message..." class="flex-1 bg-[#16181c] border border-[#313233ad] focus:border-[#1d9bf0] text-white px-4 py-2.5 rounded-full text-xs focus:outline-none" />
-          <button id="chat-send-btn" class="bg-[#1d9bf0] hover:bg-[#1a8cd8] text-white font-bold px-5 py-2 rounded-full text-xs cursor-pointer shadow-md">Send</button>
-        </div>
-      </div>
-    </div>
-  `;
-
-  const sendBtn = mainContainer.querySelector("#chat-send-btn");
-  const inputEl = mainContainer.querySelector("#chat-input-msg");
-  const box = mainContainer.querySelector("#chat-messages-box");
-
-  const sendDirectMsg = () => {
-    const txt = inputEl.value.trim();
-    if (!txt) return;
-    box.insertAdjacentHTML("beforeend", `
-      <div class="flex justify-end animate-fade-in">
-        <div class="bg-[#1d9bf0] text-white px-3.5 py-2 rounded-2xl rounded-br-sm text-xs max-w-[80%] shadow-md font-medium">${txt}</div>
-      </div>
-    `);
-    inputEl.value = "";
-    box.scrollTop = box.scrollHeight;
-  };
-
-  sendBtn?.addEventListener("click", sendDirectMsg);
-  inputEl?.addEventListener("keydown", (e) => { if (e.key === "Enter") sendDirectMsg(); });
-}
-
-/**
- * Render Creator Studio (`Creator Studio` pill)
- */
-async function renderCreatorStudioScreen(mainContainer) {
-  const currentUser = getCurrentUser();
-  if (!currentUser || !getToken()) {
-    showAuthModal("login", true);
-    return;
-  }
-
-  mainContainer.innerHTML = `<div class="p-12 text-center text-[#71767b] text-sm animate-pulse">Loading Creator Studio & Analytics...</div>`;
-
-  try {
-    const res = await fetch(`${API_BASE_URL}/api/users/profile/${encodeURIComponent(currentUser.handle || "@user")}`);
-    const data = await res.json();
-    const posts = data.posts || [];
-
-    const totalPosts = posts.length;
-    let totalLikes = 0;
-    let totalReplies = 0;
-    let totalViews = 0;
-
-    posts.forEach(p => {
-      totalLikes += (p.likes?.length || 0);
-      totalReplies += (p.repliesCount || p.replies?.length || 0);
-      totalViews += (p.views || ((p.likes?.length || 0) * 320 + 1420));
-    });
-
-    const displayImpressions = totalViews + (totalPosts * 4200) + 124852;
-    const displayLikes = totalLikes + 84;
-    const engagementRate = ((displayLikes + totalReplies) / Math.max(1, totalPosts * 120 + 1200) * 100).toFixed(1);
-    const followersCount = data.followersCount ?? (currentUser.followers || []).length;
-    const estRevenue = ((displayImpressions * 0.00114) + (displayLikes * 0.08)).toFixed(2);
-
-    const topTweets = [...posts].sort((a, b) => {
-      const scoreA = (a.likes?.length || 0) * 10 + (a.views || 0);
-      const scoreB = (b.likes?.length || 0) * 10 + (b.views || 0);
-      return scoreB - scoreA;
-    }).slice(0, 5);
-
-    mainContainer.innerHTML = `
-      <div class="sticky top-0 z-10 w-full bg-[#000000dd] backdrop-blur-md px-4 py-3 border-b border-[#313233ad] flex items-center justify-between">
-        <div>
-          <h1 class="text-xl font-extrabold text-white">Creator Studio & Analytics</h1>
-          <p class="text-xs text-[#71767b]">Monitor real-time tweet performance, impressions, and monetization metrics</p>
-        </div>
-        <div class="flex items-center gap-2.5">
-          <button id="studio-export-btn" class="border border-[#536471] hover:bg-white/10 text-white font-bold px-3.5 py-1.5 rounded-full text-xs flex items-center gap-1.5 transition-colors cursor-pointer" title="Download Report">
-            <svg class="size-3.5 fill-current" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg> Export CSV
-          </button>
-          <button id="studio-payout-btn" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-1.5 rounded-full text-xs transition-colors cursor-pointer shadow-md">
-            Request $${estRevenue} Payout
-          </button>
-        </div>
-      </div>
-
-      <div class="p-6 space-y-6">
-        <!-- KPI Cards -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <div class="bg-[#16181c] border border-[#313233ad] p-4 rounded-2xl relative overflow-hidden group hover:border-[#1d9bf0] transition-colors">
-            <div class="text-xs font-bold text-[#71767b] mb-1">Total Impressions</div>
-            <div class="text-2xl font-black text-white">${displayImpressions.toLocaleString()}</div>
-            <div class="text-[11px] text-emerald-400 mt-1">↑ +24.8% vs last month</div>
-          </div>
-          <div class="bg-[#16181c] border border-[#313233ad] p-4 rounded-2xl relative overflow-hidden group hover:border-[#1d9bf0] transition-colors">
-            <div class="text-xs font-bold text-[#71767b] mb-1">Engagement Rate</div>
-            <div class="text-2xl font-black text-[#1d9bf0]">${engagementRate}%</div>
-            <div class="text-[11px] text-emerald-400 mt-1">↑ +1.2% above industry avg</div>
-          </div>
-          <div class="bg-[#16181c] border border-[#313233ad] p-4 rounded-2xl relative overflow-hidden group hover:border-[#1d9bf0] transition-colors">
-            <div class="text-xs font-bold text-[#71767b] mb-1">Total Followers</div>
-            <div class="text-2xl font-black text-white">${followersCount.toLocaleString()}</div>
-            <div class="text-[11px] text-emerald-400 mt-1">↑ Real-time tracked</div>
-          </div>
-          <div class="bg-[#16181c] border border-[#313233ad] p-4 rounded-2xl relative overflow-hidden group hover:border-[#1d9bf0] transition-colors">
-            <div class="text-xs font-bold text-[#71767b] mb-1">Est. Revenue</div>
-            <div class="text-2xl font-black text-amber-400">$${estRevenue}</div>
-            <div class="text-[11px] text-[#71767b] mt-1">Next payout: Aug 1</div>
-          </div>
-        </div>
-
-        <!-- Analytics Overview & Controls -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div class="md:col-span-2 bg-[#16181c] border border-[#313233ad] rounded-2xl p-5">
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="font-bold text-white text-sm flex items-center gap-2">
-                <span>🔥 Top Performing Tweets</span>
-                <span class="text-xs text-[#71767b] font-normal">(${topTweets.length} shown)</span>
-              </h3>
-              <span class="text-[11px] bg-[#1d9bf0]/10 text-[#1d9bf0] px-2.5 py-1 rounded-full font-bold">Real-time DB ranking</span>
-            </div>
-
-            <div class="divide-y divide-[#313233ad]/40 text-xs">
-              ${topTweets.length === 0 ? `
-                <div class="py-8 text-center text-[#71767b]">
-                  You haven't posted any tweets yet. Start posting from Home to see real-time engagement!
-                </div>
-              ` : topTweets.map(t => {
-                const views = t.views || ((t.likes?.length || 0) * 320 + 4200);
-                return `
-                  <div class="py-3.5 flex justify-between items-center gap-4 hover:bg-white/[0.03] px-2 rounded-xl transition-colors cursor-pointer studio-tweet-row" data-id="${t._id || t.id}">
-                    <div class="flex-1 min-w-0">
-                      <p class="text-white font-medium truncate">${t.text || "Media post"}</p>
-                      <div class="flex items-center gap-3 mt-1 text-[11px] text-[#71767b]">
-                        <span>❤️ ${t.likes?.length || 0} Likes</span>
-                        <span>💬 ${t.repliesCount || t.replies?.length || 0} Replies</span>
-                        <span>🔁 ${t.repostsCount || 0} Reposts</span>
-                      </div>
-                    </div>
-                    <span class="text-[#1d9bf0] font-bold shrink-0">${views.toLocaleString()} impressions</span>
-                  </div>
-                `;
-              }).join("")}
-            </div>
-          </div>
-
-          <!-- Quick Creator Actions / Tips -->
-          <div class="bg-[#16181c] border border-[#313233ad] rounded-2xl p-5 flex flex-col justify-between">
-            <div>
-              <h3 class="font-bold text-white text-sm mb-3">Audience Growth Insights</h3>
-              <div class="space-y-3 text-xs text-[#e7e9ea] leading-relaxed">
-                <div class="p-3 rounded-xl bg-white/[0.03] border border-[#313233ad]/60">
-                  <span class="text-[#ffad1f] font-bold">💡 Tip 1:</span> Posting photos & videos increases total reach and impressions by up to 2.4x.
-                </div>
-                <div class="p-3 rounded-xl bg-white/[0.03] border border-[#313233ad]/60">
-                  <span class="text-[#1d9bf0] font-bold">🤖 Grok AI Advantage:</span> Use Grok AI in the sidebar to generate high-converting hooks and viral tweet threads in seconds!
-                </div>
-                <div class="p-3 rounded-xl bg-white/[0.03] border border-[#313233ad]/60">
-                  <span class="text-emerald-400 font-bold">💰 Creator Payouts:</span> Payouts trigger automatically once your estimated revenue crosses the $50 threshold.
-                </div>
-              </div>
-            </div>
-            
-            <button id="studio-grok-shortcut" class="mt-4 w-full bg-[#1d9bf0] hover:bg-[#1a8cd8] text-white font-bold py-2.5 rounded-full text-xs transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-lg">
-              Launch Grok AI Studio
-            </button>
-          </div>
-        </div>
-      </div>
-    `;
-
-    mainContainer.querySelector("#studio-export-btn")?.addEventListener("click", () => {
-      let csvContent = "data:text/csv;charset=utf-8,Tweet Text,Likes,Replies,Views\n";
-      topTweets.forEach(t => {
-        const cleanText = (t.text || "Media").replace(/,/g, " ");
-        csvContent += `"${cleanText}",${t.likes?.length || 0},${t.repliesCount || 0},${t.views || ((t.likes?.length || 0) * 320 + 4200)}\n`;
-      });
-      const encodedUri = encodeURI(csvContent);
-      const link = document.createElement("a");
-      link.setAttribute("href", encodedUri);
-      link.setAttribute("download", `X_Analytics_${currentUser.handle || 'Report'}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      showToast("📈 CSV Analytics Report downloaded successfully!");
-    });
-
-    mainContainer.querySelector("#studio-payout-btn")?.addEventListener("click", () => {
-      showToast(`🎉 Payout request submitted for $${estRevenue}! Expected transfer by Aug 1.`);
-    });
-
-    mainContainer.querySelector("#studio-grok-shortcut")?.addEventListener("click", () => {
-      const grokPill = Array.from(document.querySelectorAll(".left ul li, .nav li")).find(li => li.textContent.includes("Grok"));
-      if (grokPill) grokPill.click();
-    });
-
-  } catch (err) {
-    console.error("Creator studio load error:", err);
-    mainContainer.innerHTML = `<div class="p-8 text-center text-red-400 text-sm">Failed to load real-time analytics data</div>`;
-  }
-}
-
-/**
  * Render Bookmarks Screen (`Bookmarks` pill)
  */
 async function renderBookmarksScreen(mainContainer) {
@@ -1115,7 +1422,7 @@ async function renderBookmarksScreen(mainContainer) {
 
     mainContainer.innerHTML = "";
     const header = document.createElement("div");
-    header.className = "sticky top-0 z-10 w-full bg-[#000000dd] backdrop-blur-md px-4 py-3 border-b border-[#313233ad] flex items-center justify-between";
+    header.className = "sticky top-0 z-40 w-full bg-[#000000dd] backdrop-blur-md px-4 py-3 border-b border-[#313233ad] flex items-center justify-between";
     header.innerHTML = `<div><h1 class="text-xl font-extrabold text-white">Bookmarks</h1><p class="text-xs text-[#71767b]">${posts.length || 0} saved posts</p></div>`;
     mainContainer.appendChild(header);
 
@@ -1148,7 +1455,7 @@ async function renderBookmarksScreen(mainContainer) {
  */
 function renderNotificationsScreen(mainContainer) {
   mainContainer.innerHTML = `
-    <div class="sticky top-0 z-10 w-full bg-[#000000dd] backdrop-blur-md px-4 py-3 border-b border-[#313233ad]">
+    <div class="sticky top-0 z-40 w-full bg-[#000000dd] backdrop-blur-md px-4 py-3 border-b border-[#313233ad]">
       <h1 class="text-xl font-extrabold text-white">Notifications</h1>
       <p class="text-xs text-[#71767b]">Recent activity, likes, replies, and mentions</p>
     </div>
@@ -1168,6 +1475,35 @@ function renderNotificationsScreen(mainContainer) {
       </div>
     </div>
   `;
+}
+
+/**
+ * Initialize Subscribe & Premium Buttons global delegation
+ */
+export function initSubscribeButtons() {
+  if (document.body.dataset.subscribeButtonsWired === "true") return;
+  document.body.dataset.subscribeButtonsWired = "true";
+
+  document.body.addEventListener("click", (e) => {
+    const btn = e.target.closest("button");
+    const li = e.target.closest("li, .tab");
+
+    // Check if clicked Subscribe button in right sidebar or top mobile bar
+    if (btn && (btn.textContent.trim() === "Subscribe" || btn.closest(".subscribe") || btn.dataset?.label === "Subscribe")) {
+      e.preventDefault();
+      e.stopPropagation();
+      showPremiumModal();
+      return;
+    }
+
+    // Check if clicked Premium or Subscribe in left sidebar or nav pills
+    if (li && (li.dataset?.label === "Premium" || li.dataset?.label === "Subscribe" || li.textContent?.trim() === "Premium")) {
+      e.preventDefault();
+      e.stopPropagation();
+      showPremiumModal();
+      return;
+    }
+  });
 }
 
 /**
@@ -1243,4 +1579,5 @@ export function initInteractiveFeatures() {
   initSearchBar();
   initHeaderTabs();
   initSidebarNav();
+  initSubscribeButtons();
 }

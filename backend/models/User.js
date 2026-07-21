@@ -33,6 +33,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "/assets/user/headShot.jpg",
     },
+    banner: {
+      type: String,
+      default: "",
+    },
     bio: {
       type: String,
       default: "Hey there! I am using X.",

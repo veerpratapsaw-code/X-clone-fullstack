@@ -21,7 +21,7 @@ export function showPostDetailModal(postId, postElement) {
   modal.innerHTML = `
     <div class="bg-[#000000] border border-[#313233ad] rounded-3xl w-full max-w-xl shadow-2xl overflow-hidden my-auto">
       <!-- Header -->
-      <div class="flex items-center justify-between px-4 py-3 border-b border-[#313233ad]/60 bg-[#000000]/90 sticky top-0 z-10 backdrop-blur-sm">
+      <div class="flex items-center justify-between px-4 py-3 border-b border-[#313233ad]/60 bg-[#000000]/90 sticky top-0 z-40 backdrop-blur-sm">
         <div class="flex items-center gap-6">
           <button class="close-detail p-2 hover:bg-[#181818] rounded-full text-white cursor-pointer transition-colors">
             <svg class="size-5 fill-current" viewBox="0 0 24 24"><path d="M10.59 12L4.54 5.96l1.42-1.42L12 10.59l6.04-6.05 1.42 1.42L13.41 12l6.05 6.04-1.42 1.42L12 13.41l-6.04 6.05-1.42-1.42L10.59 12z"/></svg>
@@ -165,8 +165,8 @@ export function showPostDetailModal(postId, postElement) {
 }
 
 export function initTweetActions() {
-  const postsContainer = document.querySelector(".posts");
-  if (!postsContainer) return;
+  if (document.body.dataset.tweetActionsWired === "true") return;
+  document.body.dataset.tweetActionsWired = "true";
 
   // Toast notification helper
   const showToast = (message) => {
@@ -193,14 +193,12 @@ export function initTweetActions() {
   const formatNum = (num) => {
     if (num <= 0) return "0";
     if (num >= 1000000) return (num / 1000000).toFixed(1).replace(/\.0$/, "") + "M";
-    if (num >= 10000) return (num / 1000).toFixed(1).replace(/\.0$/, "") + "K";
-    if (num >= 1000) return (num / 1000).toFixed(1) + "K";
-    return num.toString();
+    return Math.round(num).toString();
   };
 
-  // Event Delegation for all post actions & More menu & detail click
-  postsContainer.addEventListener("click", (e) => {
-    // Check if clicked the More (...) button
+  // Global Event Delegation on document.body for all post actions & More menu & detail click
+  document.body.addEventListener("click", (e) => {
+    // Check if clicked the More (...) button inside a post
     const moreBtn = e.target.closest(".more");
     if (moreBtn) {
       e.stopPropagation();
@@ -247,33 +245,23 @@ export function initTweetActions() {
       return;
     }
 
-    const actionItem = e.target.closest(".actions > div, .actions .hover\\:bg-\\[\\#1d9cf01e\\], .likeAction, .repostAction, .bookmarkAction, .replyAction, .viewsAction, img[alt='Bookmark'], img[src*='bookmarks.svg']");
     const post = e.target.closest(".post");
     if (!post) return;
 
+    const actionItem = e.target.closest(".actions > div, .actions .hover\\:bg-\\[\\#1d9cf01e\\], .likeAction, .repostAction, .bookmarkAction, .replyAction, .viewsAction, img[alt='Bookmark'], img[src*='bookmarks.svg']");
     const postId = post.dataset.id || post.id || "";
-
-    // Check auth requirement for actions
-    if (actionItem && !getToken()) {
-      e.stopPropagation();
-      showAuthModal("login", true);
-      return;
-    }
-
     if (!actionItem) {
-      // If clicking inside the tweet body (not on an action icon or media or link), open Post Detail Modal
-      if (!e.target.closest("video, img, button, a")) {
+      // If clicking inside the tweet body (not on an action icon or media or link or comment section or input), open Post Detail Modal
+      if (!e.target.closest("video, img, button, a, input, textarea, .yt-comments-section, .x-detail-modal, .x-more-dropdown, .x-edit-profile-modal")) {
         showPostDetailModal(postId, post);
       }
       return;
     }
 
-    e.stopPropagation();
-
     // 1. LIKE / HEART ACTION
-    if (actionItem.classList.contains("likeAction") || actionItem.closest(".likeAction") || actionItem.classList.contains("hover:text-[#f91880]") || actionItem.closest(".hover\\:text-\\[\\#f91880\\]")) {
-      const likeBtn = actionItem.closest(".likeAction, .hover\\:text-\\[\\#f91880\\]") || actionItem;
-      const span = likeBtn.querySelector("span");
+    if (actionItem.classList.contains("likeAction") || actionItem.closest(".likeAction")) {
+      const likeBtn = actionItem.closest(".likeAction") || actionItem;
+      const span = likeBtn.querySelector(".like-count-span") || likeBtn.querySelector("span");
       const svgPath = likeBtn.querySelector("svg path");
       const isLiked = post.dataset.liked === "true";
 
@@ -285,8 +273,9 @@ export function initTweetActions() {
         if (span) span.textContent = formatNum(parseNum(span.textContent) + 1);
         if (postId) {
           fetch(`${API_BASE_URL}/api/posts/${postId}/like`, {
-            method: "POST",
-            headers: { "Authorization": `Bearer ${getToken()}` }
+            method: getToken() ? "POST" : "PUT",
+            headers: getToken() ? { "Authorization": `Bearer ${getToken()}`, "Content-Type": "application/json" } : { "Content-Type": "application/json" },
+            body: JSON.stringify({ isLiked: true })
           }).catch(err => console.warn("Backend sync error:", err));
         }
       } else {
@@ -296,29 +285,32 @@ export function initTweetActions() {
         if (span) span.textContent = formatNum(Math.max(0, parseNum(span.textContent) - 1));
         if (postId) {
           fetch(`${API_BASE_URL}/api/posts/${postId}/like`, {
-            method: "POST",
-            headers: { "Authorization": `Bearer ${getToken()}` }
+            method: getToken() ? "POST" : "PUT",
+            headers: getToken() ? { "Authorization": `Bearer ${getToken()}`, "Content-Type": "application/json" } : { "Content-Type": "application/json" },
+            body: JSON.stringify({ isLiked: false })
           }).catch(err => console.warn("Backend sync error:", err));
         }
       }
       return;
     }
 
-    // 2. REPOST / QUOTE ACTION
-    if (actionItem.classList.contains("repostAction") || actionItem.closest(".repostAction") || actionItem.classList.contains("hover:text-[#00ba7c]") || actionItem.closest(".hover\\:text-\\[\\#00ba7c\\]")) {
-      const repostBtn = actionItem.closest(".repostAction, .hover\\:text-\\[\\#00ba7c\\]") || actionItem;
-      const span = repostBtn.querySelector("span");
+    // 2. REPOST / RETWEET ACTION
+    if (actionItem.classList.contains("repostAction") || actionItem.closest(".repostAction")) {
+      const repostBtn = actionItem.closest(".repostAction") || actionItem;
+      const span = repostBtn.querySelector(".repost-count-span") || repostBtn.querySelector("span");
       const isReposted = post.dataset.reposted === "true";
 
       if (!isReposted) {
         post.dataset.reposted = "true";
         repostBtn.classList.add("text-[#00ba7c]");
+        repostBtn.querySelector("svg, img")?.classList.add("animate-[heartPop_0.35s_ease-out]");
         if (span) span.textContent = formatNum(parseNum(span.textContent) + 1);
-        showToast("You reposted");
+        showToast("Reposted to your followers!");
         if (postId) {
           fetch(`${API_BASE_URL}/api/posts/${postId}/repost`, {
-            method: "POST",
-            headers: { "Authorization": `Bearer ${getToken()}` }
+            method: getToken() ? "POST" : "PUT",
+            headers: getToken() ? { "Authorization": `Bearer ${getToken()}`, "Content-Type": "application/json" } : { "Content-Type": "application/json" },
+            body: JSON.stringify({ isReposted: true })
           }).catch(err => console.warn("Backend sync error:", err));
         }
       } else {
@@ -328,47 +320,166 @@ export function initTweetActions() {
         showToast("Removed repost");
         if (postId) {
           fetch(`${API_BASE_URL}/api/posts/${postId}/repost`, {
-            method: "POST",
-            headers: { "Authorization": `Bearer ${getToken()}` }
+            method: getToken() ? "POST" : "PUT",
+            headers: getToken() ? { "Authorization": `Bearer ${getToken()}`, "Content-Type": "application/json" } : { "Content-Type": "application/json" },
+            body: JSON.stringify({ isReposted: false })
           }).catch(err => console.warn("Backend sync error:", err));
         }
+      }
+      return;
+    }
+
+    // 3. VIEWS / SELF IMPRESSIONS ACTION
+    if (actionItem.classList.contains("viewsAction") || actionItem.closest(".viewsAction")) {
+      const viewsBtn = actionItem.closest(".viewsAction") || actionItem;
+      const span = viewsBtn.querySelector(".view-count-span") || viewsBtn.querySelector("span");
+      const currentVal = parseNum(span ? span.textContent : "1");
+      const newVal = currentVal + 1;
+      if (span) span.textContent = formatNum(newVal);
+      showToast("📈 Self impression & views updated!");
+      if (postId) {
+        fetch(`${API_BASE_URL}/api/posts/${postId}/views`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ views: formatNum(newVal) })
+        }).catch(() => {});
       }
       return;
     }
 
     // 3. BOOKMARK ACTION
-    if (actionItem.classList.contains("bookmarkAction") || actionItem.closest(".bookmarkAction") || actionItem.matches("img[alt='Bookmark'], img[src*='bookmarks.svg'], .hover\\:bg-\\[\\#1d9cf01e\\]") || actionItem.closest(".actions > div:last-child")) {
+    if (actionItem.classList.contains("bookmarkAction") || actionItem.closest(".bookmarkAction")) {
+      const bookmarkBtn = actionItem.closest(".bookmarkAction") || actionItem;
+      const span = bookmarkBtn.querySelector(".bookmark-count-span") || bookmarkBtn.querySelector("span");
+      const icon = bookmarkBtn.querySelector("img, svg") || bookmarkBtn;
       const isBookmarked = post.dataset.bookmarked === "true";
-      const icon = actionItem.querySelector("img, svg") || actionItem;
 
       if (!isBookmarked) {
         post.dataset.bookmarked = "true";
+        bookmarkBtn.classList.add("text-[#1d9bf0]");
         icon.classList.add("filter", "brightness-200", "scale-110");
+        if (span) span.textContent = formatNum(parseNum(span.textContent) + 1);
         showToast("Added to your Bookmarks");
         if (postId) {
           fetch(`${API_BASE_URL}/api/posts/${postId}/bookmark`, {
-            method: "POST",
-            headers: { "Authorization": `Bearer ${getToken()}` }
+            method: getToken() ? "POST" : "PUT",
+            headers: getToken() ? { "Authorization": `Bearer ${getToken()}`, "Content-Type": "application/json" } : { "Content-Type": "application/json" },
+            body: JSON.stringify({ isBookmarked: true })
           }).catch(err => console.warn("Backend sync error:", err));
         }
       } else {
         post.dataset.bookmarked = "false";
+        bookmarkBtn.classList.remove("text-[#1d9bf0]");
         icon.classList.remove("filter", "brightness-200", "scale-110");
+        if (span) span.textContent = formatNum(Math.max(0, parseNum(span.textContent) - 1));
         showToast("Removed from your Bookmarks");
         if (postId) {
           fetch(`${API_BASE_URL}/api/posts/${postId}/bookmark`, {
-            method: "POST",
-            headers: { "Authorization": `Bearer ${getToken()}` }
+            method: getToken() ? "POST" : "PUT",
+            headers: getToken() ? { "Authorization": `Bearer ${getToken()}`, "Content-Type": "application/json" } : { "Content-Type": "application/json" },
+            body: JSON.stringify({ isBookmarked: false })
           }).catch(err => console.warn("Backend sync error:", err));
         }
       }
       return;
     }
 
-    // 4. REPLY ACTION
-    if (actionItem.classList.contains("replyAction") || actionItem.closest(".replyAction") || actionItem === post.querySelector(".actions > div:first-child") || actionItem.closest(".actions > div:first-child")) {
-      showPostDetailModal(postId, post);
+    // 4. REPLY / COMMENT ACTION (Inline YouTube-style comment infrastructure)
+    if (actionItem.classList.contains("replyAction") || actionItem.closest(".replyAction")) {
+      const commentSec = post.querySelector(".yt-comments-section");
+      if (!commentSec) {
+        showPostDetailModal(postId, post);
+        return;
+      }
+
+      if (commentSec.classList.contains("hidden")) {
+        commentSec.classList.remove("hidden");
+        // Load comments if not loaded yet
+        if (!post.dataset.commentsLoaded) {
+          post.dataset.commentsLoaded = "true";
+          const list = commentSec.querySelector(".yt-comments-list");
+          if (list) {
+            try {
+              fetch(`${API_BASE_URL}/api/posts/${postId}/replies`).then(res => res.json()).then(data => {
+                const replies = Array.isArray(data) ? data : [];
+                if (replies.length === 0) {
+                  list.innerHTML = `<div class="text-center py-3 text-xs text-[#71767b]">No comments yet. Be the first to comment inline below!</div>`;
+                } else {
+                  list.innerHTML = replies.map(r => renderInlineCommentItem(r)).join("");
+                }
+              }).catch(() => {
+                list.innerHTML = `<div class="text-center py-3 text-xs text-[#71767b]">No comments yet. Be the first to comment inline below!</div>`;
+              });
+            } catch (e) {
+              list.innerHTML = `<div class="text-center py-3 text-xs text-[#71767b]">No comments yet. Be the first to comment inline below!</div>`;
+            }
+          }
+        }
+        // Wire submit button if not wired
+        if (!commentSec.dataset.submitWired) {
+          commentSec.dataset.submitWired = "true";
+          const submitBtn = commentSec.querySelector(".yt-comment-submit");
+          const inputEl = commentSec.querySelector(".yt-comment-input");
+          const list = commentSec.querySelector(".yt-comments-list");
+
+          const doSubmit = async () => {
+            const text = inputEl.value.trim();
+            if (!text) return;
+            const user = getCurrentUser() || { username: "Veer Pratap Saw", handle: "@vps", avatar: "/assets/user/headShot.jpg", verified: true };
+            const replyObj = {
+              postId: postId,
+              author: user.username,
+              handle: user.handle,
+              avatar: user.avatar || "/assets/user/headShot.jpg",
+              verified: user.verified || false,
+              text: text,
+              createdAt: new Date().toISOString()
+            };
+
+            inputEl.value = "";
+            if (list.querySelector(".text-center")) list.innerHTML = "";
+            const div = document.createElement("div");
+            div.innerHTML = renderInlineCommentItem(replyObj);
+            list.appendChild(div.firstElementChild || div);
+            list.scrollTop = list.scrollHeight;
+
+            const span = post.querySelector(".reply-count-span") || post.querySelector(".replyAction span");
+            if (span) span.textContent = formatNum(parseNum(span.textContent) + 1);
+
+            try {
+              const headers = { "Content-Type": "application/json" };
+              if (getToken()) headers["Authorization"] = `Bearer ${getToken()}`;
+              fetch(`${API_BASE_URL}/api/posts/${postId}/replies`, { method: "POST", headers, body: JSON.stringify({ text }) }).catch(() => {});
+            } catch (e) {}
+          };
+
+          submitBtn?.addEventListener("click", doSubmit);
+          inputEl?.addEventListener("keydown", (ev) => { if (ev.key === "Enter") doSubmit(); });
+        }
+      } else {
+        commentSec.classList.add("hidden");
+      }
       return;
     }
   });
+}
+
+function renderInlineCommentItem(r) {
+  const timeStr = r.createdAt ? new Date(r.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "Just now";
+  return `
+    <div class="py-2.5 flex items-start gap-2.5 animate-[fadeInPop_0.15s_ease-out]">
+      <img class="size-7 rounded-full object-cover shrink-0 border border-[#313233ad]" src="${r.avatar || '/assets/user/headShot.jpg'}" alt="${r.author}" />
+      <div class="flex-1 min-w-0 bg-[#16181c] border border-[#313233ad]/60 rounded-2xl px-3 py-2">
+        <div class="flex items-center gap-1.5 justify-between">
+          <div class="flex items-center gap-1 truncate font-bold text-white text-xs">
+            <span>${r.author || "User"}</span>
+            <span class="text-[#71767b] font-normal">${r.handle || "@user"}</span>
+            ${r.verified ? `<img class="size-3 shrink-0" src="/assets/svg/lock.svg" />` : ''}
+          </div>
+          <span class="text-[10px] text-[#71767b] shrink-0">${timeStr}</span>
+        </div>
+        <p class="text-xs text-[#e7e9ea] mt-1 leading-relaxed break-words">${r.text}</p>
+      </div>
+    </div>
+  `;
 }

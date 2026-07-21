@@ -19,10 +19,20 @@ const parseCount = (str) => {
 const formatCount = (num) => {
   if (num <= 0) return "0";
   if (num >= 1000000) return (num / 1000000).toFixed(1).replace(/\.0$/, "") + "M";
-  if (num >= 10000) return (num / 1000).toFixed(1).replace(/\.0$/, "") + "K";
-  if (num >= 1000) return (num / 1000).toFixed(1) + "K";
   return Math.round(num).toString();
 };
+
+const findPostSafe = async (idParam) => {
+  if (!idParam) return null;
+  const isObjectId = /^[0-9a-fA-F]{24}$/.test(String(idParam));
+  if (isObjectId) {
+    const p = await Post.findById(idParam);
+    if (p) return p;
+  }
+  return await Post.findOne({ id: idParam });
+};
+
+
 
 /**
  * @route   GET /api/posts
@@ -43,7 +53,7 @@ router.get("/", async (req, res) => {
           verified: true,
           text: `True wisdom lies in understanding the eternal truth of action without attachment to results. As the Bhagavad Gita teaches us, perform your duty with absolute determination and honesty. 🙏📚 #BhagavadGita #Wisdom #Duty #Truth`,
           media: { type: "video", url: "/assets/posts_videos/bhagwat_gita.mp4" },
-          stats: { replies: "4.1K", reposts: "31.8K", likes: "198K", views: "1.9M" },
+          stats: { replies: "0", reposts: "0", likes: "0", bookmarks: "0", views: "1" },
         },
         {
           author: "Cristiano Ronaldo",
@@ -52,7 +62,7 @@ router.get("/", async (req, res) => {
           verified: true,
           text: `Hard work beats talent when talent doesn't work hard. Always master your craft first before dreaming of the results. Thank you for all the incredible support! ⚽🏆 #CR7 #Motivation #Mastery`,
           media: { type: "video", url: "/assets/posts_videos/master_a_thing_first.mp4" },
-          stats: { replies: "14.8K", reposts: "89.2K", likes: "450K", views: "4.2M" },
+          stats: { replies: "0", reposts: "0", likes: "0", bookmarks: "0", views: "1" },
         },
         {
           author: "Akshay Kumar",
@@ -61,7 +71,7 @@ router.get("/", async (req, res) => {
           verified: true,
           text: `Risk assessment and emotional control are key when navigating fast-moving markets and building businesses. Stay focused, do your research, and keep learning! 📈💡 #Trading #Business #Mindset #Finance`,
           media: { type: "video", url: "/assets/posts_videos/trading.mp4" },
-          stats: { replies: "1.1K", reposts: "9.2K", likes: "67.5K", views: "610K" },
+          stats: { replies: "0", reposts: "0", likes: "0", bookmarks: "0", views: "1" },
         },
         {
           author: "Grok AI Engine [AI Controlled]",
@@ -70,7 +80,7 @@ router.get("/", async (req, res) => {
           verified: true,
           text: `Our latest neural model architecture now executes complex full-stack web generation with sub-second latency. Mention @GrokAI anywhere in your replies or feed to test live intelligent autonomous completion right inside X! 🤖⚡ #AI #Grok #DeepLearning #Coding`,
           media: { type: "video", url: "/assets/posts_videos/how_to_become_king.mp4" },
-          stats: { replies: "1.4K", reposts: "18.4K", likes: "152K", views: "1.2M" },
+          stats: { replies: "0", reposts: "0", likes: "0", bookmarks: "0", views: "1" },
         },
         {
           author: "Veer Pratap Saw",
@@ -79,7 +89,7 @@ router.get("/", async (req, res) => {
           verified: true,
           text: `When the pressure rises, true champions step up. There are no excuses when you step onto the field—give everything you have until the final whistle blows! 🚀👊 #NoExcuses #FullStack #Mindset`,
           media: { type: "video", url: "/assets/posts_videos/no_excuses.mp4" },
-          stats: { replies: "1.2K", reposts: "11.4K", likes: "84.5K", views: "720K" },
+          stats: { replies: "0", reposts: "0", likes: "0", bookmarks: "0", views: "1" },
         },
         {
           author: "Dipika Padukone",
@@ -88,7 +98,7 @@ router.get("/", async (req, res) => {
           verified: true,
           text: `Finding serenity amidst the chaos of everyday life. Nothing heals the soul quite like the tranquility of mountain peaks and breathtaking nature views. 🏔️✨ #Nature #Peace #Travel`,
           media: { type: "image", url: "https://images.unsplash.com/photo-1504893524553-b855bce32c67?w=1200&auto=format&fit=crop&q=80", alt: "Kirkjufell mountain" },
-          stats: { replies: "3.2K", reposts: "24.5K", likes: "142K", views: "1.4M" },
+          stats: { replies: "0", reposts: "0", likes: "0", bookmarks: "0", views: "1" },
         },
         {
           author: "Nandani Gupta",
@@ -97,7 +107,7 @@ router.get("/", async (req, res) => {
           verified: true,
           text: `Exploring the hidden gems across Europe! Every bridge has a story to tell and every cobblestone path leads to a new adventure. Where should I travel next? 🌍✈️ #TravelDiary #Europe #Wanderlust`,
           media: { type: "image", url: "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=1200&auto=format&fit=crop&q=80", alt: "Europe travel" },
-          stats: { replies: "412", reposts: "2.8K", likes: "19.4K", views: "210K" },
+          stats: { replies: "0", reposts: "0", likes: "0", bookmarks: "0", views: "1" },
         },
         {
           author: "Anushka Sharma",
@@ -106,7 +116,7 @@ router.get("/", async (req, res) => {
           verified: true,
           text: `Morning sunlight and clean eating are my ultimate energy boosters. Taking care of your mental peace is the highest self-love you can practice every day. ☀️🧘‍♀️ #SelfLove #Wellness #Peace`,
           media: { type: "image", url: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=1200&auto=format&fit=crop&q=80", alt: "Morning yoga meditation" },
-          stats: { replies: "1.5K", reposts: "14.2K", likes: "98.1K", views: "940K" },
+          stats: { replies: "0", reposts: "0", likes: "0", bookmarks: "0", views: "1" },
         },
         {
           author: "Donald J. Trump",
@@ -115,7 +125,7 @@ router.get("/", async (req, res) => {
           verified: true,
           text: `We are making American innovation stronger and faster than ever before! The economy is booming, tech infrastructure is leading the world, and tremendous things are ahead. Believe me! 🇺🇸🦅 #USA #Innovation #Leadership`,
           media: { type: "image", url: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1200&auto=format&fit=crop&q=80", alt: "Skyscrapers" },
-          stats: { replies: "28.4K", reposts: "95.1K", likes: "510K", views: "6.8M" },
+          stats: { replies: "0", reposts: "0", likes: "0", bookmarks: "0", views: "1" },
         },
         {
           author: "Lata Mangeshkar",
@@ -124,7 +134,7 @@ router.get("/", async (req, res) => {
           verified: true,
           text: `Music is the divine language that unites hearts across the world across generations. May peace and harmony resonate in every soul today and forever. 🎶🙏 #Music #Melody #Divine`,
           media: { type: "image", url: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=1200&auto=format&fit=crop&q=80", alt: "Studio microphone" },
-          stats: { replies: "5.6K", reposts: "42.1K", likes: "280K", views: "2.4M" },
+          stats: { replies: "0", reposts: "0", likes: "0", bookmarks: "0", views: "1" },
         },
         {
           author: "Kyra Advani",
@@ -133,7 +143,7 @@ router.get("/", async (req, res) => {
           verified: true,
           text: `Wrapped up an amazing weekend shoot! Truly grateful for the wonderful team and all the love you guys shower on every project. Big things coming soon! 🎬✨ #BehindTheScenes #Grateful #Cinema`,
           media: { type: "image", url: "https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?w=1200&auto=format&fit=crop&q=80", alt: "Film shoot setup" },
-          stats: { replies: "620", reposts: "4.5K", likes: "38.2K", views: "390K" },
+          stats: { replies: "0", reposts: "0", likes: "0", bookmarks: "0", views: "1" },
         },
         {
           author: "Vikramaditya Motwane",
@@ -142,7 +152,7 @@ router.get("/", async (req, res) => {
           verified: true,
           text: `Storytelling in modern cinema is undergoing a massive revolution with digital color grading and immersive virtual production techniques. Exciting times for filmmakers globally! 🎥🎞️ #Filmmaking #Cinema #Tech`,
           media: { type: "image", url: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=1200&auto=format&fit=crop&q=80", alt: "Cinema hall" },
-          stats: { replies: "310", reposts: "2.1K", likes: "15.8K", views: "180K" },
+          stats: { replies: "0", reposts: "0", likes: "0", bookmarks: "0", views: "1" },
         },
         {
           author: "Parineeti Chopra",
@@ -151,7 +161,7 @@ router.get("/", async (req, res) => {
           verified: true,
           text: `Sometimes you just need a spontaneous road trip with good playlists and great friends to hit the refresh button on life! Driving through the scenic highways today. 🚗💨 #RoadTrip #Vibes #Friends`,
           media: { type: "image", url: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=1200&auto=format&fit=crop&q=80", alt: "Road trip adventure" },
-          stats: { replies: "940", reposts: "8.1K", likes: "64.3K", views: "580K" },
+          stats: { replies: "0", reposts: "0", likes: "0", bookmarks: "0", views: "1" },
         },
         {
           author: "TechPulse Autonomous AI [AI Controlled]",
@@ -159,7 +169,7 @@ router.get("/", async (req, res) => {
           avatar: "/assets/user/headShot.jpg",
           verified: true,
           text: `⚡ Autonomous Tech Digest: Quantum computation and Gemini 2.0 multi-agent reasoning frameworks are scaling across global cloud clusters. Stay tuned for real-time benchmark reports. #TechPulse #AI #Quantum #SiliconValley`,
-          stats: { replies: "812", reposts: "6.4K", likes: "48.9K", views: "490K" },
+          stats: { replies: "0", reposts: "0", likes: "0", bookmarks: "0", views: "1" },
         },
       ];
 
@@ -170,6 +180,17 @@ router.get("/", async (req, res) => {
       // If posts exist, let's clean broken/fictional ones and ensure all authentic seed posts exist
       await seedAllSystemAccountsAndPosts();
       posts = await Post.find().sort({ createdAt: -1 });
+    }
+
+    const fakeNumbers = ["1980", "4500", "675", "1520", "845", "1420", "194", "981", "5100", "2800", "382", "158", "643", "489", "41", "318", "14", "19000", "148", "892", "42", "42000", "11", "92", "8", "6100", "184", "19", "12000", "12", "114", "7200", "32", "245", "24", "14000", "4", "28", "3", "2100", "15", "142", "9400", "284", "951", "51", "68000", "56", "421", "24000", "6", "45", "5", "3900", "21", "2", "1800", "9", "81", "7", "5800", "64", "4900", "198K"];
+    for (const p of posts) {
+      if (!p.stats) p.stats = {};
+      let changed = false;
+      if (fakeNumbers.includes(String(p.stats.likes))) { p.stats.likes = (p.likedBy || []).length.toString(); changed = true; }
+      if (fakeNumbers.includes(String(p.stats.reposts))) { p.stats.reposts = (p.repostedBy || []).length.toString(); changed = true; }
+      if (fakeNumbers.includes(String(p.stats.bookmarks))) { p.stats.bookmarks = (p.bookmarkedBy || []).length.toString(); changed = true; }
+      if (fakeNumbers.includes(String(p.stats.replies))) { p.stats.replies = "0"; changed = true; }
+      if (changed) { await p.save().catch(() => {}); }
     }
 
     // Return the posts as JSON to the frontend
@@ -207,19 +228,30 @@ router.all("/reset-seed", async (req, res) => {
 router.get("/search", async (req, res) => {
   try {
     const q = (req.query.q || "").trim();
+    const fakeNumbers = ["1980", "4500", "675", "1520", "845", "1420", "194", "981", "5100", "2800", "382", "158", "643", "489", "41", "318", "14", "19000", "148", "892", "42", "42000", "11", "92", "8", "6100", "184", "19", "12000", "12", "114", "7200", "32", "245", "24", "14000", "4", "28", "3", "2100", "15", "142", "9400", "284", "951", "51", "68000", "56", "421", "24000", "6", "45", "5", "3900", "21", "2", "1800", "9", "81", "7", "5800", "64", "4900", "198K"];
+    let posts;
     if (!q) {
-      const posts = await Post.find().sort({ createdAt: -1 });
-      return res.status(200).json(posts);
+      posts = await Post.find().sort({ createdAt: -1 });
+    } else {
+      const regex = new RegExp(q, "i");
+      posts = await Post.find({
+        $or: [
+          { text: { $regex: regex } },
+          { author: { $regex: regex } },
+          { handle: { $regex: regex } },
+          { "media.title": { $regex: regex } }
+        ]
+      }).sort({ createdAt: -1 });
     }
-    const regex = new RegExp(q, "i");
-    const posts = await Post.find({
-      $or: [
-        { text: { $regex: regex } },
-        { author: { $regex: regex } },
-        { handle: { $regex: regex } },
-        { "media.title": { $regex: regex } }
-      ]
-    }).sort({ createdAt: -1 });
+    for (const p of posts) {
+      if (!p.stats) p.stats = {};
+      let changed = false;
+      if (fakeNumbers.includes(String(p.stats.likes))) { p.stats.likes = (p.likedBy || []).length.toString(); changed = true; }
+      if (fakeNumbers.includes(String(p.stats.reposts))) { p.stats.reposts = (p.repostedBy || []).length.toString(); changed = true; }
+      if (fakeNumbers.includes(String(p.stats.bookmarks))) { p.stats.bookmarks = (p.bookmarkedBy || []).length.toString(); changed = true; }
+      if (fakeNumbers.includes(String(p.stats.replies))) { p.stats.replies = "0"; changed = true; }
+      if (changed) { await p.save().catch(() => {}); }
+    }
     res.status(200).json(posts);
   } catch (error) {
     console.error("Search error:", error);
@@ -359,14 +391,15 @@ router.get("/feed/following", protect, async (req, res) => {
  */
 router.get("/user/bookmarks", protect, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).populate("bookmarks");
-    if (!user || !user.bookmarks) {
+    const user = await User.findById(req.user.id);
+    if (!user) {
       return res.status(200).json([]);
     }
-    // Also support querying by bookmarkedBy array directly on posts
+    const userBookmarkIds = user.bookmarks || [];
     const posts = await Post.find({
       $or: [
-        { _id: { $in: user.bookmarks } },
+        { _id: { $in: userBookmarkIds } },
+        { id: { $in: userBookmarkIds } },
         { bookmarkedBy: req.user.id }
       ]
     }).sort({ createdAt: -1 });
@@ -426,7 +459,7 @@ router.post("/", optionalAuth, async (req, res) => {
   }
 });
 
-// Helper to parse string numbers like "1.4K" or "42" to raw integers
+// Helper to parse string numbers to raw integers
 const parseNum = (str) => {
   if (!str || str === "0") return 0;
   str = String(str).trim().toUpperCase();
@@ -435,7 +468,7 @@ const parseNum = (str) => {
   return parseInt(str.replace(/,/g, ""), 10) || 0;
 };
 
-// Helper to format raw numbers back to "1.4K", "1.2M" or raw string
+// Helper to format raw numbers
 const formatNum = (num) => {
   if (num <= 0) return "0";
   if (num >= 1000000) return (num / 1000000).toFixed(1).replace(/\.0$/, "") + "M";
@@ -444,82 +477,226 @@ const formatNum = (num) => {
   return num.toString();
 };
 
-/**
- * @route   PUT /api/posts/:id/like
- * @desc    Toggle Like status and update counter in MongoDB
- * @access  Public
- */
-router.put("/:id/like", async (req, res) => {
+const handleLikeToggle = async (req, res) => {
   try {
-    const { isLiked } = req.body; // boolean indicating new desired state
-    const post = await Post.findById(req.params.id);
+    const { isLiked: bodyLiked } = req.body || {};
+    const post = await findPostSafe(req.params.id);
     if (!post) return res.status(404).json({ message: "Post not found" });
 
-    let count = parseNum(post.stats?.likes || "0");
-    if (isLiked) {
-      count += 1;
-    } else {
-      count = Math.max(0, count - 1);
+    let user = null;
+    if (req.user && req.user.id) {
+      try { user = await User.findById(req.user.id); } catch (e) {}
     }
-    post.stats.likes = formatNum(count);
-    await post.save();
 
-    res.status(200).json(post);
-  } catch (error) {
-    console.error("Error toggling like:", error);
-    res.status(500).json({ message: "Server error while toggling like" });
-  }
-});
+    const userId = user ? user._id.toString() : null;
+    if (!post.likedBy) post.likedBy = [];
+    const currentlyLiked = userId ? post.likedBy.some(id => id.toString() === userId) : false;
+    const targetLiked = bodyLiked !== undefined ? Boolean(bodyLiked) : !currentlyLiked;
 
-/**
- * @route   PUT /api/posts/:id/repost
- * @desc    Toggle Repost status and update counter in MongoDB
- * @access  Public
- */
-router.put("/:id/repost", async (req, res) => {
-  try {
-    const { isReposted } = req.body;
-    const post = await Post.findById(req.params.id);
-    if (!post) return res.status(404).json({ message: "Post not found" });
+    if (!post.stats) post.stats = {};
+    let count = parseCount(post.stats.likes || "0");
 
-    let count = parseNum(post.stats?.reposts || "0");
-    if (isReposted) {
-      count += 1;
+    if (targetLiked) {
+      if (!currentlyLiked) count += 1;
+      if (userId && !post.likedBy.some(id => id.toString() === userId)) {
+        post.likedBy.push(user._id);
+      }
+      if (user) {
+        if (!user.likes) user.likes = [];
+        if (!user.likes.some(id => id.toString() === post._id.toString() || id.toString() === post.id)) {
+          user.likes.push(post._id);
+          if (post.id && post.id !== post._id.toString()) user.likes.push(post.id);
+        }
+        await user.save();
+      }
     } else {
-      count = Math.max(0, count - 1);
+      if (currentlyLiked || bodyLiked === false) count = Math.max(0, count - 1);
+      if (userId) {
+        post.likedBy = post.likedBy.filter(id => id.toString() !== userId);
+      }
+      if (user && user.likes) {
+        user.likes = user.likes.filter(id => id.toString() !== post._id.toString() && id.toString() !== post.id);
+        await user.save();
+      }
     }
-    post.stats.reposts = formatNum(count);
+
+    post.stats.likes = formatCount(count);
     await post.save();
 
-    res.status(200).json(post);
+    res.status(200).json({ post, liked: targetLiked, likesCount: post.stats.likes, stats: post.stats, likedBy: post.likedBy });
   } catch (error) {
-    console.error("Error toggling repost:", error);
-    res.status(500).json({ message: "Server error while toggling repost" });
+    console.error("Error in like handler:", error);
+    res.status(500).json({ message: "Server error toggling like" });
   }
-});
+};
 
-/**
- * @route   POST /api/posts/:id/reply
- * @desc    Increment reply count and store reply info in MongoDB
- * @access  Public
- */
-router.post("/:id/reply", async (req, res) => {
+const handleRepostToggle = async (req, res) => {
   try {
-    const { replyText, author, handle, avatar } = req.body;
-    const post = await Post.findById(req.params.id);
+    const { isReposted: bodyReposted } = req.body || {};
+    const post = await findPostSafe(req.params.id);
     if (!post) return res.status(404).json({ message: "Post not found" });
 
-    let count = parseNum(post.stats?.replies || "0");
-    count += 1;
-    post.stats.replies = formatNum(count);
+    let user = null;
+    if (req.user && req.user.id) {
+      try { user = await User.findById(req.user.id); } catch (e) {}
+    }
+
+    const userId = user ? user._id.toString() : null;
+    if (!post.repostedBy) post.repostedBy = [];
+    const currentlyReposted = userId ? post.repostedBy.some(id => id.toString() === userId) : false;
+    const targetReposted = bodyReposted !== undefined ? Boolean(bodyReposted) : !currentlyReposted;
+
+    if (!post.stats) post.stats = {};
+    let count = parseCount(post.stats.reposts || "0");
+
+    if (targetReposted) {
+      if (!currentlyReposted) count += 1;
+      if (userId && !post.repostedBy.some(id => id.toString() === userId)) {
+        post.repostedBy.push(user._id);
+      }
+    } else {
+      if (currentlyReposted || bodyReposted === false) count = Math.max(0, count - 1);
+      if (userId) {
+        post.repostedBy = post.repostedBy.filter(id => id.toString() !== userId);
+      }
+    }
+
+    post.stats.reposts = formatCount(count);
     await post.save();
 
+    res.status(200).json({ post, reposted: targetReposted, repostsCount: post.stats.reposts, stats: post.stats, repostedBy: post.repostedBy });
+  } catch (error) {
+    console.error("Error in repost handler:", error);
+    res.status(500).json({ message: "Server error toggling repost" });
+  }
+};
+
+const handleViewsUpdate = async (req, res) => {
+  try {
+    const { views } = req.body || {};
+    const post = await findPostSafe(req.params.id);
+    if (!post) return res.status(404).json({ message: "Post not found" });
+
+    if (!post.stats) post.stats = {};
+    if (views) {
+      post.stats.views = views;
+    } else {
+      let v = parseCount(post.stats.views || "1");
+      post.stats.views = formatCount(v + 1);
+    }
+    await post.save();
     res.status(200).json(post);
   } catch (error) {
-    console.error("Error posting reply:", error);
-    res.status(500).json({ message: "Server error while saving reply" });
+    res.status(500).json({ message: "Server error updating views" });
   }
-});
+};
+
+const handleReplyCreate = async (req, res) => {
+  try {
+    const { text, replyText, author, handle, avatar } = req.body || {};
+    const contentText = (text || replyText || "").trim();
+    if (!contentText) {
+      return res.status(400).json({ message: "Reply text cannot be empty" });
+    }
+
+    const post = await findPostSafe(req.params.id);
+    if (!post) return res.status(404).json({ message: "Post not found" });
+
+    let user = null;
+    if (req.user && req.user.id) {
+      try { user = await User.findById(req.user.id); } catch (e) {}
+    }
+
+    const reply = new Reply({
+      postId: req.params.id,
+      userId: user ? user._id : post._id,
+      author: author || (user ? user.username : "Veer Pratap Saw"),
+      handle: handle || (user ? user.handle : "@veerpratapsaw"),
+      avatar: avatar || (user ? (user.avatar || "/assets/user/headShot.jpg") : "/assets/user/headShot.jpg"),
+      verified: user ? (user.verified || false) : true,
+      text: contentText,
+    });
+
+    const savedReply = await reply.save();
+
+    if (!post.stats) post.stats = {};
+    let currentReplies = parseCount(post.stats.replies || "0");
+    post.stats.replies = formatCount(currentReplies + 1);
+    await post.save();
+
+    res.status(201).json(savedReply);
+  } catch (error) {
+    console.error("Reply creation error:", error);
+    res.status(500).json({ message: "Server error creating reply" });
+  }
+};
+
+router.put("/:id/like", optionalAuth, handleLikeToggle);
+router.post("/:id/like", optionalAuth, handleLikeToggle);
+
+router.put("/:id/repost", optionalAuth, handleRepostToggle);
+router.post("/:id/repost", optionalAuth, handleRepostToggle);
+
+const handleBookmarkToggle = async (req, res) => {
+  try {
+    const { isBookmarked: bodyBookmarked } = req.body || {};
+    const post = await findPostSafe(req.params.id);
+    if (!post) return res.status(404).json({ message: "Post not found" });
+
+    let user = null;
+    if (req.user && req.user.id) {
+      try { user = await User.findById(req.user.id); } catch (e) {}
+    }
+
+    const userId = user ? user._id.toString() : null;
+    const currentlyBookmarked = userId ? post.bookmarkedBy.some(id => id.toString() === userId) : false;
+    const targetBookmarked = bodyBookmarked !== undefined ? Boolean(bodyBookmarked) : !currentlyBookmarked;
+
+    let count = parseCount(post.stats?.bookmarks || "0");
+    if (!post.stats) post.stats = {};
+
+    if (targetBookmarked) {
+      if (!currentlyBookmarked) count += 1;
+      if (userId && !post.bookmarkedBy.some(id => id.toString() === userId)) {
+        post.bookmarkedBy.push(user._id);
+      }
+      if (user) {
+        if (!user.bookmarks) user.bookmarks = [];
+        if (!user.bookmarks.some(id => id.toString() === post._id.toString() || id.toString() === post.id)) {
+          user.bookmarks.push(post._id);
+          if (post.id && post.id !== post._id.toString()) user.bookmarks.push(post.id);
+        }
+        await user.save();
+      }
+    } else {
+      if (currentlyBookmarked || bodyBookmarked === false) count = Math.max(0, count - 1);
+      if (userId) {
+        post.bookmarkedBy = post.bookmarkedBy.filter(id => id.toString() !== userId);
+      }
+      if (user && user.bookmarks) {
+        user.bookmarks = user.bookmarks.filter(id => id.toString() !== post._id.toString() && id.toString() !== post.id);
+        await user.save();
+      }
+    }
+
+    post.stats.bookmarks = formatCount(count);
+    await post.save();
+
+    res.status(200).json({ post, bookmarked: targetBookmarked, stats: post.stats });
+  } catch (error) {
+    console.error("Error in bookmark handler:", error);
+    res.status(500).json({ message: "Server error toggling bookmark" });
+  }
+};
+
+router.put("/:id/bookmark", optionalAuth, handleBookmarkToggle);
+router.post("/:id/bookmark", optionalAuth, handleBookmarkToggle);
+
+router.put("/:id/views", optionalAuth, handleViewsUpdate);
+router.post("/:id/views", optionalAuth, handleViewsUpdate);
+
+router.post("/:id/reply", optionalAuth, handleReplyCreate);
+router.post("/:id/replies", optionalAuth, handleReplyCreate);
 
 /**
  * @route   DELETE /api/posts/:id
@@ -528,165 +705,13 @@ router.post("/:id/reply", async (req, res) => {
  */
 router.delete("/:id", async (req, res) => {
   try {
-    const deletedPost = await Post.findByIdAndDelete(req.params.id);
-    if (!deletedPost) return res.status(404).json({ message: "Post not found" });
+    const post = await findPostSafe(req.params.id);
+    if (!post) return res.status(404).json({ message: "Post not found" });
+    await Post.findByIdAndDelete(post._id);
     res.status(200).json({ message: "Post deleted successfully" });
   } catch (error) {
     console.error("Error deleting post:", error);
     res.status(500).json({ message: "Server error while deleting post" });
-  }
-});
-
-/**
- * @route   POST /api/posts/:id/like
- * @desc    Toggle like/unlike on a post for the authenticated user
- * @access  Protected
- */
-router.post("/:id/like", protect, async (req, res) => {
-  try {
-    const post = await Post.findById(req.params.id);
-    if (!post) return res.status(404).json({ message: "Post not found" });
-
-    const userId = req.user.id;
-    const isLiked = post.likedBy.some(id => id.toString() === userId.toString());
-    let currentLikes = parseCount(post.stats?.likes || "0");
-
-    if (isLiked) {
-      post.likedBy = post.likedBy.filter(id => id.toString() !== userId.toString());
-      currentLikes = Math.max(0, currentLikes - 1);
-    } else {
-      post.likedBy.push(userId);
-      currentLikes += 1;
-    }
-
-    if (!post.stats) post.stats = {};
-    post.stats.likes = formatCount(currentLikes);
-    await post.save();
-
-    res.status(200).json({
-      liked: !isLiked,
-      likesCount: post.stats.likes,
-      likedBy: post.likedBy,
-    });
-  } catch (error) {
-    console.error("Like error:", error);
-    res.status(500).json({ message: "Server error toggling like" });
-  }
-});
-
-/**
- * @route   POST /api/posts/:id/repost
- * @desc    Toggle repost/unrepost on a post for the authenticated user
- * @access  Protected
- */
-router.post("/:id/repost", protect, async (req, res) => {
-  try {
-    const post = await Post.findById(req.params.id);
-    if (!post) return res.status(404).json({ message: "Post not found" });
-
-    const userId = req.user.id;
-    const isReposted = post.repostedBy.some(id => id.toString() === userId.toString());
-    let currentReposts = parseCount(post.stats?.reposts || "0");
-
-    if (isReposted) {
-      post.repostedBy = post.repostedBy.filter(id => id.toString() !== userId.toString());
-      currentReposts = Math.max(0, currentReposts - 1);
-    } else {
-      post.repostedBy.push(userId);
-      currentReposts += 1;
-    }
-
-    if (!post.stats) post.stats = {};
-    post.stats.reposts = formatCount(currentReposts);
-    await post.save();
-
-    res.status(200).json({
-      reposted: !isReposted,
-      repostsCount: post.stats.reposts,
-      repostedBy: post.repostedBy,
-    });
-  } catch (error) {
-    console.error("Repost error:", error);
-    res.status(500).json({ message: "Server error toggling repost" });
-  }
-});
-
-/**
- * @route   POST /api/posts/:id/bookmark
- * @desc    Toggle bookmark/unbookmark on a post for the authenticated user
- * @access  Protected
- */
-router.post("/:id/bookmark", protect, async (req, res) => {
-  try {
-    const post = await Post.findById(req.params.id);
-    const user = await User.findById(req.user.id);
-    if (!post || !user) return res.status(404).json({ message: "Post or User not found" });
-
-    const userId = req.user.id;
-    const isBookmarked = post.bookmarkedBy.some(id => id.toString() === userId.toString());
-
-    if (isBookmarked) {
-      post.bookmarkedBy = post.bookmarkedBy.filter(id => id.toString() !== userId.toString());
-      user.bookmarks = (user.bookmarks || []).filter(id => id.toString() !== post._id.toString());
-    } else {
-      post.bookmarkedBy.push(userId);
-      if (!user.bookmarks) user.bookmarks = [];
-      user.bookmarks.push(post._id);
-    }
-
-    await post.save();
-    await user.save();
-
-    res.status(200).json({
-      bookmarked: !isBookmarked,
-      bookmarkedBy: post.bookmarkedBy,
-      userBookmarks: user.bookmarks,
-    });
-  } catch (error) {
-    console.error("Bookmark error:", error);
-    res.status(500).json({ message: "Server error toggling bookmark" });
-  }
-});
-
-/**
- * @route   POST /api/posts/:id/replies
- * @desc    Create a threaded comment/reply on a post
- * @access  Protected
- */
-router.post("/:id/replies", protect, async (req, res) => {
-  try {
-    const { text } = req.body;
-    if (!text || !text.trim()) {
-      return res.status(400).json({ message: "Reply text cannot be empty" });
-    }
-
-    const post = await Post.findById(req.params.id);
-    if (!post) return res.status(404).json({ message: "Post not found" });
-
-    const user = await User.findById(req.user.id);
-    if (!user) return res.status(404).json({ message: "User not found" });
-
-    const reply = new Reply({
-      postId: post._id,
-      userId: user._id,
-      author: user.username,
-      handle: user.handle,
-      avatar: user.avatar || "/assets/user/headShot.jpg",
-      verified: user.verified || false,
-      text: text.trim(),
-    });
-
-    const savedReply = await reply.save();
-
-    let currentReplies = parseCount(post.stats?.replies || "0");
-    if (!post.stats) post.stats = {};
-    post.stats.replies = formatCount(currentReplies + 1);
-    await post.save();
-
-    res.status(201).json(savedReply);
-  } catch (error) {
-    console.error("Reply creation error:", error);
-    res.status(500).json({ message: "Server error creating reply" });
   }
 });
 
@@ -697,7 +722,12 @@ router.post("/:id/replies", protect, async (req, res) => {
  */
 router.get("/:id/replies", async (req, res) => {
   try {
-    const replies = await Reply.find({ postId: req.params.id }).sort({ createdAt: 1 });
+    const post = await findPostSafe(req.params.id);
+    const ids = [String(req.params.id)];
+    if (post && post._id) ids.push(post._id.toString());
+    if (post && post.id && post.id !== post._id.toString()) ids.push(String(post.id));
+
+    const replies = await Reply.find({ postId: { $in: ids } }).sort({ createdAt: 1 });
     res.status(200).json(replies);
   } catch (error) {
     console.error("Fetch replies error:", error);
@@ -712,7 +742,7 @@ router.get("/:id/replies", async (req, res) => {
  */
 router.get("/:id", async (req, res) => {
   try {
-    const post = await Post.findById(req.params.id);
+    const post = await findPostSafe(req.params.id);
     if (!post) return res.status(404).json({ message: "Post not found" });
     res.status(200).json(post);
   } catch (error) {
