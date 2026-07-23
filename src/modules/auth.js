@@ -7,7 +7,14 @@ export const getToken = () => localStorage.getItem("x_auth_token") || null;
 export const getCurrentUser = () => {
   try {
     const data = localStorage.getItem("x_current_user");
-    return data ? JSON.parse(data) : null;
+    if (data) {
+      const user = JSON.parse(data);
+      if (user.avatar && user.avatar.startsWith("/src/assets/")) {
+        user.avatar = user.avatar.replace("/src/assets/", "/assets/");
+      }
+      return user;
+    }
+    return null;
   } catch (err) {
     return null;
   }
@@ -74,6 +81,13 @@ export const updateUserProfilePill = () => {
     `;
     pill.querySelector("#open-login-btn")?.addEventListener("click", () => showAuthModal("login"));
   }
+
+  // Also update static avatars in the UI (Mobile header & Create Post box)
+  const mobileAvatar = document.querySelector(".mobile-profile-avatar img");
+  if (mobileAvatar) mobileAvatar.src = user ? (user.avatar || "/assets/user/headShot.jpg") : "/assets/user/headShot.jpg";
+
+  const createPostAvatar = document.querySelector(".createPost img, .avatar img");
+  if (createPostAvatar) createPostAvatar.src = user ? (user.avatar || "/assets/user/headShot.jpg") : "/assets/user/headShot.jpg";
 };
 
 const showAccountMenuPopover = (anchorEl) => {

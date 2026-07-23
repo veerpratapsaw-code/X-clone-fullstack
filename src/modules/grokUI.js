@@ -5,9 +5,9 @@ let isGrokActive = false;
 
 // Initialize Grok UI click listener from Sidebar and Navigation
 export function initGrokUI() {
-  const sidebarItems = document.querySelectorAll('.sidebar li, .bottom-nav li, .nav li, ul li');
+  const sidebarItems = document.querySelectorAll('.sidebar li, .bottom-nav li, .nav li, ul li, [data-label="Grok"]');
   sidebarItems.forEach((item) => {
-    const text = item.textContent || "";
+    const text = item.textContent || item.getAttribute('data-label') || "";
     const img = item.querySelector('img');
     if (text.includes("Grok") || (img && img.src && img.src.includes("grok.svg"))) {
       item.addEventListener("click", () => {

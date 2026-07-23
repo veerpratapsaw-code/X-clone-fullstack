@@ -444,10 +444,30 @@ export function initHeaderTabs() {
             </div>
             <div class="flex items-center gap-3 overflow-x-auto pb-2 no-scrollbar [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           `;
+          const avatarMap = {
+            "@akshay": "/assets/user/akshay_kumar.jpg",
+            "@akshaykumar": "/assets/user/akshay_kumar.jpg",
+            "@chandni": "/assets/user/attitude_girl.png",
+            "@xdevelopers": "/assets/user/headShotio.jpg",
+            "@cristiano": "/assets/user/Cristiano-Ronaldo.jpg",
+            "@elonmusk": "/assets/user/headShot.jpg",
+            "@deepikapadukone": "/assets/user/dipika.jpg",
+            "@sardarpatel": "/assets/user/sardar_patel.jpg",
+            "@realdonaldtrump": "/assets/user/Donald_Trump.png",
+            "@nandanigupta": "/assets/user/nandani_gupta.jpg",
+            "@anushkasharma": "/assets/user/anushka_sharma.png",
+            "@kyraadvani": "/assets/user/kyrea_gunue.png",
+            "@vikramaditya": "/assets/user/headShotio.jpg",
+            "@parineetichopra": "/assets/user/halkat_choopra.png",
+            "@latamangeshkar": "/assets/user/LataMangeskar.png",
+            "@grokai": "/assets/user/headShot.jpg"
+          };
           followingHandles.forEach(h => {
+            const lowerHandle = h.toLowerCase();
+            const avatar = avatarMap[lowerHandle] || "/assets/user/headShot.jpg";
             summaryHtml += `
               <div class="flex flex-col items-center shrink-0 bg-black border border-[#313233ad] rounded-2xl p-2.5 min-w-[110px] max-w-[130px]">
-                <img class="size-10 rounded-full object-cover border border-[#313233ad] mb-1.5" src="/assets/user/headShot.jpg" onerror="this.src='/assets/user/headShot.jpg'" alt="${h}" />
+                <img class="size-10 rounded-full object-cover border border-[#313233ad] mb-1.5" src="${avatar}" onerror="this.onerror=null;this.src='/assets/user/headShot.jpg';" alt="${h}" />
                 <span class="text-xs font-bold text-white truncate w-full text-center">${h}</span>
                 <button class="mt-2 text-[11px] font-bold px-2.5 py-0.5 rounded-full border border-[#536471] text-white transition-colors cursor-pointer inline-follow-toggle-btn" data-handle="${h}" data-following="true">
                   Following
@@ -983,10 +1003,10 @@ export function renderExploreScreen(mainContainer, initialQuery = "") {
   ];
 
   const suggestedCreators = [
-    { name: "Cristiano Ronaldo", handle: "@cristiano", avatar: "/assets/user/headShot.jpg", bio: "Football legend · CR7" },
-    { name: "Akshay Kumar", handle: "@akshaykumar", avatar: "/assets/user/headShot.jpg", bio: "Actor · Producer" },
+    { name: "Cristiano Ronaldo", handle: "@cristiano", avatar: "/assets/user/Cristiano-Ronaldo.jpg", bio: "Football legend · CR7" },
+    { name: "Akshay Kumar", handle: "@akshaykumar", avatar: "/assets/user/akshay_kumar.jpg", bio: "Actor · Producer" },
     { name: "Grok AI", handle: "@grok", avatar: "/assets/user/headShot.jpg", bio: "Real-time AI assistant by xAI" },
-    { name: "Anushka Sharma", handle: "@anushkasharma", avatar: "/assets/user/headShot.jpg", bio: "Artist & Entrepreneur" },
+    { name: "Anushka Sharma", handle: "@anushkasharma", avatar: "/assets/user/anushka_sharma.png", bio: "Artist & Entrepreneur" },
     { name: "Veer Pratap Saw", handle: "@vps", avatar: "/assets/user/headShot.jpg", bio: "Full Stack Creator & Engineer" }
   ];
 
@@ -1034,7 +1054,7 @@ export function renderExploreScreen(mainContainer, initialQuery = "") {
         <div class="flex items-center gap-3 overflow-x-auto pb-2 no-scrollbar [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           ${suggestedCreators.map(c => `
             <div class="shrink-0 bg-black border border-[#313233ad] rounded-2xl p-3.5 flex flex-col items-center min-w-[150px] max-w-[170px] hover:border-[#1d9bf0]/50 transition-colors">
-              <img class="size-14 rounded-full object-cover border border-[#313233ad] mb-2" src="${c.avatar}" onerror="this.src='/assets/user/headShot.jpg'" alt="${c.name}" />
+              <img class="size-14 rounded-full object-cover border border-[#313233ad] mb-2" src="${c.avatar}" onerror="this.onerror=null;this.src='/assets/user/headShot.jpg';" alt="${c.name}" />
               <div class="font-bold text-white text-sm truncate w-full text-center">${c.name}</div>
               <div class="text-xs text-[#71767b] truncate w-full text-center">${c.handle}</div>
               <div class="text-[11px] text-[#8b9299] text-center mt-1 line-clamp-2 h-8">${c.bio}</div>

@@ -418,7 +418,7 @@
 
   <!-- Mobile Floating Post Button matching real X -->
   <button
-    onclick="const btn = document.querySelector('.postbtn button') || document.querySelector('.createPost textarea'); if (btn && btn.click) { btn.click(); } else if (btn) { btn.focus(); window.scrollTo({top: 0, behavior: 'smooth'}); }"
+    onclick="const ta = document.querySelector('.createPost textarea'); if (ta) { window.scrollTo({top: 0, behavior: 'smooth'}); setTimeout(() => ta.focus(), 300); } else { const btn = document.querySelector('.left .postbtn button'); if (btn) btn.click(); }"
     class="fixed bottom-20 right-4 z-50 size-14 rounded-full bg-[#1d9bf0] hover:bg-[#1a8cd8] active:scale-95 text-white shadow-2xl flex items-center justify-center sm:hidden transition-all cursor-pointer border border-white/10">
     <img src="/assets/svg/post.svg" class="w-6 invert" alt="">
   </button>
